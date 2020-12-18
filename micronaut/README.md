@@ -1,13 +1,14 @@
 # Micronaut Visual Studio Code Extension <!-- omit in toc -->
 
-The Micronaut extension for Visual Studio Code (VS Code) provides the basic support for developing applications based on the [Micronaut Framework](https://micronaut.io/). The extension is Technology Preview.
+The Micronaut extension for Visual Studio Code (VS Code) provides the basic support for developing applications based on the [Micronaut Framework](https://micronaut.io/).
+The extension is Technology Preview.
 
-Besides, it enables the [Micronaut Launch](https://micronaut.io/launch/) application that allows you to create Micronaut projects through an interface inside VS Code, in addition to using the console CLI.
+The extension also enables the [Micronaut Launch](https://micronaut.io/launch/) application that allows you to create Micronaut projects through an interface inside VS Code, in addition to using the console CLI.
 Optionally, if a user provides a path to the Micronaut CLI installation, the option to create a project using the `mn` executable is also provided.
 
 In combination with the [GraalVM Extension](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm), you can run Micronaut projects on GraalVM, and debug them directly from the VS Code development environment with different debugging protocols enabled with the extension.
 
-The Micronaut extension was also developed to help developers build native images right from the VS Code console.
+The Micronaut extension was also developed to help developers build native executables right from the VS Code console.
 
 #### Table of contents  <!-- omit in toc -->
 - [Installation and Setup](#installation-and-setup)
@@ -21,46 +22,50 @@ The Micronaut extension was also developed to help developers build native image
 
 ## Installation and Setup
 
-Install the Micronaut extension from the VS Code consolde by clicking on the Extensions icon in the Activity Bar (or invoke it with _Ctrl+Shift+X_). Search for "Micronaut" and install the package. Reload will be required.
+Install the Micronaut extension from the VS Code consolde by clicking on the "Extensions" icon in the Activity Bar (or invoke it with _Ctrl+Shift+X_). Search for "Micronaut" and install the package. Reload will be required.
 
 Note: The Micronaut extension also requires the [GraalVM Extension](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm), which provides support for editing and debugging polyglot programs running on GraalVM. Please install it the same way.
 
-When installed, the Micronaut extension might check whether there is a registered GraalVM instance and eventually request to download it or point to a local installation (see [GraalVM  Installation and Setup in VS Code](../graalvm/README.md#installation-and-setup)).
+When installed, the Micronaut extension might check whether there is a registered GraalVM instance, and eventually request to download it or point to a local installation (see [GraalVM  Installation and Setup in VS Code](../graalvm/README.md#installation-and-setup)).
 
-Upon the installaiton, the Micronaut Tools Page window opens which provides you with shortcuts to create a new Micronaut project, or open an exisiting one; to build a native image of a Micronaut project; to acquaint you with available features and redirect to the documentation available.
+Upon installaiton, the Micronaut Tools Page window opens, which provides you with shortcuts to:
+- create a new Micronaut project or open an exisiting one
+- build a native executable of a Micronaut project
+- acquaint you with available features
+- redirect you to the documentation available
 
 ![Micronaut Tools Page](images/micronaut_tools_page.png)
 
 ## Features
 
 The Micronaut extension provides:
-* Micronaut project creation wizard
-* Micronaut CLI installation
-* Editing and debugging Micronaut projects capabilities
-* Building Micronaut projects ahead-of-time into native images with GraalVM
+* the Micronaut project creation wizard
+* installation of Micronaut CLI
+* editing and debugging capabilities for Micronaut projects
+* the ability to build Micronaut projects ahead-of-time into native images with GraalVM
 
 ### Micronaut VS Code Commands
 
-To start going, invoke the Micronaut commands from the View > Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_ hot keys combination for Linux and _Command+Shift+P_ for macOS):
+To begin, invoke the Micronaut commands from the View > Command Palette (Command Palette can be also opened by pressing F1, or the _Ctrl+Shift+P_ hot keys combination for Linux, and _Command+Shift+P_ for macOS):
 
 ![Micronaut VS Code Commands](images/micronaut-vs-code-commands.png)
 
 The following commands are available for Micronaut project development:
 
-* `Micronaut: Show Micronaut Tools Page`: Show the Micronaut Tools Page
-* `Micronaut: Create Micronaut Project`: Create a Micronaut project based on https://micronaut.io/launch
-* `Micronaut: Build ...`: Build a Micronaut project with the user selected goal/target
-* `Micronaut: Build Native Image`: Build a native image of a Micronaut project
+* `Micronaut: Show Micronaut Tools Page` - show the Micronaut Tools Page
+* `Micronaut: Create Micronaut Project` - create a Micronaut project based on https://micronaut.io/launch
+* `Micronaut: Build ...` - build a Micronaut project with the user-selected goal/target
+* `Micronaut: Build Native Image` - build a native executable of a Micronaut project
 
 ### Extension Settings
 
 This extension contributes the following settings:
-* __micronaut.home__ - The optional path to the Micronaut CLI installation.
-* __micronaut.showWelcomePage__ - Show the Micronaut Tools Page on extension activation.
+* __micronaut.home__ - the optional path to the Micronaut CLI installation
+* __micronaut.showWelcomePage__ - show the Micronaut Tools Page on extension activation
 
 ## Create Micronaut Project
 
-The Create Micronaut Project command in VS Code supports generating Micronaut applications, CLI applications, and other types of applications that a regular Micronaut Launch application does. The wizard prompts to:
+The Create Micronaut Project command in VS Code supports generating Micronaut applications, CLI applications, and other types of applications that a regular Micronaut Launch application does. The wizard prompts users to:
 
   * pick the application type
   * pick the Micronaut version
@@ -68,14 +73,14 @@ The Create Micronaut Project command in VS Code supports generating Micronaut ap
   * provide a project name
   * provide a base package name
   * pick the project language (Java, Kotlin, Groovy)
-  * pick the project features
+  * pick the project features:
 
   ![Micronaut Project Features](images/micronaut-project-features_view.png)
 
   * pick the build tool (Maven or Gradle)
   * pick the test framework (JUnit, Spock, Kotlintest)
 
-Finally, you are asked to select the destination folder on your local disk and whether to open the created project in new editor or add to the current workspace.
+Finally, you are asked to select the destination folder on your local disk and whether to open the created project in a new editor or add it to the current workspace.
 
 The GUI part of the Micronaut extension adds a new view to the Explorer activity, which shows Micronaut projects in the current workspace.
 
@@ -89,7 +94,7 @@ That will run the `mvnw package -Dpackaging=native-image` job.
 
 ![Micronaut Build Commands](images/micronaut-build-commands.png)
 
-Besides that, you can push a newly built native image to the Docker Registry from the VS Code console.
+Besides that, you can push a newly-built native executable to the Docker Registry from the VS Code console.
 
 For more details, continue reading to the [Micronaut documentation](https://guides.micronaut.io/micronaut-creating-first-graal-app/guide/index.html#creatingGraalImage).
 
