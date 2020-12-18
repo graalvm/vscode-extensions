@@ -3,7 +3,9 @@
 The [GraalVM Extension for Visual Studio Code (VS Code)](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) provides basic support for editing and debugging programs running on [GraalVM](http://www.graalvm.org).
 The extension is Technology Preview.
 
-The major goal of creating the GraalVM VS Code Extension was to enable a polyglot environment in VS Code, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (Java, JS, Ruby, R, and Python).
+The GraalVM extension on pair with [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=asf.apache-netbeans-java) extension will also enable a full-fledged support for Java 8 and higher, as well as Java to scripting languages polyglot debugging in VS Code.
+
+The major goal of creating the GraalVM VS Code Extension was to enable a polyglot environment in VS Code, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (JS, Ruby, R, and Python).
 
 #### Table of contents
 - [Features](#features)
@@ -470,7 +472,7 @@ This extension contributes the following settings:
 * __graalvm.installations__ - all registered GraalVM installations
 * __graalvm.systemDetect__ - detect GraalVM's installation from the system environment variables
 * __graalvm.languageServer.currentWorkDir__ - an absolute path to the working directory of GraalVM's Language Server Protocol
-* __graalvm.languageServer.inProcessServer__ - atart GraalVM's Language Server Protocol within processes being run or debugged
+* __graalvm.languageServer.inProcessServer__ - start GraalVM's Language Server Protocol within processes being run or debugged
 * __graalvm.languageServer.delegateServers__ - a comma-separated list of `language@[host:]port` where other language servers run
 * __graalvm.languageServer.startRLanguageServer__ - start the R Language Server
 * __graalvm.languageServer.startRubyLanguageServer__ - start the Ruby Language Server

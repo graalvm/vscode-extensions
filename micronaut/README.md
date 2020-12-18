@@ -8,7 +8,7 @@ Optionally, if a user provides a path to the Micronaut CLI installation, the opt
 
 In combination with the [GraalVM Extension](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm), you can run Micronaut projects on GraalVM, and debug them directly from the VS Code development environment with different debugging protocols enabled with the extension.
 
-The Micronaut extension was also developed to help developers build native executables right from the VS Code console.
+The Micronaut extension was also developed to help developers build native images right from the VS Code console.
 
 #### Table of contents  <!-- omit in toc -->
 - [Installation and Setup](#installation-and-setup)
