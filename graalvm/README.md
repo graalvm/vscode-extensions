@@ -5,7 +5,7 @@ The extension is Technology Preview.
 
 The GraalVM extension on pair with [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=asf.apache-netbeans-java) extension will also enable a full-fledged support for Java 8 and higher, as well as Java to scripting languages polyglot debugging in VS Code.
 
-The major goal of creating the GraalVM VS Code Extension was to enable a polyglot environment in VS Code, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (JS, Ruby, R, and Python).
+GraalVM VSCode Extension enables a polyglot environment in VSCode, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (Java, JS, Ruby, R, and Python).
 
 #### Table of contents
 - [Features](#features)
