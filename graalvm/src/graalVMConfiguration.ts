@@ -42,11 +42,11 @@ export function setGVMInsts(gvmConfig: vscode.WorkspaceConfiguration, installati
 	return gvmConfig.update(CONFIG_INSTALLATIONS, installations, true);
 }
 
-export function dist(): string {
+function dist(): string {
     if (process.platform === 'linux') {
         return 'linux';
     } else if (process.platform === 'darwin') {
-        return 'mac';
+        return 'osx';
     } else if (process.platform === 'win32') {
         return 'windows';
     }
