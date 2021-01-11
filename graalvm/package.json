@@ -39,42 +39,42 @@
 				"graalvm.home": {
 					"type": "string",
 					"default": "",
-					"description": "Path to the active GraalVM installation"
+					"description": "Path to the active GraalVM installation."
 				},
 				"graalvm.installations": {
 					"type": "array",
 					"default": [],
-					"description": "Paths to GraalVM installations"
+					"description": "Paths to GraalVM installations."
 				},
 				"graalvm.languageServer.currentWorkDir": {
 					"type": "string",
 					"default": "",
-					"description": "Absolute path to the working directory of the GraalVM Language Server"
+					"description": "Absolute path to the working directory of the GraalVM Language Server."
 				},
 				"graalvm.languageServer.inProcessServer": {
 					"type": "boolean",
-					"default": true,
-					"description": "Start GraalVM Language Server within processes being run or debugged"
+					"default": false,
+					"description": "Start a new GraalVM Language Server with every processes being run or debugged. By default, a single GraalVM Language Server is started per IDE run."
 				},
 				"graalvm.languageServer.delegateServers": {
 					"type": "string",
 					"default": "",
-					"description": "Comma-separated list of language@[host:]port where other language servers run"
+					"description": "Comma-separated list of language@[host:]port where other language servers run."
 				},
 				"graalvm.languageServer.startRLanguageServer": {
 					"type": "boolean",
-					"default": true,
-					"description": "Start R Language Server"
+					"default": false,
+					"description": "Start R Language Server."
 				},
 				"graalvm.languageServer.startRubyLanguageServer": {
 					"type": "boolean",
 					"default": false,
-					"description": "Start Ruby Language Server"
+					"description": "Start Ruby Language Server."
 				},
 				"graalvm.systemDetect": {
 					"type": "boolean",
 					"default": true,
-					"description": "Detect system GraalVM installations"
+					"description": "Detect system GraalVM installations."
 				}
 			}
 		},
