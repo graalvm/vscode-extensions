@@ -883,7 +883,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
 }
 
 function processsGUOutput(stdout: string): {label: string, detail: string}[] {
-    const components: {label: string, detail: string}[] = [];
+    const infos: any[] = []
     let header: boolean = true;
     stdout.split('\n').forEach(line => {
         if (header) {
@@ -892,11 +892,21 @@ function processsGUOutput(stdout: string): {label: string, detail: string}[] {
             }
         } else {
             const info: string[] | null = line.match(/(\S+( \S)?)+/g);
-            if (info && info.length > 3) {
-                components.push({ label: info[0], detail: info[2] });
+            if (info) {
+                infos.push(info);
             }
         }
     });
+    let maxLength: number = 4;
+    for (const info of infos) {
+        maxLength = Math.max(info.length, maxLength);
+    }
+    const components: {label: string, detail: string}[] = [];
+    for (const info of infos) {
+        if(info.length == maxLength) {
+            components.push({ label: info[0], detail: info[2] });
+        }
+    }
     return components;
 }
 
