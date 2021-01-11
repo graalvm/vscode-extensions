@@ -9,21 +9,22 @@ GraalVM VSCode Extension enables a polyglot environment in VSCode, thus making i
 
 #### Table of contents
 - [Features](#features)
-- [Installation and Setup](#graalvm-installation-and-setup)
-- [Java Development and Support](#java-development-and-support)
+- [Installation and Setup](#installation-and-setup)
+- [Java Development and Debugging](#java-development-and-debugging)
 - [JavaScript and Node.js Debugging](#javascript-and-nodejs-debugging)
 - [Python Debugging](#python-debugging)
 - [R Debugging](#r-debugging)
 - [Ruby Debugging](#ruby-debugging)
 - [Polyglot Applications Debugging](#polyglot-applications-debugging)
 - [Debug Adapter Protocol](#debug-adapter-protocol)
-- [Language Server Integration](#language-server-integration)
+- [Language Server Protocol Integration](#language-server-protocol-integration)
 - [R Language Server](#r-language-server)
 - [Ruby Language Server](#ruby-language-server)
 - [Additional Editor Features](#additional-editor-features)
 - [Extension Settings](#extension-settings)
 - [Recommendations](#recommendations)
 - [Feedback](#feedback)
+- [Privacy Policy](#privacy-policy)
 
 ## Features
 
