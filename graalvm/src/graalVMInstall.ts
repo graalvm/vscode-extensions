@@ -14,6 +14,7 @@ import * as utils from './utils';
 import { basename, dirname, join, normalize, delimiter } from 'path';
 import { LicenseCheckPanel } from './graalVMLicenseCheck';
 import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName } from './graalVMConfiguration';
+import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 
 const GITHUB_URL: string = 'https://github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/graalvm/graalvm-ce-builds/releases';
@@ -545,7 +546,12 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
                 }
             }
             return;
-        }).then(() => vscode.commands.executeCommand('extension.graalvm.refreshInstallations'));
+        }).then(() => {
+            vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
+            if (graalVMHome === getGVMHome()) {
+                stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
+            }
+        });
     }
 }
 
