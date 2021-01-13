@@ -42,8 +42,10 @@ export function startLanguageServer(graalVMHome: string) {
 						reject(`Launching server using command ${re} failed.`);
 					} else {
 						languageServerPID = serverProcess.pid;
-						serverProcess.stderr.once('data', data => {
-							reject(data);
+						serverProcess.on('close', code => {
+							if (code) {
+								reject(`Server exited with exit code: ${code}`);
+							}
 						});
 						serverProcess.stdout.once('data', () => {
 							const socket = new net.Socket();
