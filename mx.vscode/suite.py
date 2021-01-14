@@ -51,6 +51,13 @@ suite = {
     "micronaut" : {
       "class": "VSCodeExtensionProject",
     },
+    "graalvm-pack" : {
+      "dependencies" : [
+        "graalvm",
+        "micronaut"
+      ],
+      "class": "VSCodeExtensionProject",
+    },
   },
 
   "distributions": {
@@ -59,7 +66,8 @@ suite = {
       "layout" : {
         "./" : [
           "dependency:graalvm/*",
-          "dependency:micronaut/*"
+          "dependency:micronaut/*",
+          "dependency:graalvm-pack/*"
         ]
       }
     },
