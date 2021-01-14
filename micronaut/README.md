@@ -17,6 +17,7 @@ The Micronaut extension was also developed to help developers build native image
   - [Extension Settings](#extension-settings)
 - [Create Micronaut Project](#create-micronaut-project)
 - [Generate Native Images of Micronaut Projects](#generate-native-images-of-micronaut-projects)
+- [Feedback](#feedback)
 - [Privacy Policy](#privacy-policy)
 - [Known Issues](#known-issues)
 
@@ -97,6 +98,11 @@ That will run the `mvnw package -Dpackaging=native-image` job.
 Besides that, you can push a newly-built native executable to the Docker Registry from the VS Code console.
 
 For more details, continue reading to the [Micronaut documentation](https://guides.micronaut.io/micronaut-creating-first-graal-app/guide/index.html#creatingGraalImage).
+
+## Feedback
+
+* [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
+* [File a bug](https://github.com/graalvm/vscode-extensions/issues/new?labels=bug)
 
 ## Privacy Policy
 
