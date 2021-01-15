@@ -174,17 +174,17 @@ export async function getGraalVMVersion(homeFolder: string): Promise<string | un
                             javaVersion = javaVersion.slice(0, i);
                             resolve(`${graalVMVersion}, Java ${javaVersion}`);
                         } else {
-                            resolve();
+                            resolve(undefined);
                         }
                     } else {
-                        resolve();
+                        resolve(undefined);
                     }
                 });
             } else {
-                resolve();
+                resolve(undefined);
             }
         } else {
-            resolve();
+            resolve(undefined);
         }
     });
 }
@@ -561,7 +561,7 @@ function execCancellable(cmd: string, token: vscode.CancellationToken): Promise<
             if (error) {
                 reject(error);
             } else {
-                resolve();
+                resolve(undefined);
             }
         });
         token.onCancellationRequested(() => child.kill());
@@ -653,14 +653,20 @@ async function getGraalVMEEReleases(): Promise<any> {
         .forEach((releaseInfo: any) => {
             if (releaseInfo.version && releaseInfo.java && releaseInfo.license) {
                 let releaseVersion = releases[releaseInfo.version];
-                let key = Object.keys(releases).find(key => releaseInfo.version.endsWith('-dev') ? key.endsWith('-dev') : releaseInfo.version.slice(0, 2) === key.slice(0, 2));
-                if (key) {
-                    if (releaseInfo.version > key) {
-                        delete releases[key];
+                if (Object.keys(releaseInfo).includes('status')) {
+                    if (releaseInfo.status === 'new') {
                         releases[releaseInfo.version] = releaseVersion = {};
                     }
                 } else {
-                    releases[releaseInfo.version] = releaseVersion = {};
+                    let key = Object.keys(releases).find(key => releaseInfo.version.endsWith('-dev') ? key.endsWith('-dev') : releaseInfo.version.slice(0, 2) === key.slice(0, 2));
+                    if (key) {
+                        if (releaseInfo.version > key) {
+                            delete releases[key];
+                            releases[releaseInfo.version] = releaseVersion = {};
+                        }
+                    } else {
+                        releases[releaseInfo.version] = releaseVersion = {};
+                    }
                 }
                 if (releaseVersion) {
                     let releaseJavaVersion = releaseVersion[releaseInfo.java];
