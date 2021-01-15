@@ -888,17 +888,26 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
     return undefined;
 }
 
+const reg: RegExp = /(\S+( \S)?)+/g;
 function processsGUOutput(stdout: string): {label: string, detail: string}[] {
     const components: {label: string, detail: string}[] = [];
     let header: boolean = true;
-    stdout.split('\n').forEach(line => {
+    let head: string;
+    let maxLength: number = 4;
+    stdout.split('\n').forEach((line: string) => {
         if (header) {
             if (line.startsWith('-----')) {
                 header = false;
+                const headMatch: string[] | null = head.match(reg);
+                if (headMatch) {
+                    maxLength = Math.max(headMatch.length, maxLength);
+                }
+            } else {
+                head = line;
             }
         } else {
-            const info: string[] | null = line.match(/(\S+( \S)?)+/g);
-            if (info && info.length > 3) {
+            const info: string[] | null = line.match(reg);
+            if(info && info.length == maxLength) {
                 components.push({ label: info[0], detail: info[2] });
             }
         }
