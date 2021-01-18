@@ -8,10 +8,11 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as fs from 'fs';
+import * as http from 'http';
 import * as https from 'https';
 import * as path from 'path';
 import * as decompress from 'decompress';
-import { getMicronautHome, getJavaHome, MultiStepInput } from "./utils";
+import { getMicronautHome, getMicronautLaunchURL, getJavaHome, MultiStepInput } from "./utils";
 
 const PROTOCOL: string = 'https://';
 const MICRONAUT_LAUNCH_URL: string = 'https://launch.micronaut.io';
@@ -330,6 +331,7 @@ async function selectCreateOptions(): Promise<{url: string, args?: string[], nam
 }
 
 async function getMicronautVersions(): Promise<{label: string, serviceUrl: string}[]> {
+    const micronautLauchURL: string = getMicronautLaunchURL();
     return Promise.all([
         get(MICRONAUT_LAUNCH_URL + VERSIONS).catch(() => undefined).then(data => {
             return data ? { label: JSON.parse(data).versions["micronaut.version"], serviceUrl: MICRONAUT_LAUNCH_URL } : undefined;
@@ -337,6 +339,9 @@ async function getMicronautVersions(): Promise<{label: string, serviceUrl: strin
         get(MICRONAUT_SNAPSHOT_URL + VERSIONS).catch(() => undefined).then(data => {
             return data ? { label: JSON.parse(data).versions["micronaut.version"], serviceUrl: MICRONAUT_SNAPSHOT_URL } : undefined;
         }),
+        micronautLauchURL ? get(micronautLauchURL + VERSIONS).catch(() => undefined).then(data => {
+            return data ? { label: JSON.parse(data).versions["micronaut.version"], serviceUrl: micronautLauchURL, description: '(using configured Micronaut Launch URL)'  } : undefined;
+        }) : undefined,
         getMNVersion()
     ]).then((data: any) => {
         return data.filter((item: any) => item !== undefined);
@@ -386,7 +391,8 @@ async function getFeatures(micronautVersion: {label: string, serviceUrl: string}
 
 async function get(url: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        https.get(url, res => {
+        const protocol = url.startsWith('http://') ? http : https;
+        protocol.get(url, res => {
             const { statusCode } = res;
             const contentType = res.headers['content-type'] || '';
             let error;
