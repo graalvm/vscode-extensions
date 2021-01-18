@@ -488,9 +488,8 @@ The GraalVM Extension for VS Code recommends the following extensions:
 
 ## Feedback
 
-* [Request a feature](https://github.com/oracle/graal/issues/new?assignees=&labels=feature,vscode&template=0_feature_request.md&title=)
-* [File a bug](https://github.com/oracle/graal/issues/new?assignees=&labels=bug,agent&template=5_issues_other.md&title=)
-* [Discuss with us](https://github.com/oracle/graal/discussions)
+* [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
+* [File a bug](https://github.com/graalvm/vscode-extensions/issues/new?labels=bug)
 
 ### Privacy Policy
 

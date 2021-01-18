@@ -91,7 +91,7 @@ class VSCodeExtensionBuildTask(mx.ArchivableBuildTask):
         if not exists(vsce):
             mx.run(['npm', 'install'], nonZeroIsFatal=True, cwd=_suite.dir)
         mx.run(['npm', 'install'], nonZeroIsFatal=True, cwd=self.subject.dir)
-        mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/oracle/graal/raw/master/vscode/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
+        mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
 
     def clean(self, forBuild=False):
         for file in self.subject.getResults():

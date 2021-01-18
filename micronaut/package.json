@@ -2,7 +2,7 @@
 	"name": "micronaut",
 	"displayName": "Micronaut",
 	"description": "Micronaut support for VS Code",
-	"version": "0.5.1",
+	"version": "0.5.2",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
@@ -14,13 +14,13 @@
 		"color": "#000000",
 		"theme": "dark"
 	},
-	"homepage": "https://github.com/oracle/graal/blob/master/vscode/micronaut/README.md",
+	"homepage": "https://github.com/graalvm/vscode-extensions/blob/master/micronaut/README.md",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/oracle/graal.git"
+		"url": "https://github.com/graalvm/vscode-extensions.git"
 	},
 	"bugs": {
-		"url": "https://github.com/oracle/graal/issues"
+		"url": "https://github.com/graalvm/vscode-extensions/issues"
 	},
 	"engines": {
 		"vscode": "^1.49.0"

@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 0.5.2
+* Bug fixes
+* Repository moved
+
 ## Version 0.5.0
 * GraalVM DAP support added
 * GraalVM installations management added
