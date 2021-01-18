@@ -49,6 +49,11 @@
 					"type": "string",
 					"default": "",
 					"description": "Optional path to Micronaut CLI installation"
+				},
+				"micronaut.launchUrl": {
+					"type": "string",
+					"default": "",
+					"description": "Optional Micronaut Launch URL (e.g. 'https://launch.micronaut.io')"
 				}
 			}
 		},

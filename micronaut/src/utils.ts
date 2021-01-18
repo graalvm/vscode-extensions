@@ -22,6 +22,22 @@ export function getMicronautHome(): string {
 	return micronautHome;
 }
 
+export function getMicronautLaunchURL(): string {
+	let micronautLaunchURL: string = vscode.workspace.getConfiguration('micronaut').get('launchUrl') as string;
+	if (!micronautLaunchURL) {
+		micronautLaunchURL = process.env['MICRONAUT_LAUNCH_URL'] as string;
+	}
+	if (micronautLaunchURL) {
+		if (!micronautLaunchURL.startsWith('https://') && !micronautLaunchURL.startsWith('http://')) {
+			micronautLaunchURL = 'https://' + micronautLaunchURL;
+		}
+		if (micronautLaunchURL.endsWith('/')) {
+			return micronautLaunchURL.slice(0, micronautLaunchURL.length - 1);
+		}
+	}
+	return micronautLaunchURL;
+}
+
 export function getJavaHome(): string {
 	let javaHome: string = vscode.workspace.getConfiguration('graalvm').get('home') as string;
 	if (javaHome) {
