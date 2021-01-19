@@ -14,7 +14,8 @@ import * as path from 'path';
 import * as decompress from 'decompress';
 import { getMicronautHome, getMicronautLaunchURL, getJavaHome, MultiStepInput } from "./utils";
 
-const PROTOCOL: string = 'https://';
+const HTTP_PROTOCOL: string = 'http://';
+const HTTPS_PROTOCOL: string = 'https://';
 const MICRONAUT_LAUNCH_URL: string = 'https://launch.micronaut.io';
 const MICRONAUT_SNAPSHOT_URL: string = 'https://snapshot.micronaut.io';
 const APPLICATION_TYPES: string = '/application-types';
@@ -52,7 +53,7 @@ export async function createProject() {
     const options = await selectCreateOptions();
     if (options) {
         let created = false;
-        if (options.url.startsWith(PROTOCOL)) {
+        if (options.url.startsWith(HTTP_PROTOCOL) || options.url.startsWith(HTTPS_PROTOCOL)) {
             try {
                 const downloadedFile = await downloadProject(options);
                 const files = await decompress(downloadedFile, options.target);
@@ -288,7 +289,7 @@ async function selectCreateOptions(): Promise<{url: string, args?: string[], nam
             } else {
                 appName = state.projectName;
             }
-            if (state.micronautVersion.serviceUrl.startsWith(PROTOCOL)) {
+            if (state.micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || state.micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
                 let query = '?javaVersion=JDK_8';
                 query += `&lang=${state.language.value}`;
                 query += `&build=${state.buildTool.value}`;
@@ -349,7 +350,7 @@ async function getMicronautVersions(): Promise<{label: string, serviceUrl: strin
 }
 
 async function getApplicationTypes(micronautVersion: {label: string, serviceUrl: string}): Promise<{label: string, name: string}[]> {
-    if (micronautVersion.serviceUrl.startsWith(PROTOCOL)) {
+    if (micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
         return get(micronautVersion.serviceUrl + APPLICATION_TYPES).then(data => {
             return JSON.parse(data).types.map((type: any) => ({ label: type.title, name: type.name }));
         });
@@ -381,7 +382,7 @@ function getTestFrameworks() {
 }
 
 async function getFeatures(micronautVersion: {label: string, serviceUrl: string}, applicationType: {label: string, name: string}): Promise<{label: string, detail?: string, name: string}[]> {
-    if (micronautVersion.serviceUrl.startsWith(PROTOCOL)) {
+    if (micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
         return get(micronautVersion.serviceUrl + APPLICATION_TYPES + '/' + applicationType.name + FEATURES).then(data => {
             return JSON.parse(data).features.map((feature: any) => ({label: `${feature.category}: ${feature.title}`, detail: feature.description, name: feature.name})).sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
         });
@@ -391,7 +392,7 @@ async function getFeatures(micronautVersion: {label: string, serviceUrl: string}
 
 async function get(url: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        const protocol = url.startsWith('http://') ? http : https;
+        const protocol = url.startsWith(HTTP_PROTOCOL) ? http : https;
         protocol.get(url, res => {
             const { statusCode } = res;
             const contentType = res.headers['content-type'] || '';
