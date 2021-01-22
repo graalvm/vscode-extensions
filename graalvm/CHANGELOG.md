@@ -1,5 +1,7 @@
 # Change Log
 
+## Version 0.5.3
+* GraalVM EE JDK 11 bits are not offered for download
 ## Version 0.5.2
 * Bug fixes
 * Repository moved

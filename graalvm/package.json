@@ -2,7 +2,7 @@
 	"name": "graalvm",
 	"displayName": "GraalVM",
 	"description": "Support for GraalVM",
-	"version": "0.5.2",
+	"version": "0.5.3",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
