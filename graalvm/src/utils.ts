@@ -133,6 +133,40 @@ export function killProcess(pid: number) {
 	}
 }
 
+export function checkFolderWritePermissions(graalVMHome: string, silent?: boolean): boolean {
+    try {
+		if (platform() === PLATFORM_WINDOWS) {
+			const tmpFile = path.join(graalVMHome, 'tmp.tmp')
+			fs.writeFileSync(tmpFile, '');
+			fs.unlinkSync(tmpFile);
+		} else {
+			fs.accessSync(graalVMHome, fs.constants.W_OK);
+		}
+        return true;
+    } catch (err) {
+        if (!silent) {
+            vscode.window.showErrorMessage(`Permission denied: no write access to ${graalVMHome}`);
+        }
+        return false;
+    }
+}
+export const PLATFORM_WINDOWS: string = 'windows';
+export const PLATFORM_WIN32: string = 'win32';
+export const PLATFORM_OSX: string = 'osx';
+export const PLATFORM_DARWIN: string = 'darwin';
+export const PLATFORM_LINUX: string = 'linux';
+export const PLATFORM_UNDEFINED: string = 'undefined';
+export function platform(): string {
+    if (process.platform === PLATFORM_LINUX) {
+        return PLATFORM_LINUX;
+    } else if (process.platform === PLATFORM_DARWIN) {
+        return PLATFORM_OSX;
+    } else if (process.platform === PLATFORM_WIN32) {
+        return PLATFORM_WINDOWS;
+    }
+    return PLATFORM_UNDEFINED;
+}
+
 class InputFlowAction {
 	static back = new InputFlowAction();
 	static cancel = new InputFlowAction();

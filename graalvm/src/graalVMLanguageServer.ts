@@ -24,7 +24,10 @@ export function registerLanguageServer(server: (() => Thenable<string>)): void {
     delegateLanguageServers.add(server);
 }
 
-export function startLanguageServer(graalVMHome: string) {
+export function startLanguageServer(graalVMHome?: string) {
+	if (!graalVMHome) {
+		return;
+	}
 	const inProcessServer = getGVMConfig().get('languageServer.inProcessServer') as boolean;
 	if (!inProcessServer || delegateLanguageServers.size > 0) {
 		const re = utils.findExecutable(POLYGLOT, graalVMHome);

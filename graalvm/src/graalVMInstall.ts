@@ -31,26 +31,23 @@ export async function installGraalVM(context: vscode.ExtensionContext): Promise<
     try {
         const selected = await selectGraalVMRelease(context);
         if (selected) {
-            try {
-                fs.accessSync(selected.location, fs.constants.W_OK);
-            } catch (e) {
-                throw new Error(`Permission denied: no write access to ${selected.location}`);
-            }
-            const downloadedFile = await dowloadGraalVMRelease(selected.url, selected.location);
-            const targetDir = dirname(downloadedFile);
-            const name = await extractGraalVM(downloadedFile, targetDir);
-            fs.unlinkSync(downloadedFile);
-            if (name) {
-                let graalVMHome = join(targetDir, name);
-                if (process.platform === 'darwin') {
-                    graalVMHome = join(graalVMHome, 'Contents', 'Home');
+            if (utils.checkFolderWritePermissions(selected.location)) {
+                const downloadedFile = await dowloadGraalVMRelease(selected.url, selected.location);
+                const targetDir = dirname(downloadedFile);
+                const name = await extractGraalVM(downloadedFile, targetDir);
+                fs.unlinkSync(downloadedFile);
+                if (name) {
+                    let graalVMHome = join(targetDir, name);
+                    if (process.platform === 'darwin') {
+                        graalVMHome = join(graalVMHome, 'Contents', 'Home');
+                    }
+                    updateGraalVMLocations(graalVMHome);
+                    checkForMissingComponents(graalVMHome);
                 }
-                updateGraalVMLocations(graalVMHome);
-                checkForMissingComponents(graalVMHome);
             }
         }
     } catch (err) {
-        vscode.window.showErrorMessage(err.message);
+        vscode.window.showErrorMessage(err?.message);
     }
 }
 
@@ -64,13 +61,15 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
         return -1;
     }
     await removeGraalVMconfiguration(graalFolder);
-    return utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
-        try {
-            deleteFolder(graalFolder);
-        } catch (err) {
-            vscode.window.showErrorMessage(err?.message);
-        }
-    }, 1000));
+    if (utils.checkFolderWritePermissions(graalFolder, true)) {
+        return utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
+            try {
+                deleteFolder(graalFolder);
+            } catch (err) {
+                vscode.window.showErrorMessage(err?.message);
+            }
+        }, 1000));
+    }
 }
 
 export async function installGraalVMComponent(component: string | Component | undefined, homeFolder?: string, context?: vscode.ExtensionContext): Promise<void> {
@@ -95,7 +94,9 @@ export async function addExistingGraalVM(): Promise<void> {
         if (graalVMHome) {
             graalVMHome += process.platform === 'darwin' && !graalVMHome.endsWith(MACOS_JDK_SUBDIR) ? MACOS_JDK_SUBDIR : '';
             updateGraalVMLocations(graalVMHome);
-            checkForMissingComponents(graalVMHome);
+            if (utils.checkFolderWritePermissions(graalVMHome, true)) {
+                checkForMissingComponents(graalVMHome);
+            }
         }
     } else {
         throw new Error('No GraalVM Installation selected.');
@@ -300,6 +301,9 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
 }
 
 export async function checkForMissingComponents(homeFolder: string): Promise<void> {
+    if (!utils.checkFolderWritePermissions(homeFolder, true)) {
+        return;
+    }
     const available = await getAvailableComponents(homeFolder);
     const components = available.filter(availableItem => !availableItem.installed);
     if (components.length > 1) {
@@ -395,7 +399,7 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
             }
             if (!email) {
                 return undefined;
-            }
+            } 
         }
         const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
             canSelectFiles: false,
@@ -404,7 +408,7 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
             title: 'Choose Installation Directory',
             openLabel: 'Install Here'
         });
-        if (location && location.length > 0) {
+        if (location && location.length > 0 && utils.checkFolderWritePermissions(location[0].fsPath)) {
             return { url: releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url, location: location[0].fsPath };
         }
     }
@@ -504,11 +508,15 @@ async function _callIdGVMHome(component: string | Component | undefined, homeFol
 }
 
 async function _installGraalVMComponent(componentId: string | undefined, graalVMHome: string, context?: vscode.ExtensionContext): Promise<void> {
-    changeGraalVMComponent(graalVMHome, componentId ? [componentId] : await selectAvailableComponents(graalVMHome), 'install', context);
+    if (utils.checkFolderWritePermissions(graalVMHome)) {
+        changeGraalVMComponent(graalVMHome, componentId ? [componentId] : await selectAvailableComponents(graalVMHome), 'install', context);
+    }
 }
 
 async function _uninstallGraalVMComponent(componentId: string | undefined, graalVMHome: string): Promise<void> {
-    changeGraalVMComponent(graalVMHome, componentId ? [componentId] : await selectInstalledComponents(graalVMHome), 'remove');
+    if (utils.checkFolderWritePermissions(graalVMHome)) {
+        changeGraalVMComponent(graalVMHome, componentId ? [componentId] : await selectInstalledComponents(graalVMHome), 'remove');
+    }
 }
 
 async function changeGraalVMComponent(graalVMHome: string, componentIds: string[], action: string, context?: vscode.ExtensionContext): Promise<void> {
@@ -972,9 +980,10 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
             });
 		} else {
             const graalVMHome = getGVMHome();
+            const writable = utils.checkFolderWritePermissions(graalVMHome, true);
             const insts = getGVMInsts();
             return findGraalVMs().then(vms => {
-                return vms.map(item => new Installation(item.name, vscode.TreeItemCollapsibleState.Collapsed, item.path, item.path === graalVMHome, insts.includes(item.path)));
+                return vms.map(item => new Installation(item.name, vscode.TreeItemCollapsibleState.Collapsed, item.path, item.path === graalVMHome, insts.includes(item.path), writable));
             });
 		}
 	}
@@ -987,7 +996,8 @@ export class Installation extends vscode.TreeItem {
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly home: string,
         private readonly active: boolean,
-        public readonly fromConf: boolean
+        public readonly fromConf: boolean,
+        public readonly writable: boolean
 	) {
         super(label, collapsibleState);
         if (active) {
@@ -1011,10 +1021,13 @@ export class Component extends vscode.TreeItem {
         if (installed) {
             this.description = '(installed)';
         }
+        if (!this.installation.writable) {
+            this.tooltip = `Permission denied: no write access to ${this.installation.home}`;
+        }
 	}
 
     iconPath = new vscode.ThemeIcon("extensions");
-    contextValue = this.installed ? 'graalvmComponentInstalled' : 'graalvmComponent';
+    contextValue = this.installation.writable ? this.installed ? 'graalvmComponentInstalled' : 'graalvmComponent': 'graalvmLocked';
 }
 
 class InstallationFolder extends vscode.TreeItem {

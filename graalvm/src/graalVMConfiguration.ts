@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-
+import * as utils from './utils'
 import { checkForMissingComponents, getInstallConfigurations } from './graalVMInstall';
 import { getPythonConfigurations } from './graalVMPython';
 import { getRConfigurations } from './graalVMR';
@@ -42,29 +42,18 @@ export function setGVMInsts(gvmConfig: vscode.WorkspaceConfiguration, installati
 	return gvmConfig.update(CONFIG_INSTALLATIONS, installations, true);
 }
 
-function dist(): string {
-    if (process.platform === 'linux') {
-        return 'linux';
-    } else if (process.platform === 'darwin') {
-        return 'osx';
-    } else if (process.platform === 'win32') {
-        return 'windows';
-    }
-    return 'undefined';
-}
-
 const TERMINAL_INTEGRATED: string = 'terminal.integrated';
 
 export function getTerminalEnvName(): string {
-    return `${TERMINAL_INTEGRATED}.env.${dist()}`;
+    return `${TERMINAL_INTEGRATED}.env.${utils.platform()}`;
 }
 
 export function getTerminalEnv(): any {
-    return getConf(TERMINAL_INTEGRATED).get(`env.${dist()}`) as any | {};
+    return getConf(TERMINAL_INTEGRATED).get(`env.${utils.platform()}`) as any | {};
 }
 
 export async function setTerminalEnv(env: any): Promise<any> {
-    return getConf(TERMINAL_INTEGRATED).update(`env.${dist()}`, env, true);
+    return getConf(TERMINAL_INTEGRATED).update(`env.${utils.platform()}`, env, true);
 }
 
 export function setupProxy() {
