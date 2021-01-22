@@ -654,7 +654,7 @@ async function getGraalVMEEReleases(): Promise<any> {
             if (releaseInfo.version && releaseInfo.java && releaseInfo.license) {
                 let releaseVersion = releases[releaseInfo.version];
                 if (Object.keys(releaseInfo).includes('status')) {
-                    if (releaseInfo.status === 'new') {
+                    if (releaseInfo.status === 'new' && !releaseVersion) {
                         releases[releaseInfo.version] = releaseVersion = {};
                     }
                 } else {
@@ -849,20 +849,37 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
                 } else {
                     const installed: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
                     getEEReleaseInfo(graalVMHome).then(eeInfo => {
-                        const args = eeInfo ? ['available', '--custom-catalog', `${eeInfo.catalog}`] : ['available'];
-                        cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
-                            if (error) {
-                                notifyConnectionProblem();
-                                reject({error: error, list: installed.map(inst => {inst.installed = true; return inst; }) });
-                            } else {
-                                const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
-                                available.forEach(avail => {
-                                    const found = installed.find(item => item.label === avail.label);
-                                    avail.installed = found ? true : false;
-                                });
-                                resolve(available);
-                            }
-                        });
+                        if (eeInfo) {
+                            const args = ['available', '--custom-catalog', `${eeInfo.catalog}`];
+                            cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
+                                if (error) {
+                                    notifyConnectionProblem();
+                                    reject({error: error, list: installed.map(inst => {inst.installed = true; return inst; }) });
+                                } else {
+                                    const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
+                                    available.forEach(avail => {
+                                        const found = installed.find(item => item.label === avail.label);
+                                        avail.installed = found ? true : false;
+                                    });
+                                    resolve(available);
+                                }
+                            });
+                        } else {
+                            const args = ['available'];
+                            cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
+                                if (error) {
+                                    notifyConnectionProblem();
+                                    reject({error: error, list: installed.map(inst => {inst.installed = true; return inst; }) });
+                                } else {
+                                    const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
+                                    available.forEach(avail => {
+                                        const found = installed.find(item => item.label === avail.label);
+                                        avail.installed = found ? true : false;
+                                    });
+                                    resolve(available);
+                                }
+                            });
+                        }
                     }).catch(error => {
                         reject({error: error, list: installed.map(inst => {inst.installed = true; return inst; }) });
                     });
