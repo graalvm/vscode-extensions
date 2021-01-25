@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
@@ -21,13 +21,13 @@ export class LicenseCheckPanel {
 	private readonly _panel: vscode.WebviewPanel;
 	private _disposables: vscode.Disposable[] = [];
 
-	public static show(context: vscode.ExtensionContext, licenseLabel: string, license: string): Promise<boolean> {
+	public static show(context: vscode.ExtensionContext, licenseLabel: string, license: string): Promise<string | undefined> {
 		const hash = crypto.createHash('sha256').update(license).digest('hex');
 		const userAcceptedLicenses = JSON.parse(context.globalState.get(LicenseCheckPanel.userAcceptedLicenses) || '{}');
 		if (userAcceptedLicenses.licenses && userAcceptedLicenses.licenses.includes(hash)) {
-			return Promise.resolve(true);
+			return Promise.resolve(userAcceptedLicenses.userEmail);
 		}
-		return new Promise<boolean>(resolve => {
+		return new Promise<string | undefined>(resolve => {
 			const lcp = new LicenseCheckPanel(context.extensionPath, licenseLabel, license, userAcceptedLicenses.userEmail, (message: any) => {
 				if (message.command === 'accepted') {
 					if (message.email) {
@@ -39,10 +39,10 @@ export class LicenseCheckPanel {
 						context.globalState.update(LicenseCheckPanel.userAcceptedLicenses, JSON.stringify(userAcceptedLicenses));
 					}
 					lcp.dispose();
-					resolve(true);
+					resolve(userAcceptedLicenses.userEmail);
 				} else {
 					lcp.dispose();
-					resolve(false);
+					resolve(undefined);
 				}
 			});
 		});
