@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
@@ -651,33 +651,18 @@ async function getGraalVMEEReleases(): Promise<any> {
         Object.values(info.Releases)
         .filter((releaseInfo: any) => Object.keys(releaseInfo.base).find(base => releaseInfo.base[base].os === platform) !== undefined)
         .forEach((releaseInfo: any) => {
-            if (releaseInfo.version && releaseInfo.java && releaseInfo.license) {
-                let releaseVersion = releases[releaseInfo.version];
-                if (Object.keys(releaseInfo).includes('status')) {
-                    if (releaseInfo.status === 'new' && !releaseVersion) {
-                        releases[releaseInfo.version] = releaseVersion = {};
-                    }
-                } else {
-                    let key = Object.keys(releases).find(key => releaseInfo.version.endsWith('-dev') ? key.endsWith('-dev') : releaseInfo.version.slice(0, 2) === key.slice(0, 2));
-                    if (key) {
-                        if (releaseInfo.version > key) {
-                            delete releases[key];
-                            releases[releaseInfo.version] = releaseVersion = {};
-                        }
-                    } else {
-                        releases[releaseInfo.version] = releaseVersion = {};
-                    }
-                }
-                if (releaseVersion) {
-                    let releaseJavaVersion = releaseVersion[releaseInfo.java];
-                    if (!releaseJavaVersion) {
-                        const base: string | undefined = Object.keys(releaseInfo.base).find(base => releaseInfo.base[base].os === platform);
-                        if (base) {
-                            releaseVersion[releaseInfo.java] = releaseJavaVersion = {};
-                            releaseJavaVersion.url = releaseInfo.base[base].url;
-                            releaseJavaVersion.license = releaseInfo.license;
-                            releaseJavaVersion.licenseLabel = releaseInfo.licenseLabel || GRAALVM_EE_LICENSE;
-                        }
+            if (releaseInfo.version && releaseInfo.java && releaseInfo.license && releaseInfo.status === 'new') {
+                const releaseVersion = releases[releaseInfo.version] ?? (releases[releaseInfo.version] = {});
+                let releaseJavaVersion = releaseVersion[releaseInfo.java];
+                if (!releaseJavaVersion) {
+                    const arch = utils.getArch();
+                    const base: string | undefined = Object.keys(releaseInfo.base)
+                        .find(base => releaseInfo.base[base].os === platform && releaseInfo.base[base].arch === arch);
+                    if (base) {
+                        releaseVersion[releaseInfo.java] = releaseJavaVersion = {};
+                        releaseJavaVersion.url = releaseInfo.base[base].url;
+                        releaseJavaVersion.license = releaseInfo.license;
+                        releaseJavaVersion.licenseLabel = releaseInfo.licenseLabel || GRAALVM_EE_LICENSE;
                     }
                 }
             }
