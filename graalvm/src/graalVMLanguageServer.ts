@@ -160,15 +160,6 @@ export async function onClientNotification(method: string, handler: GenericNotif
 }
 
 function terminateLanguageServer() {
-	const groupPID = -languageServerPID;
-	try {
-		process.kill(groupPID, 'SIGKILL');
-	} catch (e) {
-		if (e.message === 'kill ESRCH') {
-			try {
-				process.kill(languageServerPID, 'SIGKILL');
-			} catch (e) {}
-		}
-	}
+	utils.killProcess(languageServerPID);
 	languageServerPID = 0;
 }
