@@ -8,6 +8,7 @@
 import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
+import * as cp from 'child_process';
 import { getGVMHome } from "./graalVMConfiguration";
 
 export function random(low: number, high: number): number {
@@ -110,6 +111,25 @@ export function getArch() {
 			return ARCH_AARCH64;
 		default:
 			return ARCH_UNKNOWN;
+	}
+}
+
+export function killProcess(pid: number) {
+    if (process.platform === 'win32') {
+        try {
+            cp.execSync(`${path.join(process.env['WINDIR'] || 'C:\\Windows', 'System32', 'taskkill.exe')} /f /t /pid ${pid}`);
+        } catch (e) {}
+    } else {
+		const groupPID = -pid;
+		try {
+			process.kill(groupPID, 'SIGKILL');
+		} catch (e) {
+			if (e.message === 'kill ESRCH') {
+				try {
+					process.kill(pid, 'SIGKILL');
+				} catch (e) {}
+			}
+		}
 	}
 }
 

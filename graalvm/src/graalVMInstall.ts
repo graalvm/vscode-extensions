@@ -527,6 +527,9 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             return;
         }
     }
+    if (action === 'remove' && graalVMHome === getGVMHome()) {
+        await stopLanguageServer();
+    }
     const args = eeInfo ? eeInfo.version.split('.')[0] >= 21 ? `--custom-catalog ${eeInfo.catalog} -A --email ${email} ` : `--custom-catalog ${eeInfo.catalog} -A ` : '';
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
@@ -552,7 +555,11 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
     }).then(() => {
         vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
         if (graalVMHome === getGVMHome()) {
-            stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
+            if (action === 'remove') {
+                startLanguageServer(graalVMHome);
+            } else {
+                stopLanguageServer().then(() => startLanguageServer(graalVMHome));
+            }
         }
     });
 }
