@@ -527,7 +527,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             return;
         }
     }
-    const args = eeInfo ? eeInfo.version.split('.')[0] >= 21 ? `--custom-catalog ${eeInfo.catalog} -A --email ${email} ` : `--custom-catalog ${eeInfo.catalog} ` : '';
+    const args = eeInfo ? eeInfo.version.split('.')[0] >= 21 ? `--custom-catalog ${eeInfo.catalog} -A --email ${email} ` : `--custom-catalog ${eeInfo.catalog} -A ` : '';
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: `${action === 'install' ? 'I' : 'Uni'}nstalling GraalVM Component${componentIds.length > 1 ? 's' : ' ' + componentIds[0]} of: "${await getGraalVMVersion(graalVMHome)}"`,
