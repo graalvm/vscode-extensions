@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
@@ -386,25 +386,26 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
     const state = await collectInputs();
 
     if (state.graalVMDistribution && state.graalVMVersion && state.javaVersion) {
-        let accepted;
         if (state.graalVMDistribution.label === 'Enterprise') {
             const license = await get(releaseInfos[state.graalVMVersion.label][state.javaVersion.label].license, /^text\/plain/);
-            const licenseLabel = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].licenseLabel;
-            accepted = await LicenseCheckPanel.show(context, licenseLabel, license.split('\n').join('<br>'));
-        } else {
-            accepted = true;
-        }
-        if (accepted) {
-            const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
-                canSelectFiles: false,
-                canSelectFolders: true,
-                canSelectMany: false,
-                title: 'Choose Installation Directory',
-                openLabel: 'Install Here'
-            });
-            if (location && location.length > 0) {
-                return { url: releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url, location: location[0].fsPath };
+            let email: string | undefined;
+            if (license) {
+                const licenseLabel = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].licenseLabel;
+                email = await LicenseCheckPanel.show(context, licenseLabel, license.split('\n').join('<br>'));
             }
+            if (!email) {
+                return undefined;
+            }
+        }
+        const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            title: 'Choose Installation Directory',
+            openLabel: 'Install Here'
+        });
+        if (location && location.length > 0) {
+            return { url: releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url, location: location[0].fsPath };
         }
     }
 
@@ -515,51 +516,52 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
         return;
     }
     const executablePath = await getGU(graalVMHome);
-    let accepted;
+    let email: string | undefined;
     const eeInfo: any = action === 'install' ? await getEEReleaseInfo(graalVMHome) : undefined;
     if (eeInfo && context) {
         const license = await get(eeInfo.license, /^text\/plain/);
-        accepted = await LicenseCheckPanel.show(context, eeInfo.licenseLabel, license.split('\n').join('<br>'));
-    } else {
-        accepted = true;
-    }
-    if (accepted) {
-        const args = eeInfo ? `--custom-catalog ${eeInfo.catalog} ` : '';
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: `${action === 'install' ? 'I' : 'Uni'}nstalling GraalVM Component${componentIds.length > 1 ? 's' : ' ' + componentIds[0]} of: "${await getGraalVMVersion(graalVMHome)}"`,
-            cancellable: componentIds.length > 1
-        }, async (progress, token) => {
-            const incr = 100/componentIds.length;
-            for (const id of componentIds) {
-                if (token.isCancellationRequested) {
-                    return;
-                }
-                if (incr !== 100) {
-                    progress.report({message: id, increment: incr});
-                }
-                try {
-                    await execCancellable(`${executablePath} ${action} ${args}${id}`, token);
-                    await checkGraalVMconfiguration(graalVMHome);
-                } catch (error) {
-                    vscode.window.showWarningMessage(error?.message);
-                }
-            }
+        if (license) {
+            email = await LicenseCheckPanel.show(context, eeInfo.licenseLabel, license.split('\n').join('<br>'));
+        }
+        if (!email) {
             return;
-        }).then(() => {
-            vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
-            if (graalVMHome === getGVMHome()) {
-                stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
-            }
-        });
+        }
     }
+    const args = eeInfo ? eeInfo.version.split('.')[0] >= 21 ? `--custom-catalog ${eeInfo.catalog} -A --email ${email} ` : `--custom-catalog ${eeInfo.catalog} -A ` : '';
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: `${action === 'install' ? 'I' : 'Uni'}nstalling GraalVM Component${componentIds.length > 1 ? 's' : ' ' + componentIds[0]} of: "${await getGraalVMVersion(graalVMHome)}"`,
+        cancellable: componentIds.length > 1
+    }, async (progress, token) => {
+        const incr = 100/componentIds.length;
+        for (const id of componentIds) {
+            if (token.isCancellationRequested) {
+                return;
+            }
+            if (incr !== 100) {
+                progress.report({message: id, increment: incr});
+            }
+            try {
+                await execCancellable(`${executablePath} ${action} ${args}${id}`, token);
+                await checkGraalVMconfiguration(graalVMHome);
+            } catch (error) {
+                vscode.window.showWarningMessage(error?.message);
+            }
+        }
+        return;
+    }).then(() => {
+        vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
+        if (graalVMHome === getGVMHome()) {
+            stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
+        }
+    });
 }
 
 function execCancellable(cmd: string, token: vscode.CancellationToken): Promise<any> {
     return new Promise((resolve, reject) => {
         const child = cp.exec(cmd, (error, _stdout, _stderr) => {
-            if (error) {
-                reject(error);
+            if (error || _stderr) {
+                reject(error ?? new Error(_stderr));
             } else {
                 resolve(undefined);
             }
@@ -642,42 +644,30 @@ async function getGraalVMEEReleases(): Promise<any> {
     return get(GDS_URL, /^application\/json/).catch(err => {
         throw new Error('Cannot get data from server: ' + err.message);
     }).then(rawData => {
+        const releases: any = {};
+        if (!rawData) {
+            return releases;
+        }
         const info = JSON.parse(rawData);
         let platform: string = process.platform;
         if (platform === 'win32') {
             platform = 'windows';
         }
-        const releases: any = {};
         Object.values(info.Releases)
         .filter((releaseInfo: any) => Object.keys(releaseInfo.base).find(base => releaseInfo.base[base].os === platform) !== undefined)
         .forEach((releaseInfo: any) => {
-            if (releaseInfo.version && releaseInfo.java && releaseInfo.license) {
-                let releaseVersion = releases[releaseInfo.version];
-                if (Object.keys(releaseInfo).includes('status')) {
-                    if (releaseInfo.status === 'new') {
-                        releases[releaseInfo.version] = releaseVersion = {};
-                    }
-                } else {
-                    let key = Object.keys(releases).find(key => releaseInfo.version.endsWith('-dev') ? key.endsWith('-dev') : releaseInfo.version.slice(0, 2) === key.slice(0, 2));
-                    if (key) {
-                        if (releaseInfo.version > key) {
-                            delete releases[key];
-                            releases[releaseInfo.version] = releaseVersion = {};
-                        }
-                    } else {
-                        releases[releaseInfo.version] = releaseVersion = {};
-                    }
-                }
-                if (releaseVersion) {
-                    let releaseJavaVersion = releaseVersion[releaseInfo.java];
-                    if (!releaseJavaVersion) {
-                        const base: string | undefined = Object.keys(releaseInfo.base).find(base => releaseInfo.base[base].os === platform);
-                        if (base) {
-                            releaseVersion[releaseInfo.java] = releaseJavaVersion = {};
-                            releaseJavaVersion.url = releaseInfo.base[base].url;
-                            releaseJavaVersion.license = releaseInfo.license;
-                            releaseJavaVersion.licenseLabel = releaseInfo.licenseLabel || GRAALVM_EE_LICENSE;
-                        }
+            if (releaseInfo.version && releaseInfo.java && releaseInfo.license && releaseInfo.status === 'new') {
+                const releaseVersion = releases[releaseInfo.version] ?? (releases[releaseInfo.version] = {});
+                let releaseJavaVersion = releaseVersion[releaseInfo.java];
+                if (!releaseJavaVersion) {
+                    const arch = utils.getArch();
+                    const base: string | undefined = Object.keys(releaseInfo.base)
+                        .find(base => releaseInfo.base[base].os === platform && releaseInfo.base[base].arch === arch);
+                    if (base) {
+                        releaseVersion[releaseInfo.java] = releaseJavaVersion = {};
+                        releaseJavaVersion.url = releaseInfo.base[base].url;
+                        releaseJavaVersion.license = releaseInfo.license;
+                        releaseJavaVersion.licenseLabel = releaseInfo.licenseLabel || GRAALVM_EE_LICENSE;
                     }
                 }
             }
@@ -688,6 +678,10 @@ async function getGraalVMEEReleases(): Promise<any> {
 
 async function getGraalVMReleaseURLs(releasesURL: string): Promise<string[]> {
     return get(releasesURL, /^text\/html/).then(rawData => {
+        const ret: string[] = [];
+        if(!rawData) {
+            return ret;
+        }
         let regex;
         if (process.platform === 'linux') {
             regex = LINUX_LINK_REGEXP;
@@ -696,7 +690,6 @@ async function getGraalVMReleaseURLs(releasesURL: string): Promise<string[]> {
         } else if (process.platform === 'win32') {
             regex = WINDOWS_LINK_REGEXP;
         }
-        const ret = [];
         if (regex) {
             let match;
             while ((match = regex.exec(rawData)) !== null) {
@@ -707,8 +700,8 @@ async function getGraalVMReleaseURLs(releasesURL: string): Promise<string[]> {
     });
 }
 
-async function get(url: string, contentTypeRegExp: RegExp, file?: fs.WriteStream): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+async function get(url: string, contentTypeRegExp: RegExp, file?: fs.WriteStream): Promise<string | undefined> {
+    return new Promise<string | undefined>((resolve, reject) => {
         https.get(url, res => {
             const { statusCode } = res;
             const contentType = res.headers['content-type'] || '';
@@ -844,25 +837,42 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
     return new Promise<{label: string, detail: string, installed?: boolean}[]>((resolve, reject) => {
         getGU(graalVMHome).then(executablePath => {
             cp.exec(`${executablePath} list`, (error, stdout, _stderr) => {
-                if (error) {
-                    reject(error);
+                if (error || _stderr) {
+                    reject(error ?? new Error(_stderr));
                 } else {
                     const installed: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
                     getEEReleaseInfo(graalVMHome).then(eeInfo => {
-                        const args = eeInfo ? ['available', '--custom-catalog', `${eeInfo.catalog}`] : ['available'];
-                        cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
-                            if (error) {
-                                notifyConnectionProblem();
-                                reject({error: error, list: installed.map(inst => {inst.installed = true; return inst; }) });
-                            } else {
-                                const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
-                                available.forEach(avail => {
-                                    const found = installed.find(item => item.label === avail.label);
-                                    avail.installed = found ? true : false;
-                                });
-                                resolve(available);
-                            }
-                        });
+                        if (eeInfo) {
+                            const args = ['available', '--custom-catalog', `${eeInfo.catalog}`];
+                            cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
+                                if (error || _stderr) {
+                                    notifyConnectionProblem();
+                                    reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
+                                } else {
+                                    const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
+                                    available.forEach(avail => {
+                                        const found = installed.find(item => item.label === avail.label);
+                                        avail.installed = found ? true : false;
+                                    });
+                                    resolve(available);
+                                }
+                            });
+                        } else {
+                            const args = ['available'];
+                            cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
+                                if (error) {
+                                    notifyConnectionProblem();
+                                    reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
+                                } else {
+                                    const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
+                                    available.forEach(avail => {
+                                        const found = installed.find(item => item.label === avail.label);
+                                        avail.installed = found ? true : false;
+                                    });
+                                    resolve(available);
+                                }
+                            });
+                        }
                     }).catch(error => {
                         reject({error: error, list: installed.map(inst => {inst.installed = true; return inst; }) });
                     });
@@ -886,7 +896,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
         if (versionInfo && versionInfo.length >= 4) {
             if (versionInfo[1] === 'EE') {
                 const javaVersion = `jdk${versionInfo[3]}`;
-                const rawData = await get(GDS_URL, /^application\/json/);
+                const rawData = await get(GDS_URL, /^application\/json/) ?? '{}';
                 return Object.values(JSON.parse(rawData).Releases).find((release: any) => release.version === versionInfo[2] && release.java === javaVersion);
             }
         }

@@ -6,3 +6,4 @@
 **/*.vsix
 package-lock.json
 /mxbuild
+/.project

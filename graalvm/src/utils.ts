@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
@@ -95,6 +95,22 @@ export function isSymlinked(dirPath: string): Promise<boolean> {
             }
         });
     });
+}
+export const ARCH_X64: string = 'x64';
+export const ARCH_AMD64: string = 'amd64';
+export const ARCH_ARM64: string = 'arm64';
+export const ARCH_AARCH64: string = 'aarch64';
+export const ARCH_UNKNOWN: string = 'unknown';
+export function getArch() {
+	const arch = process.arch;
+	switch (arch) {
+		case ARCH_X64:
+			return ARCH_AMD64;
+		case ARCH_ARM64:
+			return ARCH_AARCH64;
+		default:
+			return ARCH_UNKNOWN;
+	}
 }
 
 class InputFlowAction {

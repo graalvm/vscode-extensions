@@ -1,5 +1,7 @@
 # Change Log
 
+## Version 0.5.3
+* Set custom Micronaut Launch service URL
 ## Version 0.5.2
 * Repository moved
 
