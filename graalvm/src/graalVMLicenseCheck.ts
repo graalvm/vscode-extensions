@@ -8,7 +8,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as crypto from 'crypto';
 import * as mustache from 'mustache';
 
 export class LicenseCheckPanel {
@@ -22,19 +21,11 @@ export class LicenseCheckPanel {
 	private _disposables: vscode.Disposable[] = [];
 
 	public static show(context: vscode.ExtensionContext, licenseLabel: string, license: string): Promise<string | undefined> {
-		const hash = crypto.createHash('sha256').update(license).digest('hex');
 		const userAcceptedLicenses = JSON.parse(context.globalState.get(LicenseCheckPanel.userAcceptedLicenses) || '{}');
-		if (userAcceptedLicenses.licenses && userAcceptedLicenses.licenses.includes(hash)) {
-			return Promise.resolve(userAcceptedLicenses.userEmail);
-		}
 		return new Promise<string | undefined>(resolve => {
 			const lcp = new LicenseCheckPanel(context.extensionPath, licenseLabel, license, userAcceptedLicenses.userEmail, (message: any) => {
 				if (message.command === 'accepted') {
 					if (message.email) {
-						if (!userAcceptedLicenses.licenses) {
-							userAcceptedLicenses.licenses = [];
-						}
-						userAcceptedLicenses.licenses.push(hash);
 						userAcceptedLicenses.userEmail = message.email;
 						context.globalState.update(LicenseCheckPanel.userAcceptedLicenses, JSON.stringify(userAcceptedLicenses));
 					}
