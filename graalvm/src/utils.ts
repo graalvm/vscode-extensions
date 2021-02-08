@@ -9,6 +9,7 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
+import * as xml2js from 'xml2js';
 import { getGVMHome } from "./graalVMConfiguration";
 
 export function random(low: number, high: number): number {
@@ -150,6 +151,7 @@ export function checkFolderWritePermissions(graalVMHome: string, silent?: boolea
         return false;
     }
 }
+
 export const PLATFORM_WINDOWS: string = 'windows';
 export const PLATFORM_WIN32: string = 'win32';
 export const PLATFORM_OSX: string = 'osx';
@@ -166,6 +168,33 @@ export function platform(): string {
     }
     return PLATFORM_UNDEFINED;
 }
+
+export function getUserHome(): string | undefined{
+    const env = process.env;
+	if (platform() === PLATFORM_WINDOWS) {
+		const drive = env['HOMEDRIVE'];
+		const homePath = env['HOMEPATH'];
+		return drive && homePath ? drive + homePath : undefined;
+	} else {
+		return env['HOME']
+	}
+}
+
+export async function parseXMLFile(file: string, explicitArray: boolean = false): Promise<any> {
+    const content = readFileToString(file);
+    return await xml2js.parseStringPromise(content, { explicitArray: explicitArray });
+}
+
+export function writeXMLFile(file: string, content: any) {
+	fs.writeFileSync(file, new xml2js.Builder().buildObject(content));
+}
+
+export function readFileToString(file: string): string {
+	return fs.readFileSync(file).toString();
+}
+
+export const STRING_VALUE_TRUE: string = 'true';
+export const STRING_VALUE_FALSE: string = 'false';
 
 class InputFlowAction {
 	static back = new InputFlowAction();

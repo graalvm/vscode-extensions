@@ -6,7 +6,9 @@
  */
 
 import * as vscode from 'vscode';
-import * as utils from './utils'
+import * as utils from './utils';
+import * as fs from 'fs';
+import * as path from 'path';
 import { checkForMissingComponents, getInstallConfigurations } from './graalVMInstall';
 import { getPythonConfigurations } from './graalVMPython';
 import { getRConfigurations } from './graalVMR';
@@ -56,21 +58,37 @@ export async function setTerminalEnv(env: any): Promise<any> {
     return getConf(TERMINAL_INTEGRATED).update(`env.${utils.platform()}`, env, true);
 }
 
-export function setupProxy() {
+export async function setupProxy() {
     const http = getConf('http');
-    const proxy = http.get('proxy') as string;
+    const proxy = http.get<string>('proxy');
+    const mavenProxy: string | undefined = await readMavenProxy();
+    const usedProxy = proxy || mavenProxy;
     vscode.window.showInputBox(
         {
             prompt: 'Input proxy settings.',
             placeHolder: '<http(s)>://<host>:<port>',
-            value: proxy
+            value: usedProxy
         }
     ).then(async out => {
-        if (proxy !== out) {
-            await http.update('proxy', out, true);
-            await http.update('proxySupport', out ? 'off' : 'on', true);
-            await vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
+        if (out === undefined) {
+            return;
         }
+        try {
+            if (out) {
+                validateProxySettings(out);
+            }
+            if (proxy !== out || mavenProxy !== out) {
+                await http.update('proxy', out, true);
+                await http.update('proxySupport', out ? 'off' : 'on', true);
+                await vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
+                if (mavenProxy !== out) {
+                    utils.askYesNo(`Change also Maven proxy in "${getMavenSettingsFilePath()}"?`,
+                        () => updateMavenProxy(out));
+                }
+            }
+        } catch (e) {
+            vscode.window.showWarningMessage(e?.message);
+        };
     });
 }
 
@@ -100,6 +118,146 @@ export async function configureGraalVMHome(graalVMHome: string, nonInteractive?:
 export async function removeGraalVMconfiguration(graalVMHome: string) {
     await removeDefaultConfigurations(graalVMHome);
     await removeConfigurations(graalVMHome);
+}
+
+function validateProxySettings(proxy: string) {
+    const parts = splitProxy(proxy);
+    if (parts[0].length === 0) {
+        throw new Error("Proxy protocol must be specified.");
+    }
+    if (parts[0] !== "http" && parts[0] !== "https") {
+        throw new Error("Http/s protocol must be used for proxy settings.");
+    }
+    if (parts[1].length === 0) {
+        throw new Error("Proxy host must be specified.");
+    }
+    if (parts[2].length === 0) {
+        throw new Error("Proxy port must be specified.");
+    }
+    if (!Number.isSafeInteger(parseInt(parts[2]))) {
+        throw new Error("Proxy port must be number.");
+    }
+}
+
+function parseMavenProxies(mavenSettings: any): any[] {
+    const proxies: any | any[] | undefined = mavenSettings?.settings?.proxies?.proxy;
+    if (!proxies) {
+        return [];
+    }
+    if (Array.isArray(proxies)) {
+        return proxies;
+    }
+    return [proxies];
+}
+
+async function getMavenProxies(file: string | undefined = getMavenSettingsFilePath()): Promise<any[]> {
+    if (!file || !fs.existsSync(file)) {
+        return [];
+    }
+    const mavenSettings = await utils.parseXMLFile(file);
+    console.log(mavenSettings);
+    return parseMavenProxies(mavenSettings);
+}
+
+async function readMavenProxy(): Promise<string | undefined> {
+    const proxies: any[] = await getMavenProxies();
+    const proxy = proxies.find(p => p.active === utils.STRING_VALUE_TRUE);
+    if (!proxy) {
+        return undefined;
+    }
+    return `${proxy.protocol}://${proxy.host}:${proxy.port}`;
+}
+
+function getMavenSettingsFilePath(): string | undefined {
+    const home = utils.getUserHome();
+    if (!home) {
+        vscode.window.showErrorMessage("Users HOME is undefined in process!");
+        return undefined;
+    }
+    const file = path.join(home, '.m2', 'settings.xml');
+    return file;
+}
+
+const ID_GRAALVM_VSCODE: string = 'graalvm-vscode';
+async function updateMavenProxy(proxy: string | undefined) {
+    const file = getMavenSettingsFilePath();
+    if (!file) {
+        return;
+    }
+    if (!fs.existsSync(file) && proxy) {
+        utils.writeXMLFile(file, wrappedMavenProxy(proxy));
+        return;
+    }
+    const mavenSettings = await utils.parseXMLFile(file);
+    const mavenProxies = parseMavenProxies(mavenSettings);
+    if (mavenProxies.length === 0 && proxy) {
+        mavenSettings.proxies = { proxy: createMavenProxy(proxy) };
+        utils.writeXMLFile(file, mavenSettings);
+        return;
+    }
+    const aProxy = mavenProxies.find(p => p.active === utils.STRING_VALUE_TRUE);
+    if (aProxy) {
+        aProxy.active = utils.STRING_VALUE_FALSE;
+    }
+    if (!proxy) {
+        utils.writeXMLFile(file, mavenSettings);
+        return;
+    }
+    const foundProxy = mavenProxies.find(findMavenProxy(proxy));
+    if (foundProxy) {
+        foundProxy.active = utils.STRING_VALUE_TRUE;
+    } else {
+        const gvmProxyIndex = mavenProxies.findIndex(p => p.id == ID_GRAALVM_VSCODE);
+        if (gvmProxyIndex < 0) {
+            mavenProxies.push(createMavenProxy(proxy));
+        } else {
+            mavenProxies[gvmProxyIndex] = createMavenProxy(proxy);
+        }
+    }
+    mavenSettings.settings.proxies.proxy = mavenProxies;
+    utils.writeXMLFile(file, mavenSettings);
+    return;
+}
+
+function findMavenProxy(proxy: string): (mavenProxy: any) => boolean {
+    const parts = splitProxy(proxy);
+    return function (mavenProxy: any): boolean {
+        return mavenProxy.protocol === parts[0]
+            && mavenProxy.host === parts[1]
+            && mavenProxy.port === parts[2];
+    }
+}
+
+function splitProxy(proxy: string): [string, string, string] {
+    const protocolIndex = proxy.indexOf('://');
+    const portIndex = proxy.lastIndexOf(':');
+    if (protocolIndex < 0 || portIndex < 0) {
+        throw new Error("Proxy is invalid.");
+    }
+    return [proxy.substring(0, protocolIndex),
+        proxy.substring(protocolIndex + 3, portIndex),
+        proxy.substring(portIndex + 1)];
+}
+
+function createMavenProxy(proxy: string): any {
+    const parts = splitProxy(proxy);
+    return {
+        id: ID_GRAALVM_VSCODE,
+        active: true,
+        protocol: parts[0],
+        host: parts[1],
+        port: parts[2]
+    };
+}
+
+function wrappedMavenProxy(proxy: any) {
+    return {
+        settings: {
+            proxies: {
+                proxy: createMavenProxy(proxy)
+            }
+        }
+    };
 }
 
 async function removeDefaultConfigurations(graalVMHome: string) {
