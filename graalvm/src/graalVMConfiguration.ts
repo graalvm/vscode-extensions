@@ -139,8 +139,10 @@ function validateProxySettings(proxy: string) {
     }
 }
 
-function parseMavenProxies(mavenSettings: any): any[] {
-    const proxies: any | any[] | undefined = mavenSettings?.settings?.proxies?.proxy;
+type MavenProxy = { id?:string, active: boolean, protocol: string, host: string, port: number }
+type MavenSettings = { settings?: { proxies?: { proxy?: MavenProxy | MavenProxy[] }, [key: string]: any }}
+function parseMavenProxies(mavenSettings: MavenSettings | undefined): MavenProxy[] {
+    const proxies: MavenProxy | MavenProxy[] | undefined = mavenSettings?.settings?.proxies?.proxy;
     if (!proxies) {
         return [];
     }
@@ -150,18 +152,17 @@ function parseMavenProxies(mavenSettings: any): any[] {
     return [proxies];
 }
 
-async function getMavenProxies(file: string | undefined = getMavenSettingsFilePath()): Promise<any[]> {
+async function getMavenProxies(file: string | undefined = getMavenSettingsFilePath()): Promise<MavenProxy[]> {
     if (!file || !fs.existsSync(file)) {
         return [];
     }
-    const mavenSettings = await utils.parseXMLFile(file);
-    console.log(mavenSettings);
+    const mavenSettings: MavenSettings = await utils.parseXMLFile(file);
     return parseMavenProxies(mavenSettings);
 }
 
 async function readMavenProxy(): Promise<string | undefined> {
-    const proxies: any[] = await getMavenProxies();
-    const proxy = proxies.find(p => p.active === utils.STRING_VALUE_TRUE);
+    const proxies: MavenProxy[] = await getMavenProxies();
+    const proxy = proxies.find(p => p.active);
     if (!proxy) {
         return undefined;
     }
@@ -188,16 +189,19 @@ async function updateMavenProxy(proxy: string | undefined) {
         utils.writeXMLFile(file, wrappedMavenProxy(proxy));
         return;
     }
-    const mavenSettings = await utils.parseXMLFile(file);
+    const mavenSettings: MavenSettings = await utils.parseXMLFile(file) || { settings: {}};
+    if(!mavenSettings.settings) {
+        mavenSettings.settings = {};
+    }
     const mavenProxies = parseMavenProxies(mavenSettings);
     if (mavenProxies.length === 0 && proxy) {
-        mavenSettings.proxies = { proxy: createMavenProxy(proxy) };
+        mavenSettings.settings.proxies = { proxy: createMavenProxy(proxy) };
         utils.writeXMLFile(file, mavenSettings);
         return;
     }
-    const aProxy = mavenProxies.find(p => p.active === utils.STRING_VALUE_TRUE);
+    const aProxy = mavenProxies.find(p => p.active);
     if (aProxy) {
-        aProxy.active = utils.STRING_VALUE_FALSE;
+        aProxy.active = false;
     }
     if (!proxy) {
         utils.writeXMLFile(file, mavenSettings);
@@ -205,7 +209,7 @@ async function updateMavenProxy(proxy: string | undefined) {
     }
     const foundProxy = mavenProxies.find(findMavenProxy(proxy));
     if (foundProxy) {
-        foundProxy.active = utils.STRING_VALUE_TRUE;
+        foundProxy.active = true;
     } else {
         const gvmProxyIndex = mavenProxies.findIndex(p => p.id == ID_GRAALVM_VSCODE);
         if (gvmProxyIndex < 0) {
@@ -214,17 +218,17 @@ async function updateMavenProxy(proxy: string | undefined) {
             mavenProxies[gvmProxyIndex] = createMavenProxy(proxy);
         }
     }
-    mavenSettings.settings.proxies.proxy = mavenProxies;
+    mavenSettings.settings.proxies = { proxy: mavenProxies };
     utils.writeXMLFile(file, mavenSettings);
     return;
 }
 
-function findMavenProxy(proxy: string): (mavenProxy: any) => boolean {
+function findMavenProxy(proxy: string): (mavenProxy: MavenProxy) => boolean {
     const parts = splitProxy(proxy);
-    return function (mavenProxy: any): boolean {
+    return function (mavenProxy: MavenProxy): boolean {
         return mavenProxy.protocol === parts[0]
             && mavenProxy.host === parts[1]
-            && mavenProxy.port === parts[2];
+            && mavenProxy.port === parseInt(parts[2]);
     }
 }
 
@@ -239,18 +243,18 @@ function splitProxy(proxy: string): [string, string, string] {
         proxy.substring(portIndex + 1)];
 }
 
-function createMavenProxy(proxy: string): any {
+function createMavenProxy(proxy: string): MavenProxy {
     const parts = splitProxy(proxy);
     return {
         id: ID_GRAALVM_VSCODE,
         active: true,
         protocol: parts[0],
         host: parts[1],
-        port: parts[2]
+        port: parseInt(parts[2])
     };
 }
 
-function wrappedMavenProxy(proxy: any) {
+function wrappedMavenProxy(proxy: string): MavenSettings {
     return {
         settings: {
             proxies: {

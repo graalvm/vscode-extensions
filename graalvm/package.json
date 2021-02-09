@@ -628,7 +628,7 @@
 		"sax": "^1.2.4",
 		"vscode-chrome-debug-core": "^6.8.8",
 		"vscode-languageclient": "^5.2.1",
-		"xml2js": "^0.4.23"
+		"fast-xml-parser": "^3.18.0"
 	},
 	"devDependencies": {
 		"@types/mocha": "^7.0.2",

@@ -9,7 +9,7 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
-import * as xml2js from 'xml2js';
+import * as xmlparser from 'fast-xml-parser';
 import { getGVMHome } from "./graalVMConfiguration";
 
 export function random(low: number, high: number): number {
@@ -182,19 +182,16 @@ export function getUserHome(): string | undefined{
 
 export async function parseXMLFile(file: string, explicitArray: boolean = false): Promise<any> {
     const content = readFileToString(file);
-    return await xml2js.parseStringPromise(content, { explicitArray: explicitArray });
+	return await xmlparser.parse(content, { arrayMode: explicitArray });
 }
 
-export function writeXMLFile(file: string, content: any) {
-	fs.writeFileSync(file, new xml2js.Builder().buildObject(content));
+export function writeXMLFile(file: string, content: any, pretty: boolean = true) {
+	fs.writeFileSync(file, new xmlparser.j2xParser({ format: pretty }).parse(content));
 }
 
 export function readFileToString(file: string): string {
 	return fs.readFileSync(file).toString();
 }
-
-export const STRING_VALUE_TRUE: string = 'true';
-export const STRING_VALUE_FALSE: string = 'false';
 
 class InputFlowAction {
 	static back = new InputFlowAction();
