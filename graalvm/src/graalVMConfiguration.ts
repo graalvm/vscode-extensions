@@ -61,7 +61,8 @@ export async function setTerminalEnv(env: any): Promise<any> {
 export async function setupProxy() {
     const http = getConf('http');
     const proxy = http.get<string>('proxy');
-    const mavenProxy: string | undefined = await readMavenProxy();
+    const isMvn: boolean = isMaven();
+    const mavenProxy: string | undefined = isMvn ? await readMavenProxy() : undefined;
     const usedProxy = proxy || mavenProxy;
     vscode.window.showInputBox(
         {
@@ -81,7 +82,7 @@ export async function setupProxy() {
                 await http.update('proxy', out, true);
                 await http.update('proxySupport', out ? 'off' : 'on', true);
                 await vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
-                if (mavenProxy !== out) {
+                if (isMvn && mavenProxy !== out) {
                     utils.askYesNo(`Change also Maven proxy in "${getMavenSettingsFilePath()}"?`,
                         () => updateMavenProxy(out));
                 }
@@ -168,7 +169,9 @@ async function readMavenProxy(): Promise<string | undefined> {
     }
     return `${proxy.protocol}://${proxy.host}:${proxy.port}`;
 }
-
+export function isMaven(): boolean {
+    return vscode.extensions.getExtension('vscjava.vscode-maven') !== undefined;
+}
 function getMavenSettingsFilePath(): string | undefined {
     const home = utils.getUserHome();
     if (!home) {
