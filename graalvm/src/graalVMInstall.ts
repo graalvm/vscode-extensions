@@ -13,7 +13,7 @@ import * as decompress from 'decompress';
 import * as utils from './utils';
 import { basename, dirname, join, normalize, delimiter } from 'path';
 import { LicenseCheckPanel } from './graalVMLicenseCheck';
-import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName, isMaven } from './graalVMConfiguration';
+import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName } from './graalVMConfiguration';
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 
 const GITHUB_URL: string = 'https://github.com';
@@ -267,7 +267,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
     ret.push(new ConfigurationPickItem(
         'Set as Java for Maven',
         '(JAVA_HOME in maven.terminal.customEnv)',
-        _graalVMHome => isMaven(), 
+        _graalVMHome => vscode.extensions.getExtension('vscjava.vscode-maven') !== undefined,
         graalVMHome => {
             const envs = getConf('maven').get('terminal.customEnv') as [];
             return envs ? envs.find(env => env["environmentVariable"] === "JAVA_HOME" && env["value"] === graalVMHome) !== undefined : false;

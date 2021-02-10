@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as cp from 'child_process';
 import { checkForMissingComponents, getInstallConfigurations } from './graalVMInstall';
 import { getPythonConfigurations } from './graalVMPython';
 import { getRConfigurations } from './graalVMR';
@@ -61,7 +62,7 @@ export async function setTerminalEnv(env: any): Promise<any> {
 export async function setupProxy() {
     const http = getConf('http');
     const proxy = http.get<string>('proxy');
-    const isMvn: boolean = isMaven();
+    const isMvn: boolean = await isMaven();
     const mavenProxy: string | undefined = isMvn ? await readMavenProxy() : undefined;
     const usedProxy = proxy || mavenProxy;
     vscode.window.showInputBox(
@@ -169,8 +170,12 @@ async function readMavenProxy(): Promise<string | undefined> {
     }
     return `${proxy.protocol}://${proxy.host}:${proxy.port}`;
 }
-export function isMaven(): boolean {
-    return vscode.extensions.getExtension('vscjava.vscode-maven') !== undefined;
+export function isMaven(): Promise<boolean> {
+    return new Promise((resolve, _reject) => {
+        cp.exec('mvn --version',(_error, stdout, _stderr) => {
+            resolve(stdout.includes('Apache Maven'));
+        });
+    });
 }
 function getMavenSettingsFilePath(): string | undefined {
     const home = utils.getUserHome();
