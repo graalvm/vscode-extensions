@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.5.4
+* Check writable permission before GraalVM is downloaded
+* Fix injectTos and scopeNames
+* User has to always accept GraalVM EE license
+
 ## Version 0.5.3
 * GraalVM EE JDK 11 bits are not offered for download
 ## Version 0.5.2
