@@ -392,7 +392,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
--------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Thanks - https://github.com/janl/mustache.js
 
@@ -443,6 +443,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 ================================================================================
 
 decompress 4.2.1
@@ -470,23 +471,34 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ==== All decompress npm dependencies ===========================================
+
 - decompress-tar (https://www.npmjs.com/package/decompress-tar) -4.1.1
 MIT License same as above
+
+--------------------------------------------------------------------------------
 
 - file-type (https://www.npmjs.com/package/file-type) - 15.0.1 MIT
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 License same as above
 
+--------------------------------------------------------------------------------
+
 - @tokenizer/token (https://www.npmjs.com/package/@tokenizer/token) - 0.1.1
 MIT license same as above
 Copyright (c) 2020 Borewit
 
+--------------------------------------------------------------------------------
+
 - @types/debug (https://www.npmjs.com/package/@types/debug) -4.1.5
 MIT licese same as above
+
+--------------------------------------------------------------------------------
 
 - peek-readable (https://www.npmjs.com/package/peek-readable) - 3.1.0
 MIT license same as above
 Copyright (c) 2010-2017 Borewit
+
+--------------------------------------------------------------------------------
 
 - ieee754 (https://www.npmjs.com/package/ieee754) - 1.1.13
 BSD-3-Clause
@@ -516,22 +528,32 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
 - is-typedarray (https://www.npmjs.com/package/is-typedarray) - 1.0.0
 MIT license same as above
+
+--------------------------------------------------------------------------------
 
 - is-stream (https://www.npmjs.com/package/is-stream) -2.0.0
 MIT license same as above
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 Copyright (c) 2014 Mathias Buus
 
+--------------------------------------------------------------------------------
+
 - bl (https://www.npmjs.com/package/bl) - 4.0.3
 MIT license same as above
 Copyright (c) 2013-2019 bl contributors Rod Vagg, Matteo Collina, Jarett Cruger
 
+--------------------------------------------------------------------------------
+
 - base64-js (https://www.npmjs.com/package/base64-js) - 1.3.1
 MIT license same as above
 Copyright (c) 2014 Jameson Little
+
+--------------------------------------------------------------------------------
 
 - inherits (https://www.npmjs.com/package/inherits) - 2.0.4
 
@@ -550,7 +572,9 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
 - readable-stream (https://www.npmjs.com/package/readable-stream) - 3.0.6
 
 Node.js is licensed for use as follows:
@@ -600,21 +624,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
 """
+
 ------------------------------------------------------------------------------
+
 - string_decoder (https://www.npmjs.com/package/string_decoder) - 1.3.0
 node.js license same as above
+
+--------------------------------------------------------------------------------
 
 - safe-buffer (https://www.npmjs.com/package/safe-buffer) - 5.2.1
 MIT license same as above
 Copyright (c) Feross Aboukhadijeh
 
+--------------------------------------------------------------------------------
+
 - util-deprecate (https://www.npmjs.com/package/util-deprecate) -1.0.2
 MIT license same as above
 Copyright (c) 2014 Nathan Rajlich <nathan@tootallnate.net>
 
+--------------------------------------------------------------------------------
+
 - end-of-stream (https://www.npmjs.com/package/end-of-stream) - 1.4.4
 MIT license same as above
 Copyright (c) 2014 Mathias Buus
+
+--------------------------------------------------------------------------------
 
 - once (https://www.npmjs.com/package/once) - 1.4.0
 The ISC License
@@ -633,17 +667,24 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 - wrappy (https://www.npmjs.com/package/wrappy) - 1.0.2
 ISC license same as above
+
+--------------------------------------------------------------------------------
 
 - fs-constants (https://www.npmjs.com/package/fs-constants) - 1.0.0
 MIT license same as above
 Copyright (c) 2018 Mathias Buus
 
+--------------------------------------------------------------------------------
 
 - decompress-tarbz2 (https://www.npmjs.com/package/decompress-tarbz2) - 4.1.1
 MIT license same as above
 Copyright (c) Kevin Mårtensson <kevinmartensson@gmail.com> (github.com/kevva)
+
+--------------------------------------------------------------------------------
 
 - seek-bzip (https://www.npmjs.com/package/seek-bzip) - 2.0.0
 MIT license same as above
@@ -651,12 +692,16 @@ Copyright (c) 2013-2015 C. Scott Ananian
 Copyright (c) 2012-2015 Eli Skeggs
 Copyright (c) 2011 Kevin Kwok
 
+--------------------------------------------------------------------------------
+
 - unbzip2-stream (https://www.npmjs.com/package/unbzip2-stream) - 1.4.3
 MIT license same as above
 Copyright (c) 2017 by Jan Boelsche (jan@lagomorph.de)
 based on bzip2.js - a small bzip2 decompression implementation
 Copyright 2011 by antimatter15 (antimatter15@gmail.com)
 Based on micro-bunzip by Rob Landley (rob@landley.net).
+
+--------------------------------------------------------------------------------
 
 - through (https://www.npmjs.com/package/through) - 2.3.8
 MIT license same as above
@@ -679,54 +724,79 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 - decompress-targz (https://www.npmjs.com/package/decompress-targz) - 4.1.1
 MIT license same as above
 Copyright (c) Kevin Mårtensson <kevinmartensson@gmail.com> (github.com/kevva)
+
+--------------------------------------------------------------------------------
 
 - decompress-unzip (https://www.npmjs.com/package/decompress-unzip) - 4.0.1
 MIT license same as above
 Copyright (c) Kevin Mårtensson <kevinmartensson@gmail.com>
 
+--------------------------------------------------------------------------------
+
 - get-stream (https://www.npmjs.com/package/get-stream) - 6.0.0
 MIT license same as above
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+
+--------------------------------------------------------------------------------
 
 - pify (https://www.npmjs.com/package/pify) - 5.0.0
 MIT license same as above
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 
+--------------------------------------------------------------------------------
+
 - yauzl (https://www.npmjs.com/package/yauzl) - 2.10.0
 MIT license same as above
 Copyright (c) 2014 Josh Wolfe
+
+--------------------------------------------------------------------------------
 
 - fd-slicer (https://www.npmjs.com/package/fd-slicer) - 1.1.0
 MIT license same as above
 Copyright (c) 2014 Andrew Kelley
 
+--------------------------------------------------------------------------------
+
 - pend (https://www.npmjs.com/package/pend) - 1.2.0
 MIT license same as above
 Copyright (c) 2014 Andrew Kelley
+
+--------------------------------------------------------------------------------
 
 - buffer-crc32 (https://www.npmjs.com/package/buffer-crc32) - 0.2.13
 MIT license same as above
 Copyright (c) 2013 Brian J. Brennan
 
+--------------------------------------------------------------------------------
+
 - graceful-fs (https://www.npmjs.com/package/graceful-fs) - 4.2.4
 ISC license same as above
 Copyright (c) Isaac Z. Schlueter, Ben Noordhuis, and Contributors
+
+--------------------------------------------------------------------------------
 
 - make-dir (https://www.npmjs.com/package/make-dir) - 3.1.0
 MIT license same as above
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
 
+--------------------------------------------------------------------------------
+
 - semver (https://www.npmjs.com/package/semver) - 7.3.2
 ISC license same as above
 Copyright (c) Isaac Z. Schlueter and Contributors
 
+--------------------------------------------------------------------------------
+
 - strip-dirs (https://www.npmjs.com/package/strip-dirs) - 3.0.0
 ISC license same as above
 Copyright 2017 - 2018 Shinnosuke Watanabe
+
+--------------------------------------------------------------------------------
 
 - kind-of (https://www.npmjs.com/package/kind-of) - 6.0.3
 MIT license same as above
@@ -761,6 +831,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === source-map ===
 
 Copyright (c) 2009-2011, Mozilla Foundation and contributors
@@ -791,7 +863,10 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+--------------------------------------------------------------------------------
+
 === color ===
+
 Copyright (c) 2012 Heather Arthur
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -812,6 +887,8 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
 
 === color-convert ===
 
@@ -836,7 +913,10 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === color-name ===
+
 The MIT License (MIT)
 Copyright (c) 2015 Dmitry Ivanov
 
@@ -857,7 +937,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === color-string ===
+
 Copyright (c) 2011 Heather Arthur <fayearthur@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -878,6 +961,8 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
 
 === simple-swizzle ===
 
@@ -903,7 +988,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === is-arrayish ===
+
 The MIT License (MIT)
 
 Copyright (c) 2015 JD Ballard
@@ -926,36 +1014,42 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === devtool-protocol ===
-// Copyright 2014 The Chromium Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//    * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//    * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//    * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Copyright 2014 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+--------------------------------------------------------------------------------
 
 === glob ===
+
 The ISC License
 
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -972,7 +1066,10 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === fs.realpath ===
+
 The ISC License
 
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -1017,7 +1114,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === inflight ===
+
 The ISC License
 
 Copyright (c) Isaac Z. Schlueter
@@ -1033,6 +1133,8 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+--------------------------------------------------------------------------------
 
 === wrappy ===
 
@@ -1052,7 +1154,10 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === inherits ===
+
 The ISC License
 
 Copyright (c) Isaac Z. Schlueter
@@ -1069,7 +1174,10 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === brace-expansion===
+
 MIT License
 
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
@@ -1092,7 +1200,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === balanced-match ===
+
 (MIT)
 
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
@@ -1114,7 +1225,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === concat-map ===
+
 This software is released under the MIT license:
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1134,7 +1248,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === minimatch ===
+
 The ISC License
 
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -1150,8 +1267,11 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+--------------------------------------------------------------------------------
 
 === once ===
+
 The ISC License
 
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -1168,7 +1288,10 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === path-is-absolute ===
+
 The MIT License (MIT)
 
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
@@ -1191,7 +1314,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === noice-json-rpc ===
+
 Copyright (c) Manoj Patel
 
 MIT License
@@ -1215,6 +1341,8 @@ BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+--------------------------------------------------------------------------------
 
 === source-map ===
 
@@ -1246,7 +1374,10 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+--------------------------------------------------------------------------------
+
 === vscode-debugeradapter ===
+
 Copyright (c) Microsoft Corporation
 
 All rights reserved.
@@ -1270,7 +1401,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === mkdirp ===
+
 Copyright 2010 James Halliday (mail@substack.net)
 
 This project is free software released under the MIT/X11 license:
@@ -1293,7 +1427,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === minimist ===
+
 This software is released under the MIT license:
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1313,7 +1450,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === vscode-debugprotocol ===
+
 Copyright (c) Microsoft Corporation
 
 All rights reserved.
@@ -1336,6 +1476,8 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
 
 === vscode-nls ===
 
@@ -1365,7 +1507,10 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === vscode-uri ===
+
 The MIT License (MIT)
 
 Copyright (c) Microsoft
@@ -1387,7 +1532,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === ws ===
+
 The MIT License (MIT)
 
 Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
@@ -1410,7 +1558,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+--------------------------------------------------------------------------------
+
 === async-limiter ===
+
 The MIT License (MIT)
 Copyright (c) 2017 Samuel Reed <samuel.trace.reed@gmail.com>
 
@@ -1430,3 +1581,53 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+================================================================================
+
+xml2js 0.4.23
+
+Copyright 2010, 2011, 2012, 2013. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+
+xmlbuilder 11.0.1
+
+The MIT License (MIT)
+
+Copyright (c) 2013 Ozgur Ozcitak
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

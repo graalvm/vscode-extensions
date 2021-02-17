@@ -267,7 +267,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
     ret.push(new ConfigurationPickItem(
         'Set as Java for Maven',
         '(JAVA_HOME in maven.terminal.customEnv)',
-        _graalVMHome => vscode.extensions.getExtension('vscjava.vscode-maven') !== undefined, 
+        _graalVMHome => vscode.extensions.getExtension('vscjava.vscode-maven') !== undefined,
         graalVMHome => {
             const envs = getConf('maven').get('terminal.customEnv') as [];
             return envs ? envs.find(env => env["environmentVariable"] === "JAVA_HOME" && env["value"] === graalVMHome) !== undefined : false;

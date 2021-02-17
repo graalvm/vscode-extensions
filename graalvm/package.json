@@ -627,7 +627,8 @@
 		"mustache": "4.0.1",
 		"sax": "^1.2.4",
 		"vscode-chrome-debug-core": "^6.8.8",
-		"vscode-languageclient": "^5.2.1"
+		"vscode-languageclient": "^5.2.1",
+		"xml2js": "^0.4.23"
 	},
 	"devDependencies": {
 		"@types/mocha": "^7.0.2",
@@ -636,6 +637,7 @@
 		"@types/mustache": "^4.0.1",
 		"@types/decompress": "^4.2.3",
 		"@types/vscode": "^1.49.0",
+		"@types/xml2js": "^0.4.8",
 		"ts-loader": "^6.2.1",
 		"tslint": "^6.1.0",
 		"typescript": "^3.8.3",

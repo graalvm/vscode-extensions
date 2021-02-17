@@ -9,6 +9,7 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
+import * as xmlparser from 'xml2js';
 import { getGVMHome } from "./graalVMConfiguration";
 
 export function random(low: number, high: number): number {
@@ -150,6 +151,7 @@ export function checkFolderWritePermissions(graalVMHome: string, silent?: boolea
         return false;
     }
 }
+
 export const PLATFORM_WINDOWS: string = 'windows';
 export const PLATFORM_WIN32: string = 'win32';
 export const PLATFORM_OSX: string = 'osx';
@@ -165,6 +167,45 @@ export function platform(): string {
         return PLATFORM_WINDOWS;
     }
     return PLATFORM_UNDEFINED;
+}
+
+export function getUserHome(): string | undefined{
+    const env = process.env;
+	if (platform() === PLATFORM_WINDOWS) {
+		const drive = env['HOMEDRIVE'];
+		const homePath = env['HOMEPATH'];
+		return drive && homePath ? drive + homePath : undefined;
+	} else {
+		return env['HOME']
+	}
+}
+
+function toNumber(value: string, _name: string): number | string {
+	const out = Number.parseInt(value);
+	return Number.isSafeInteger(out) ? out : value;
+}
+
+function toBoolean(value: string, _name: string): boolean | string {
+	if (value === "true") {
+		return true;
+	} else if (value === "false") {
+		return false;
+	} else {
+		return value;
+	}
+}
+
+export async function parseXMLFile(file: string, explicitArray: boolean = false): Promise<any> {
+    const content = readFileToString(file);
+	return await xmlparser.parseStringPromise(content, { explicitArray: explicitArray, valueProcessors: [toNumber, toBoolean]});
+}
+
+export function writeXMLFile(file: string, content: any, pretty: boolean = true) {
+	fs.writeFileSync(file, new xmlparser.Builder({renderOpts: {pretty: pretty}}).buildObject(content));
+}
+
+export function readFileToString(file: string): string {
+	return fs.readFileSync(file).toString();
 }
 
 class InputFlowAction {
