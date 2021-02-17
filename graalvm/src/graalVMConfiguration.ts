@@ -198,7 +198,7 @@ async function updateMavenProxy(proxy: string | undefined) {
         return;
     }
     const mavenSettings: MavenSettings = await utils.parseXMLFile(file) || { settings: {}};
-    if(!mavenSettings.settings) {
+    if(!mavenSettings.settings || typeof mavenSettings.settings === "string") {
         mavenSettings.settings = {};
     }
     const mavenProxies = parseMavenProxies(mavenSettings);

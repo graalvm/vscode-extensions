@@ -9,7 +9,7 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
-import * as xmlparser from 'fast-xml-parser';
+import * as xmlparser from 'xml2js';
 import { getGVMHome } from "./graalVMConfiguration";
 
 export function random(low: number, high: number): number {
@@ -180,13 +180,28 @@ export function getUserHome(): string | undefined{
 	}
 }
 
+function toNumber(value: string, _name: string): number | string {
+	const out = Number.parseInt(value);
+	return Number.isSafeInteger(out) ? out : value;
+}
+
+function toBoolean(value: string, _name: string): boolean | string {
+	if (value === "true") {
+		return true;
+	} else if (value === "false") {
+		return false;
+	} else {
+		return value;
+	}
+}
+
 export async function parseXMLFile(file: string, explicitArray: boolean = false): Promise<any> {
     const content = readFileToString(file);
-	return await xmlparser.parse(content, { arrayMode: explicitArray });
+	return await xmlparser.parseStringPromise(content, { explicitArray: explicitArray, valueProcessors: [toNumber, toBoolean]});
 }
 
 export function writeXMLFile(file: string, content: any, pretty: boolean = true) {
-	fs.writeFileSync(file, new xmlparser.j2xParser({ format: pretty }).parse(content));
+	fs.writeFileSync(file, new xmlparser.Builder({renderOpts: {pretty: pretty}}).buildObject(content));
 }
 
 export function readFileToString(file: string): string {
