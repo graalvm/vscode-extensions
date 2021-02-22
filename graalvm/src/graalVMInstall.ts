@@ -362,13 +362,33 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
 		return (input: utils.MultiStepInput) => pickGraalVMVersion(input, state);
 	}
 
+    function sortVersion(v1: {label: string}, v2: {label: string}): number {
+        const parts1 = v1.label.split('.');
+        const parts2 = v2.label.split('.');
+        const length = Math.min(parts1.length, parts2.length);
+        for (let i = 0; i < length; ++i) {
+            const diff = Number.parseInt(parts2[i]) - Number.parseInt(parts1[i]);
+            if (diff !== 0) {
+                return diff;
+            }
+        }
+        const l = Math.max(parts1.length, parts2.length) - 1;
+        if (parts1[l]) {
+            const l1 = Number.parseInt(parts1[l]);
+            return Number.isSafeInteger(l1) ? -1 : 1;
+        } else {
+            const l2 = Number.parseInt(parts2[l]);
+            return Number.isSafeInteger(l2) ? 1 : -1;
+        }
+    }
+
 	async function pickGraalVMVersion(input: utils.MultiStepInput, state: Partial<State>) {
 		state.graalVMVersion = await input.showQuickPick({
 			title,
 			step: 2,
 			totalSteps,
 			placeholder: 'Pick a GraalVM version',
-			items: Object.keys(releaseInfos).map(label => ({ label })),
+			items: Object.keys(releaseInfos).map(label => ({ label })).sort(sortVersion),
 			activeItem: state.graalVMVersion,
 			shouldResume: () => Promise.resolve(false)
 		});
