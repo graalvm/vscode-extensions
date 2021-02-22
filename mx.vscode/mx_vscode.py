@@ -44,6 +44,9 @@ from os.path import join, isfile, exists
 
 _suite = mx.suite('vscode')
 
+BUILD_NUMBER = mx.get_env("BUILD_NUMBER", None)
+JOB_NAME = mx.get_env("JOB_NAME", None)
+
 class VSCodeExtensionProject(mx.ArchivableProject):
     def __init__(self, suite, name, deps, workingSets, theLicense, mxLibs=None, **args):
         mx.ArchivableProject.__init__(self, suite, name, deps, workingSets, theLicense)
@@ -91,7 +94,14 @@ class VSCodeExtensionBuildTask(mx.ArchivableBuildTask):
         if not exists(vsce):
             mx.run(['npm', 'install'], nonZeroIsFatal=True, cwd=_suite.dir)
         mx.run(['npm', 'install'], nonZeroIsFatal=True, cwd=self.subject.dir)
-        mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
+        if 'release' not in JOB_NAME: # Append BUILD_NUMBER to non-release Jenkins builds.
+            command_output = mx.OutputCapture()
+            mx.run(['node', '-pe', 'require(\'./package.json\').version'], nonZeroIsFatal=True, cwd=self.subject.dir, out=command_output)
+            mx.run(['npm', 'version', command_output.data.strip() + '-' + BUILD_NUMBER], nonZeroIsFatal=True, cwd=self.subject.dir)
+            mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
+            mx.run(['npm', 'version', command_output.data.strip()], nonZeroIsFatal=True, cwd=self.subject.dir)
+        else:
+            mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
 
     def clean(self, forBuild=False):
         for file in self.subject.getResults():
