@@ -646,7 +646,7 @@ async function getGraalVMCEReleases(): Promise<any> {
         }
         const releases: any = {};
         merged.forEach(releaseUrl => {
-            const version: string[] | null = releaseUrl.match(/\d+\.\d+\.\d+(-dev)?/);
+            const version: string[] | null = releaseUrl.match(/\d+\.\d+\.\d+(\.\d)?(-dev)?/);
             if (version && version.length > 0) {
                 const graalvmVarsion: string = version[0];
                 let releasesVersion = releases[graalvmVarsion];
