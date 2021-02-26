@@ -573,7 +573,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
                 progress.report({message: id, increment: incr});
             }
             try {
-                await execCancellable(`${executablePath} ${action} ${args}${id}`, token);
+                await execCancellable(`${executablePath} ${action} ${args}${id}`, token, { cwd: join(graalVMHome, 'bin') });
                 await checkGraalVMconfiguration(graalVMHome);
             } catch (error) {
                 vscode.window.showWarningMessage(error?.message);
@@ -592,11 +592,11 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
     });
 }
 
-function execCancellable(cmd: string, token: vscode.CancellationToken): Promise<any> {
+function execCancellable(cmd: string, token: vscode.CancellationToken, options?: ({ encoding?: string | null | undefined; } & cp.ExecOptions) | null | undefined): Promise<any> {
     return new Promise((resolve, reject) => {
-        const child = cp.exec(cmd, (error, _stdout, _stderr) => {
+        const child = cp.exec(cmd, options, (error, _stdout, _stderr) => {
             if (error || _stderr) {
-                reject(error ?? new Error(_stderr));
+                reject(error ?? new Error(_stderr.toString()));
             } else {
                 resolve(undefined);
             }
@@ -871,7 +871,8 @@ async function selectInstalledComponents(graalVMHome: string): Promise<string[]>
 async function getAvailableComponents(graalVMHome: string): Promise<{label: string, detail: string, installed?: boolean}[]> {
     return new Promise<{label: string, detail: string, installed?: boolean}[]>((resolve, reject) => {
         getGU(graalVMHome).then(executablePath => {
-            cp.exec(`${executablePath} list`, (error, stdout, _stderr) => {
+            const binGVM = join(graalVMHome, 'bin');
+            cp.exec(`${executablePath} list`, { cwd: binGVM }, (error, stdout, _stderr) => {
                 if (error || _stderr) {
                     reject(error ?? new Error(_stderr));
                 } else {
@@ -879,7 +880,7 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
                     getEEReleaseInfo(graalVMHome).then(eeInfo => {
                         if (eeInfo) {
                             const args = ['available', '--custom-catalog', `${eeInfo.catalog}`];
-                            cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
+                            cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
                                 if (error || _stderr) {
                                     notifyConnectionProblem();
                                     reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
@@ -894,8 +895,8 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
                             });
                         } else {
                             const args = ['available'];
-                            cp.exec(`${executablePath} ${args.join(' ')}`, (error: any, stdout: string, _stderr: any) => {
-                                if (error) {
+                            cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
+                                if (error || _stderr) {
                                     notifyConnectionProblem();
                                     reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
                                 } else {
