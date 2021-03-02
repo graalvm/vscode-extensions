@@ -94,7 +94,7 @@ class VSCodeExtensionBuildTask(mx.ArchivableBuildTask):
         if not exists(vsce):
             mx.run(['npm', 'install'], nonZeroIsFatal=True, cwd=_suite.dir)
         mx.run(['npm', 'install'], nonZeroIsFatal=True, cwd=self.subject.dir)
-        if 'release' not in JOB_NAME: # Append BUILD_NUMBER to non-release Jenkins builds.
+        if JOB_NAME and 'release' not in JOB_NAME: # Append BUILD_NUMBER to non-release Jenkins builds.
             command_output = mx.OutputCapture()
             mx.run(['node', '-pe', 'require(\'./package.json\').version'], nonZeroIsFatal=True, cwd=self.subject.dir, out=command_output)
             mx.run(['npm', 'version', command_output.data.strip() + '-' + BUILD_NUMBER], nonZeroIsFatal=True, cwd=self.subject.dir)
