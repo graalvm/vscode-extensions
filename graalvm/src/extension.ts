@@ -13,7 +13,7 @@ import { onClientNotification, startLanguageServer, stopLanguageServer } from '.
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
 import { addNativeImageToPOM } from './graalVMNativeImage';
-import { getGVMHome, setupProxy } from './graalVMConfiguration';
+import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
 import { runVisualVMForPID } from './graalVMVisualVM';
 
 const INSTALL_GRAALVM: string = 'Install GraalVM';
@@ -99,6 +99,12 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
 		} else if (e.affectsConfiguration('graalvm.languageServer.currentWorkDir') || e.affectsConfiguration('graalvm.languageServer.inProcessServer')) {
 			stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
+		}
+	}));
+	context.subscriptions.push(vscode.extensions.onDidChange(() => {
+		const netbeansExt = vscode.extensions.getExtension('asf.apache-netbeans-java');
+		if (netbeansExt) {
+			configureGraalVMHome(getGVMHome(), true);
 		}
 	}));
 	const graalVMHome = getGVMHome();

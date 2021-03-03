@@ -110,8 +110,8 @@ export async function configureGraalVMHome(graalVMHome: string, nonInteractive?:
     const oldGVM = getGVMHome(gr);
     if (graalVMHome !== oldGVM) {
         await removeConfigurations(oldGVM);
-        await defaultConfig(graalVMHome, gr);
     }
+    await defaultConfig(graalVMHome, gr);
     if (!nonInteractive) {
         await configureInteractive(graalVMHome);
     }
