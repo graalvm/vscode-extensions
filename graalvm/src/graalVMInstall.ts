@@ -115,21 +115,22 @@ export async function selectActiveGraalVM(graalVMHome?: string, nonInteractive?:
 
 export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
     const paths: string[] = [];
-    addPathToJava(normalize(getGVMHome()), paths);
+    const comparator = utils.isSamePath();
+    addPathToJava(normalize(getGVMHome()), paths, comparator);
     const installations = getGVMInsts().map(inst => normalize(inst));
-    installations.forEach(installation => addPathToJava(installation, paths, true));
+    installations.forEach(installation => addPathToJava(installation, paths, comparator, true));
     if (getConf('graalvm').get('systemDetect')) {
-        addPathsToJavaIn('/opt', paths);
+        addPathsToJavaIn('/opt', paths, comparator);
         if (process.env.GRAALVM_HOME) {
-            addPathToJava(normalize(process.env.GRAALVM_HOME), paths);
+            addPathToJava(normalize(process.env.GRAALVM_HOME), paths, comparator);
         }
         if (process.env.JAVA_HOME) {
-            addPathToJava(normalize(process.env.JAVA_HOME), paths);
+            addPathToJava(normalize(process.env.JAVA_HOME), paths, comparator);
         }
         if (process.env.PATH) {
             process.env.PATH.split(delimiter)
                 .filter(p => basename(p) === 'bin')
-                .forEach(p => addPathToJava(dirname(p), paths));
+                .forEach(p => addPathToJava(dirname(p), paths, comparator));
         }
     }
     const vms: {name: string, path: string}[] = [];
@@ -804,7 +805,7 @@ function updateGraalVMLocations(homeFolder: string) {
     }
 }
 
-function addPathsToJavaIn(folder: string, paths: string[]) {
+function addPathsToJavaIn(folder: string, paths: string[], comparator = utils.isSamePath()) {
     if (folder && fs.existsSync(folder) && fs.statSync(folder).isDirectory) {
         fs.readdirSync(folder).map(f => join(folder, f)).map(p => {
             if (process.platform === 'darwin') {
@@ -812,11 +813,11 @@ function addPathsToJavaIn(folder: string, paths: string[]) {
                 return fs.existsSync(homePath) ? homePath : p;
             }
             return p;
-        }).filter(p => fs.statSync(p).isDirectory()).forEach(p => addPathToJava(p, paths));
+        }).filter(p => fs.statSync(p).isDirectory()).forEach(p => addPathToJava(p, paths, comparator));
     }
 }
 
-function addPathToJava(folder: string, paths: string[], removeOnEmpty: boolean = false): void {
+function addPathToJava(folder: string, paths: string[], comparator = utils.isSamePath(), removeOnEmpty: boolean = false): void {
     const executable: string | undefined = utils.findExecutable('java', folder);
     if (!executable) {
         if (removeOnEmpty) {
@@ -825,7 +826,7 @@ function addPathToJava(folder: string, paths: string[], removeOnEmpty: boolean =
         return;
     }
     folder = normalize(join(dirname(fs.realpathSync(executable)), '..'));
-    if (!paths.find(p => p === folder)) {
+    if (!paths.find(comparator(folder))) {
         paths.push(folder);
     }
 }
