@@ -4,7 +4,7 @@
 	"recommendations": [
 		"eg2.tslint",
 		"vscjava.vscode-maven",
-		"redhat.java",
+		"asf.apache-netbeans-java",
 		"ms-python.python",
 		"Ikuyadeu.r",
 		"rebornix.Ruby"
