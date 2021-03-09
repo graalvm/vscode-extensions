@@ -61,6 +61,16 @@ async function askInstall(question: string, ifYes: (() => any) | undefined, othe
 	return ask(question, [{option: INSTALL, fnc: ifYes}], otherwise);
 }
 
+export function isSamePath(): (path1: string) => ((path2: string) => boolean) {
+    if (platform() !== PLATFORM_WINDOWS) {
+        return (path1: string) => ((path2: string) => path1 === path2);
+    }
+    return (path1: string) => {
+        const upperPath1 = path1.toUpperCase();
+        return (path2: string) => upperPath1 === path2.toUpperCase();
+    };
+}
+
 export async function runInTerminal(command: string) {
     let terminal: vscode.Terminal | undefined = vscode.window.activeTerminal;
     if (!terminal) {
