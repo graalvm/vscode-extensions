@@ -12,18 +12,25 @@ import { getJavaHome, findExecutable } from "./utils";
 
 const MICRONAUT: string = 'Micronaut';
 const NATIVE_IMAGE: string = 'native-image';
-let goals: vscode.QuickPickItem[] = [];
+
+interface Goals {
+    build: vscode.QuickPickItem[];
+    deploy: vscode.QuickPickItem[];
+}
+let goals: Goals;
 
 export async function builderInit() {
-    goals = await buildWrapper(getAvailableGradleGoals, getAvailableMavenGoals) || [];
+    goals = await buildWrapper(getAvailableGradleGoals, getAvailableMavenGoals) || { build: [], deploy: [] };
 }
 
-export async function build(goal?: string) {
+export async function build(goal?: string, group?: string) {
+    group = group || 'build';
+    const items: vscode.QuickPickItem[] = goals[group as keyof Goals];
     if (!goal) {
-        if (goals.length === 0) {
+        if (items.length === 0) {
             goal = 'build';
         } else {
-            const selected = goals.length > 1 ? await vscode.window.showQuickPick(goals, { placeHolder: 'Select build goal to invoke' }) : goals.length === 1 ? goals[0] : undefined;
+            const selected = items.length > 1 ? await vscode.window.showQuickPick(items, { placeHolder: `Select ${group} goal to invoke` }) : items.length === 1 ? items[0] : undefined;
             if (selected) {
                 goal = selected.label;
             }
@@ -106,6 +113,12 @@ function terminalMavenCommandFor(wrapper: vscode.Uri, goal: string): string | un
             case 'dockerBuildNative':
                 command = 'package -Dpackaging=docker-native';
                 break;
+            case 'dockerPush':
+                command = 'deploy -Dpackaging=docker';
+                break;
+            case 'dockerPushNative':
+                command = 'deploy -Dpackaging=docker-native';
+                break;
             default:
                 command = goal;
                 break;
@@ -117,9 +130,15 @@ function terminalMavenCommandFor(wrapper: vscode.Uri, goal: string): string | un
     return undefined;
 }
 
-function getAvailableGradleGoals(wrapper: vscode.Uri): vscode.QuickPickItem[] {
+function getAvailableGradleGoals(wrapper: vscode.Uri): Goals {
+    const out = cp.execFileSync(wrapper.fsPath, ['tasks', '--no-daemon', `--project-dir=${path.dirname(wrapper.fsPath)}`]);
+    const buildGoals: vscode.QuickPickItem[] = parseAvailableGradleGoals(out.toString(), 'Build tasks');
+    const deployGoals: vscode.QuickPickItem[] = parseAvailableGradleGoals(out.toString(), 'Upload tasks');
+    return { build: buildGoals, deploy: deployGoals };
+}
+
+function parseAvailableGradleGoals(out: string, category: string): vscode.QuickPickItem[] {
     const goals: vscode.QuickPickItem[] = [];
-    const out = cp.execFileSync(wrapper.fsPath, ['tasks', '--no-daemon', '--group=build', `--project-dir=${path.dirname(wrapper.fsPath)}`]);
     let process: boolean = false;
     out.toString().split('\n').map(line => line.trim()).forEach(line => {
         if (process) {
@@ -133,7 +152,7 @@ function getAvailableGradleGoals(wrapper: vscode.Uri): vscode.QuickPickItem[] {
                 }
             }
         } else {
-            if (line === 'Build tasks') {
+            if (line === category) {
                 process = true;
             }
         }
@@ -141,8 +160,8 @@ function getAvailableGradleGoals(wrapper: vscode.Uri): vscode.QuickPickItem[] {
     return goals;
 }
 
-function getAvailableMavenGoals(): vscode.QuickPickItem[] {
-    const goals: vscode.QuickPickItem[] = [
+function getAvailableMavenGoals(): Goals {
+    const buildGoals: vscode.QuickPickItem[] = [
         { label: 'clean', detail: 'Cleans the project' },
         { label: 'compile', detail: 'Compiles the source code of the project' },
         { label: 'package', detail: 'Packages the compiled code in its distributable format' },
@@ -150,5 +169,9 @@ function getAvailableMavenGoals(): vscode.QuickPickItem[] {
         { label: 'dockerBuild', detail: 'Builds a Docker image with the application artifacts'},
         { label: 'dockerBuildNative', detail: 'Builds a Docker image with a GraalVM native image inside'}
     ];
-    return goals;
+    const deployGoals: vscode.QuickPickItem[] = [
+        { label: 'dockerPush', detail: 'Pushes a Docker Image' },
+        { label: 'dockerPushNative', detail: 'Pushes a Native Docker Image using GraalVM' }
+    ];
+    return { build: buildGoals, deploy: deployGoals };
 }

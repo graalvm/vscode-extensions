@@ -74,6 +74,11 @@
 				"category": "Micronaut"
 			},
 			{
+				"command": "extension.micronaut.deploy",
+				"title": "Deploy ...",
+				"category": "Micronaut"
+			},
+			{
 				"command": "extension.micronaut.buildNativeImage",
 				"title": "Build Native Image",
 				"category": "Micronaut"
@@ -83,6 +88,10 @@
 			"commandPalette": [
 				{
 					"command": "extension.micronaut.build",
+					"when": "micronautProjectExists && javaHomeSet"
+				},
+				{
+					"command": "extension.micronaut.deploy",
 					"when": "micronautProjectExists && javaHomeSet"
 				},
 				{

@@ -22,7 +22,10 @@ export function activate(context: vscode.ExtensionContext) {
 		createProject();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.build', (goal?: string) => {
-		build(goal);
+		build(goal, 'build');
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.deploy', (goal?: string) => {
+		build(goal, 'deploy');
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.buildNativeImage', () => {
 		vscode.commands.executeCommand('extension.micronaut.build', 'nativeImage');
