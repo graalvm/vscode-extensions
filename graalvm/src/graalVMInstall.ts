@@ -173,7 +173,9 @@ export async function getGraalVMVersion(homeFolder: string): Promise<string | un
                                 javaVersion = javaVersion.slice(2);
                             }
                             let i = javaVersion.indexOf('.');
-                            javaVersion = javaVersion.slice(0, i);
+                            if (i > -1) {
+                                javaVersion = javaVersion.slice(0, i);
+                            }
                             resolve(`${graalVMVersion}, Java ${javaVersion}`);
                         } else {
                             resolve(undefined);
