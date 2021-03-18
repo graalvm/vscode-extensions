@@ -27,6 +27,8 @@ const INSTALL: string = 'Install ';
 const OPTIONAL_COMPONENTS: string = 'Optional GraalVM Components';
 const GRAALVM_EE_LICENSE: string = 'GraalVM Enterprise Edition License';
 
+const lockedComponentIds: string[] = [];
+
 export async function installGraalVM(context: vscode.ExtensionContext): Promise<void> {
     try {
         const selected = await selectGraalVMRelease(context);
@@ -542,7 +544,28 @@ async function _uninstallGraalVMComponent(componentId: string | undefined, graal
     }
 }
 
+function lockComponents(graalVMHome: string, componentIds: string[]): string[] {
+    return componentIds.filter((element) => {
+        const key = graalVMHome + element;
+        if (lockedComponentIds.indexOf(key) === -1) {
+            lockedComponentIds.push(key);
+            return true;
+        }
+        return false;
+    });
+}
+
+function unlockComponents(graalVMHome: string, componentIds: string[]): void {
+    componentIds.forEach((element) => {
+        const idx = lockedComponentIds.indexOf(graalVMHome + element);
+        if (idx !== -1) {
+            lockedComponentIds.splice(idx, 1);
+        }
+    });
+}
+
 async function changeGraalVMComponent(graalVMHome: string, componentIds: string[], action: string, context?: vscode.ExtensionContext): Promise<void> {
+    componentIds = lockComponents(graalVMHome, componentIds);
     if (componentIds.length === 0) {
         return;
     }
@@ -555,6 +578,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             email = await LicenseCheckPanel.show(context, eeInfo.licenseLabel, license.split('\n').join('<br>'));
         }
         if (!email) {
+            unlockComponents(graalVMHome, componentIds);
             return;
         }
     }
@@ -592,6 +616,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
                 stopLanguageServer().then(() => startLanguageServer(graalVMHome));
             }
         }
+        unlockComponents(graalVMHome, componentIds);
     });
 }
 
