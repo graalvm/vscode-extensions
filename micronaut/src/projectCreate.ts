@@ -25,6 +25,7 @@ const CREATE: string = '/create';
 const OPEN_IN_NEW_WINDOW = 'Open in new window';
 const OPEN_IN_CURRENT_WINDOW: string = 'Open in current window';
 const ADD_TO_CURRENT_WORKSPACE = 'Add to current workspace';
+const LAST_PROJECT_PARENTDIR: string = 'lastMicronautProjectParentDir';
 
 let cliMNVersion: {label: string, serviceUrl: string, description: string} | undefined;
 
@@ -49,8 +50,8 @@ export async function creatorInit() {
     }
 }
 
-export async function createProject() {
-    const options = await selectCreateOptions();
+export async function createProject(context: vscode.ExtensionContext) {
+    const options = await selectCreateOptions(context);
     if (options) {
         let created = false;
         if (options.url.startsWith(HTTP_PROTOCOL) || options.url.startsWith(HTTPS_PROTOCOL)) {
@@ -119,7 +120,7 @@ function updateGitIgnore(options: {url: string, name: string, target: string, bu
     fs.writeFileSync(filePath, content);
 }
 
-async function selectCreateOptions(): Promise<{url: string, args?: string[], name: string, target: string, buildTool: string, java?: string} | undefined> {
+async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{url: string, args?: string[], name: string, target: string, buildTool: string, java?: string} | undefined> {
 
     const commands: string[] = await vscode.commands.getCommands();
     const graalVMs: {name: string, path: string, active: boolean}[] = commands.includes('extension.graalvm.findGraalVMs') ? await vscode.commands.executeCommand('extension.graalvm.findGraalVMs') || [] : [];
@@ -275,7 +276,9 @@ async function selectCreateOptions(): Promise<{url: string, args?: string[], nam
 
     if (state.micronautVersion && state.applicationType && state.projectName && state.basePackage &&
         state.language && state.features && state.buildTool && state.testFramework) {
+        const lastGraalVMParentDir: vscode.Uri | undefined = context.globalState.get(LAST_PROJECT_PARENTDIR);
         const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+            defaultUri: lastGraalVMParentDir,
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
@@ -283,6 +286,7 @@ async function selectCreateOptions(): Promise<{url: string, args?: string[], nam
             openLabel: 'Create Here'
         });
         if (location && location.length > 0) {
+            context.globalState.update(LAST_PROJECT_PARENTDIR, location[0]);
             let appName = state.basePackage;
             if (appName) {
                 appName += '.' + state.projectName;

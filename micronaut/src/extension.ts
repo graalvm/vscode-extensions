@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
 		WelcomePanel.createOrShow(context);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.createProject', () => {
-		createProject();
+		createProject(context);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.build', (goal?: string) => {
 		build(goal, 'build');
