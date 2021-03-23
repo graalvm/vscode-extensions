@@ -23,16 +23,14 @@ export class LicenseCheckPanel {
 	public static show(context: vscode.ExtensionContext, licenseLabel: string, license: string): Promise<string | undefined> {
 		const userAcceptedLicenses = JSON.parse(context.globalState.get(LicenseCheckPanel.userAcceptedLicenses) || '{}');
 		return new Promise<string | undefined>(resolve => {
-			const lcp = new LicenseCheckPanel(context.extensionPath, licenseLabel, license, userAcceptedLicenses.userEmail, (message: any) => {
-				if (message.command === 'accepted') {
+			new LicenseCheckPanel(context.extensionPath, licenseLabel, license, userAcceptedLicenses.userEmail, (message: any) => {
+				if (message?.command === 'accepted') {
 					if (message.email) {
 						userAcceptedLicenses.userEmail = message.email;
 						context.globalState.update(LicenseCheckPanel.userAcceptedLicenses, JSON.stringify(userAcceptedLicenses));
 					}
-					lcp.dispose();
 					resolve(userAcceptedLicenses.userEmail);
 				} else {
-					lcp.dispose();
 					resolve(undefined);
 				}
 			});
@@ -55,9 +53,17 @@ export class LicenseCheckPanel {
 		// Set the webview's html content
 		this.setHtml(extensionPath, license, userEmail || '');
 
+		let result: any;
+
 		// Listen for when the panel is disposed
 		// This happens when the user closes the panel or when the panel is closed programatically
-		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+		this._panel.onDidDispose(
+			() => {
+				this.dispose()
+				messageHandler(result);
+			},
+			null,
+			this._disposables);
 
 		// Update the content based on view changes
 		this._panel.onDidChangeViewState(
@@ -72,7 +78,10 @@ export class LicenseCheckPanel {
 
 		// Handle messages from the webview
 		this._panel.webview.onDidReceiveMessage(
-			messageHandler,
+			(message: any) => {
+				result = message;
+				this.dispose();
+			},
 			undefined,
 			this._disposables
 		);
