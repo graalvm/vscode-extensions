@@ -26,6 +26,7 @@ const WINDOWS_LINK_REGEXP: RegExp = /<a href="\/graalvm\/graalvm-\S*-builds\/rel
 const INSTALL: string = 'Install ';
 const OPTIONAL_COMPONENTS: string = 'Optional GraalVM Components';
 const GRAALVM_EE_LICENSE: string = 'GraalVM Enterprise Edition License';
+const LAST_GRAALVM_PARENTDIR: string = 'lastGraalVMInstallationParentDir';
 
 const lockedComponentIds: string[] = [];
 
@@ -83,8 +84,10 @@ export async function uninstallGraalVMComponent(component: string | Component | 
 }
 
 const MACOS_JDK_SUBDIR: string = '/Contents/Home';
-export async function addExistingGraalVM(): Promise<void> {
+export async function addExistingGraalVM(context: vscode.ExtensionContext): Promise<void> {
+    const lastGraalVMParentDir: vscode.Uri | undefined = context.globalState.get(LAST_GRAALVM_PARENTDIR);
     const uri = await vscode.window.showOpenDialog({
+        defaultUri: lastGraalVMParentDir,
         canSelectMany: false,
         canSelectFiles: false,
         canSelectFolders: true,
@@ -96,6 +99,7 @@ export async function addExistingGraalVM(): Promise<void> {
         if (graalVMHome) {
             graalVMHome += process.platform === 'darwin' && !graalVMHome.endsWith(MACOS_JDK_SUBDIR) ? MACOS_JDK_SUBDIR : '';
             updateGraalVMLocations(graalVMHome);
+            context.globalState.update(LAST_GRAALVM_PARENTDIR, vscode.Uri.file(dirname(uri[0].fsPath)));
             if (utils.checkFolderWritePermissions(graalVMHome, true)) {
                 checkForMissingComponents(graalVMHome);
             }
@@ -426,7 +430,9 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
                 return undefined;
             } 
         }
+        const lastGraalVMParentDir: vscode.Uri | undefined = context.globalState.get(LAST_GRAALVM_PARENTDIR);
         const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+            defaultUri: lastGraalVMParentDir,
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
@@ -434,6 +440,7 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
             openLabel: 'Install Here'
         });
         if (location && location.length > 0 && utils.checkFolderWritePermissions(location[0].fsPath)) {
+            context.globalState.update(LAST_GRAALVM_PARENTDIR, location[0]);
             return { url: releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url, location: location[0].fsPath };
         }
     }

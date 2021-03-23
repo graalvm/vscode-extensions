@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 		installGraalVM(context);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.addExistingGraalVM', () => {
-		addExistingGraalVM();
+		addExistingGraalVM(context);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.findGraalVMs', async () => {
 		const graalVMHome = getGVMHome();
