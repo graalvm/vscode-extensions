@@ -8,17 +8,13 @@
 import * as vscode from 'vscode';
 import { toggleCodeCoverage, activeTextEditorChaged } from './graalVMCoverage';
 import { GraalVMConfigurationProvider, GraalVMDebugAdapterDescriptorFactory, GraalVMDebugAdapterTracker } from './graalVMDebug';
-import { installGraalVM, addExistingGraalVM, installGraalVMComponent, uninstallGraalVMComponent, selectActiveGraalVM, findGraalVMs, InstallationNodeProvider, Component, Installation, removeGraalVMInstallation } from './graalVMInstall';
+import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMComponent, uninstallGraalVMComponent, selectActiveGraalVM, findGraalVMs, InstallationNodeProvider, Component, Installation, removeGraalVMInstallation } from './graalVMInstall';
 import { onClientNotification, startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
 import { addNativeImageToPOM } from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
 import { runVisualVMForPID } from './graalVMVisualVM';
-
-const INSTALL_GRAALVM: string = 'Install GraalVM';
-const SELECT_EXISTING_GRAALVM: string = 'Select Existing GraalVM';
-const SELECT_ACTIVE_GRAALVM: string = 'Set Active GraalVM';
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectGraalVMHome', async (installation?: string | Installation, nonInteractive?: boolean) => {
@@ -65,15 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 		setupProxy();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.removeInstallation', (path?: string | Installation) => {
-		if (path instanceof Installation) {
-			if (path.fromConf) {
-				removeGraalVMInstallation(path.home);
-			} else {
-				vscode.window.showWarningMessage('This GraalVM installation was detected automatically from system environment and cannot be removed. Unselect Settings / Detect system GraalVM installations to disable automatic GraalVM detection.');
-			}
-		} else {
-			removeGraalVMInstallation(path);
-		}
+		removeGraalVMInstallation(path instanceof Installation ? path.home : path);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.runVisualVMForPID', (pid?: number) => {
 		runVisualVMForPID(pid);
@@ -123,23 +111,4 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
 	return stopLanguageServer();
-}
-
-function setupGraalVM(){
-	findGraalVMs().then(vms => {
-		const items: string[] = vms.length > 0 ? [SELECT_ACTIVE_GRAALVM, INSTALL_GRAALVM] : [SELECT_EXISTING_GRAALVM, INSTALL_GRAALVM];
-		vscode.window.showInformationMessage('No active GraalVM installation found.', ...items).then(value => {
-			switch (value) {
-				case SELECT_EXISTING_GRAALVM:
-					vscode.commands.executeCommand('extension.graalvm.addExistingGraalVM');
-					break;
-				case SELECT_ACTIVE_GRAALVM:
-					vscode.commands.executeCommand('extension.graalvm.selectGraalVMHome');
-					break;
-				case INSTALL_GRAALVM:
-					vscode.commands.executeCommand('extension.graalvm.installGraalVM');
-					break;
-			}
-		});
-	});
 }

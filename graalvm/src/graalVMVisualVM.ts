@@ -8,11 +8,19 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import * as utils from './utils';
+import { getGVMHome } from './graalVMConfiguration';
+import { setupGraalVM } from './graalVMInstall';
 
 const PROVIDE: string = 'Select the process to open in VisualVM';
 export async function runVisualVMForPID(pid?: number) {
-    const executable = utils.findExecutable('jvisualvm');
+    const graalVMHome = getGVMHome();
+    if (!graalVMHome) {
+        setupGraalVM(true);
+        return;
+    }
+    const executable = utils.findExecutable('jvisualvm', graalVMHome);
     if (!executable) {
+        vscode.window.showWarningMessage("VisualVM not found in active GraalVM installation.");
         return;
     }
     if (!pid) {

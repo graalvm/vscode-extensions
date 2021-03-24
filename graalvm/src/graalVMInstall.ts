@@ -27,8 +27,31 @@ const INSTALL: string = 'Install ';
 const OPTIONAL_COMPONENTS: string = 'Optional GraalVM Components';
 const GRAALVM_EE_LICENSE: string = 'GraalVM Enterprise Edition License';
 const LAST_GRAALVM_PARENTDIR: string = 'lastGraalVMInstallationParentDir';
+const INSTALL_GRAALVM: string = 'Install GraalVM';
+const SELECT_EXISTING_GRAALVM: string = 'Select Existing GraalVM';
+const SELECT_ACTIVE_GRAALVM: string = 'Set Active GraalVM';
 
 const lockedComponentIds: string[] = [];
+
+export function setupGraalVM(warning: boolean = false) {
+	findGraalVMs().then(vms => {
+		const items: string[] = vms.length > 0 ? [SELECT_ACTIVE_GRAALVM, INSTALL_GRAALVM] : [SELECT_EXISTING_GRAALVM, INSTALL_GRAALVM];
+        const message: (message: string, ...items: string[]) => Thenable<string | undefined> = warning ? vscode.window.showWarningMessage : vscode.window.showInformationMessage;
+		message('No active GraalVM installation found.', ...items).then(value => {
+			switch (value) {
+				case SELECT_EXISTING_GRAALVM:
+					vscode.commands.executeCommand('extension.graalvm.addExistingGraalVM');
+					break;
+				case SELECT_ACTIVE_GRAALVM:
+					vscode.commands.executeCommand('extension.graalvm.selectGraalVMHome');
+					break;
+				case INSTALL_GRAALVM:
+					vscode.commands.executeCommand('extension.graalvm.installGraalVM');
+					break;
+			}
+		});
+	});
+}
 
 export async function installGraalVM(context: vscode.ExtensionContext): Promise<void> {
     try {
@@ -56,11 +79,15 @@ export async function installGraalVM(context: vscode.ExtensionContext): Promise<
 
 export async function removeGraalVMInstallation(homeFolder?: string) {
     if (!homeFolder) {
-        const insts = getGVMInsts();
-        homeFolder = await _selectInstalledGraalVM(vm => insts.includes(vm.path));
+        homeFolder = await _selectInstalledGraalVM(true);
     }
     const graalFolder = homeFolder;
     if (!graalFolder) {
+        return -1;
+    }
+    const insts = getGVMInsts();
+    if (!insts.includes(graalFolder)) {
+        vscode.window.showWarningMessage('This GraalVM installation was detected automatically from system environment and cannot be removed. Unselect Settings / Detect system GraalVM installations to disable automatic GraalVM detection.');
         return -1;
     }
     await removeGraalVMconfiguration(graalFolder);
@@ -110,7 +137,7 @@ export async function addExistingGraalVM(context: vscode.ExtensionContext): Prom
 }
 
 export async function selectActiveGraalVM(graalVMHome?: string, nonInteractive?: boolean): Promise<void> {
-    graalVMHome = graalVMHome || await _selectInstalledGraalVM();
+    graalVMHome = graalVMHome || await _selectInstalledGraalVM(true);
     if (graalVMHome) {
         const graalVMVersion = await getGraalVMVersion(graalVMHome);
         if (graalVMVersion) {
@@ -328,10 +355,17 @@ export async function checkForMissingComponents(homeFolder: string): Promise<voi
     }
 }
 
-async function _selectInstalledGraalVM(filter?: (vm: {name: string, path: string}) => boolean): Promise<string | undefined>{
-    const vms: {label: string, detail: string}[] = (filter ? (await findGraalVMs()).filter(filter) : await findGraalVMs()).map(item => {
+async function _selectInstalledGraalVM(explicit: boolean): Promise<string | undefined>{
+    const vms: {label: string, detail: string}[] = (await findGraalVMs()).map(item => {
         return {label: item.name, detail: item.path};
     });
+    if (vms.length === 0) {
+        vscode.window.showWarningMessage("No GraalVM installation found.");
+        return undefined;
+    }
+    if (!explicit && vms.length === 1 && vms[0].detail === getGVMHome()) {
+        return vms[0].detail;
+    }
     const selected = await vscode.window.showQuickPick(vms, { matchOnDetail: true, placeHolder: 'Select GraalVM' });
     return selected?.detail;
 }
@@ -532,7 +566,7 @@ async function _callIdGVMHome(component: string | Component | undefined, homeFol
     if (component instanceof Component) {
         return fnc(component.componentId, component.installation.home, context);
     } else {
-        homeFolder = homeFolder || await _selectInstalledGraalVM();
+        homeFolder = homeFolder || await _selectInstalledGraalVM(false);
         if (homeFolder) {
             return fnc(component, homeFolder, context);
         }
@@ -541,13 +575,21 @@ async function _callIdGVMHome(component: string | Component | undefined, homeFol
 
 async function _installGraalVMComponent(componentId: string | undefined, graalVMHome: string, context?: vscode.ExtensionContext): Promise<void> {
     if (utils.checkFolderWritePermissions(graalVMHome)) {
-        changeGraalVMComponent(graalVMHome, componentId ? [componentId] : await selectAvailableComponents(graalVMHome), 'install', context);
+        const componentIds: string[] = componentId ? [componentId] : await selectAvailableComponents(graalVMHome).catch((error) => {
+            vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
+            return [];
+        });
+        changeGraalVMComponent(graalVMHome, componentIds, 'install', context);
     }
 }
 
 async function _uninstallGraalVMComponent(componentId: string | undefined, graalVMHome: string): Promise<void> {
     if (utils.checkFolderWritePermissions(graalVMHome)) {
-        changeGraalVMComponent(graalVMHome, componentId ? [componentId] : await selectInstalledComponents(graalVMHome), 'remove');
+        const componentIds: string[] = componentId ? [componentId] : await selectInstalledComponents(graalVMHome).catch((error) => {
+            vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
+            return [];
+        });
+        changeGraalVMComponent(graalVMHome, componentIds, 'remove');
     }
 }
 
@@ -874,7 +916,7 @@ async function selectAvailableComponents(graalVMHome: string): Promise<string[]>
                     if (selected) {
                         resolve(selected.map(component => component.label));
                     } else {
-                        reject(new Error('No GraalVM component to install.'));
+                        resolve([]);
                     }
                 });
             } else {
@@ -889,15 +931,15 @@ async function selectInstalledComponents(graalVMHome: string): Promise<string[]>
         getAvailableComponents(graalVMHome).then(async available => {
             const components = available.filter(availableItem => availableItem.installed);
             if (components.length > 0) {
-                vscode.window.showQuickPick(components, { placeHolder: `Select GraalVM components to remove from: "${await getGraalVMVersion(graalVMHome)}"`, canPickMany: true }).then(selected => {
+                vscode.window.showQuickPick(components, { placeHolder: `Select GraalVM components to uninstall from: "${await getGraalVMVersion(graalVMHome)}"`, canPickMany: true }).then(selected => {
                     if (selected) {
                         resolve(selected.map(component => component.label));
                     } else {
-                        reject(new Error('No GraalVM component to remove.'));
+                        resolve([]);
                     }
                 });
             } else {
-                reject(new Error('No GraalVM component to remove.'));
+                reject(new Error('No GraalVM component to uninstall.'));
             }
         });
     });
@@ -1037,9 +1079,8 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
 		} else {
             const graalVMHome = getGVMHome();
             const writable = utils.checkFolderWritePermissions(graalVMHome, true);
-            const insts = getGVMInsts();
             return findGraalVMs().then(vms => {
-                return vms.map(item => new Installation(item.name, vscode.TreeItemCollapsibleState.Collapsed, item.path, item.path === graalVMHome, insts.includes(item.path), writable));
+                return vms.map(item => new Installation(item.name, vscode.TreeItemCollapsibleState.Collapsed, item.path, item.path === graalVMHome, writable));
             });
 		}
 	}
@@ -1052,7 +1093,6 @@ export class Installation extends vscode.TreeItem {
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly home: string,
         private readonly active: boolean,
-        public readonly fromConf: boolean,
         public readonly writable: boolean
 	) {
         super(label, collapsibleState);
