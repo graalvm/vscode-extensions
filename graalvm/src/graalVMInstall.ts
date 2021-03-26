@@ -85,11 +85,11 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
     if (!graalFolder) {
         return -1;
     }
+    await removeGraalVMconfiguration(graalFolder);
     if (isImplicitGraalVM(graalFolder)) {
         vscode.window.showWarningMessage('This GraalVM installation was detected automatically from system environment and cannot be removed. Unselect Settings / Detect system GraalVM installations to disable automatic GraalVM detection.');
         return -1;
     }
-    await removeGraalVMconfiguration(graalFolder);
     if (utils.checkFolderWritePermissions(graalFolder, true)) {
         return utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
             try {
