@@ -85,12 +85,11 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
     if (!graalFolder) {
         return -1;
     }
-    const insts = getGVMInsts();
-    if (!insts.includes(graalFolder)) {
+    await removeGraalVMconfiguration(graalFolder);
+    if (isImplicitGraalVM(graalFolder)) {
         vscode.window.showWarningMessage('This GraalVM installation was detected automatically from system environment and cannot be removed. Unselect Settings / Detect system GraalVM installations to disable automatic GraalVM detection.');
         return -1;
     }
-    await removeGraalVMconfiguration(graalFolder);
     if (utils.checkFolderWritePermissions(graalFolder, true)) {
         return utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
             try {
@@ -152,6 +151,19 @@ export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
     addPathToJava(normalize(getGVMHome()), paths, comparator);
     const installations = getGVMInsts().map(inst => normalize(inst));
     installations.forEach(installation => addPathToJava(installation, paths, comparator, true));
+    findImplicitGraalVMs(paths);
+    const vms: {name: string, path: string}[] = [];
+    for (let i = 0; i < paths.length; i++) {
+        const version = await getGraalVMVersion(paths[i]);
+        if (version) {
+            vms.push({name: version, path: paths[i]});
+        }
+    }
+    return vms;
+}
+
+function findImplicitGraalVMs(paths: string[]) {
+    const comparator = utils.isSamePath();
     if (getConf('graalvm').get('systemDetect')) {
         addPathsToJavaIn('/opt', paths, comparator);
         if (process.env.GRAALVM_HOME) {
@@ -166,14 +178,12 @@ export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
                 .forEach(p => addPathToJava(dirname(p), paths, comparator));
         }
     }
-    const vms: {name: string, path: string}[] = [];
-    for (let i = 0; i < paths.length; i++) {
-        const version = await getGraalVMVersion(paths[i]);
-        if (version) {
-            vms.push({name: version, path: paths[i]});
-        }
-    }
-    return vms;
+}
+
+function isImplicitGraalVM(path: string): boolean {
+    const paths: string[] = [];
+    findImplicitGraalVMs(paths);
+    return paths.includes(path);
 }
 
 export async function getGraalVMVersion(homeFolder: string): Promise<string | undefined> {
