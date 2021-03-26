@@ -679,16 +679,21 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
     });
 }
 
-function execCancellable(cmd: string, token: vscode.CancellationToken, options?: ({ encoding?: string | null | undefined; } & cp.ExecOptions) | null | undefined): Promise<any> {
+function execCancellable(cmd: string, token: vscode.CancellationToken, options?: ({ encoding?: string | null | undefined; } & cp.ExecOptions) | null | undefined): Promise<boolean> {
     return new Promise((resolve, reject) => {
+        let resolved: boolean = false;
         const child = cp.exec(cmd, options, (error, _stdout, _stderr) => {
             if (error || _stderr) {
-                reject(error ?? new Error(_stderr.toString()));
+                if (!resolved) reject(error ?? new Error(_stderr.toString()));
             } else {
-                resolve(undefined);
+                resolve(true);
             }
         });
-        token.onCancellationRequested(() => child.kill());
+        token.onCancellationRequested(() => {
+            resolved = true;
+            utils.killProcess(child.pid);
+            resolve(false);
+        });
     });
 }
 
