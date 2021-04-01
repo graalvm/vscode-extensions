@@ -599,7 +599,7 @@ async function _uninstallGraalVMComponent(componentId: string | undefined, graal
             vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
             return [];
         });
-        changeGraalVMComponent(graalVMHome, componentIds, 'remove');
+        changeGraalVMComponent(graalVMHome, componentIds.reverse(), 'remove');
     }
 }
 
