@@ -276,7 +276,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 
     if (state.micronautVersion && state.applicationType && state.projectName && state.basePackage &&
         state.language && state.features && state.buildTool && state.testFramework) {
-        const lastProjectParentDir: string | undefined = await context.globalState.get(LAST_PROJECT_PARENTDIR);
+        const lastProjectParentDir: string | undefined = context.globalState.get(LAST_PROJECT_PARENTDIR);
         let defaultDir: vscode.Uri | undefined;
         if (lastProjectParentDir) {
             try {

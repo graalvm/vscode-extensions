@@ -111,7 +111,7 @@ export async function uninstallGraalVMComponent(component: string | Component | 
 
 const MACOS_JDK_SUBDIR: string = '/Contents/Home';
 export async function addExistingGraalVM(context: vscode.ExtensionContext): Promise<void> {
-    const lastGraalVMParentDir: string | undefined = await context.globalState.get(LAST_GRAALVM_PARENTDIR);
+    const lastGraalVMParentDir: string | undefined = context.globalState.get(LAST_GRAALVM_PARENTDIR);
     let defaultDir: vscode.Uri | undefined;
     if (lastGraalVMParentDir) {
         try {
@@ -485,7 +485,7 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
                 return undefined;
             } 
         }
-        const lastGraalVMParentDir: string | undefined = await context.globalState.get(LAST_GRAALVM_PARENTDIR);
+        const lastGraalVMParentDir: string | undefined = context.globalState.get(LAST_GRAALVM_PARENTDIR);
         let defaultDir: vscode.Uri | undefined;
         if (lastGraalVMParentDir) {
             try {
