@@ -280,7 +280,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
         let defaultDir: vscode.Uri | undefined;
         if (lastProjectParentDir) {
             try {
-                defaultDir = vscode.Uri.parse(lastProjectParentDir);
+                defaultDir = vscode.Uri.parse(lastProjectParentDir, true);
             } catch (e) {
                 defaultDir = undefined;
             }

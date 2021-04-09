@@ -115,7 +115,7 @@ export async function addExistingGraalVM(context: vscode.ExtensionContext): Prom
     let defaultDir: vscode.Uri | undefined;
     if (lastGraalVMParentDir) {
         try {
-            defaultDir = vscode.Uri.parse(lastGraalVMParentDir);
+            defaultDir = vscode.Uri.parse(lastGraalVMParentDir, true);
         } catch (e) {
             defaultDir = undefined;
         }
@@ -489,7 +489,7 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
         let defaultDir: vscode.Uri | undefined;
         if (lastGraalVMParentDir) {
             try {
-                defaultDir = vscode.Uri.parse(lastGraalVMParentDir);
+                defaultDir = vscode.Uri.parse(lastGraalVMParentDir, true);
             } catch (e) {
                 defaultDir = undefined;
             }
