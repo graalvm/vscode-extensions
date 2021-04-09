@@ -276,9 +276,19 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 
     if (state.micronautVersion && state.applicationType && state.projectName && state.basePackage &&
         state.language && state.features && state.buildTool && state.testFramework) {
-        const lastGraalVMParentDir: vscode.Uri | undefined = context.globalState.get(LAST_PROJECT_PARENTDIR);
+        const lastProjectParentDir: string | undefined = context.globalState.get(LAST_PROJECT_PARENTDIR);
+        let defaultDir: vscode.Uri | undefined;
+        if (lastProjectParentDir) {
+            try {
+                defaultDir = vscode.Uri.parse(lastProjectParentDir, true);
+            } catch (e) {
+                defaultDir = undefined;
+            }
+        } else {
+            defaultDir = undefined;
+        }
         const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
-            defaultUri: lastGraalVMParentDir,
+            defaultUri: defaultDir,
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
@@ -286,7 +296,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
             openLabel: 'Create Here'
         });
         if (location && location.length > 0) {
-            context.globalState.update(LAST_PROJECT_PARENTDIR, location[0]);
+            await context.globalState.update(LAST_PROJECT_PARENTDIR, location[0].toString());
             let appName = state.basePackage;
             if (appName) {
                 appName += '.' + state.projectName;
