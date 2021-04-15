@@ -2,7 +2,7 @@
 	"name": "micronaut",
 	"displayName": "Micronaut",
 	"description": "Micronaut support for VS Code",
-	"version": "0.5.3",
+	"version": "0.5.4",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",

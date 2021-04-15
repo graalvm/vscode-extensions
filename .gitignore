@@ -7,3 +7,5 @@
 package-lock.json
 /mxbuild
 /.project
+.DS_Store
+.gitignore

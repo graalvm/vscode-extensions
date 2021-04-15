@@ -1,5 +1,7 @@
 # Change Log
 
+## Version 0.5.5
+* Various improvements and fixes for GraalVM components management
 ## Version 0.5.4
 * Check writable permission before GraalVM is downloaded
 * Fix injectTos and scopeNames

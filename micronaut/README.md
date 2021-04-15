@@ -17,6 +17,7 @@ The Micronaut extension was also developed to help developers build native image
   - [Extension Settings](#extension-settings)
 - [Create Micronaut Project](#create-micronaut-project)
 - [Generate Native Images of Micronaut Projects](#generate-native-images-of-micronaut-projects)
+- [Deploy Micronaut Projects](#deploy-micronaut-projects)
 - [Feedback](#feedback)
 - [Privacy Policy](#privacy-policy)
 - [Known Issues](#known-issues)
@@ -43,6 +44,7 @@ The Micronaut extension provides:
 * the Micronaut project creation wizard
 * installation of Micronaut CLI
 * editing and debugging capabilities for Micronaut projects
+* code completion and navigation for Micronaut configuration (yaml) files and java.
 * the ability to build Micronaut projects ahead-of-time into native images with GraalVM
 
 ### Micronaut VS Code Commands
@@ -57,6 +59,7 @@ The following commands are available for Micronaut project development:
 * `Micronaut: Create Micronaut Project` - create a Micronaut project based on https://micronaut.io/launch
 * `Micronaut: Build ...` - build a Micronaut project with the user-selected goal/target
 * `Micronaut: Build Native Image` - build a native executable of a Micronaut project
+* `Micronaut: Deploy ...` - build and deploy Docker image for Micronaut project
 
 ### Extension Settings
 
@@ -99,6 +102,12 @@ Besides that, you can push a newly-built native executable to the Docker Registr
 
 For more details, continue reading to the [Micronaut documentation](https://guides.micronaut.io/micronaut-creating-first-graal-app/guide/index.html#creatingGraalImage).
 
+## Deploy Micronaut Projects
+The Micronaut support in VSCode also allows to build and deploy Docker image to docker registry. Use command "Command Palette -> Micronaut: Deploy..." and select "dockerPush" to deploy dockerized Micronaut application or "dockerPushNative" to build and push docker with native executable of Micronaut application. 
+
+![Micronaut Deploy Commands](images/micronaut-deploy-commands.png)
+
+Particular docker registry can be configured in the build, see Micronaut [Deploying Application](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/examples/deploy.html) documentation.
 ## Feedback
 
 * [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
