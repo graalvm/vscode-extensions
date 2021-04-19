@@ -44,7 +44,7 @@ The Micronaut extension provides:
 * the Micronaut project creation wizard
 * installation of Micronaut CLI
 * editing and debugging capabilities for Micronaut projects
-* code completion and navigation for Micronaut configuration (yaml) files and java.
+* code completion and navigation for Micronaut configuration (yaml) files and java (available with Apache NetBeans Language Server extension).
 * the ability to build Micronaut projects ahead-of-time into native images with GraalVM
 
 ### Micronaut VS Code Commands
