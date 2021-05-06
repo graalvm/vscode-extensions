@@ -1,7 +1,11 @@
 # Change Log
 
+## Version 0.5.6
+* MacOS SDKMAN installation path support
+
 ## Version 0.5.5
 * Various improvements and fixes for GraalVM components management
+
 ## Version 0.5.4
 * Check writable permission before GraalVM is downloaded
 * Fix injectTos and scopeNames
@@ -9,6 +13,7 @@
 
 ## Version 0.5.3
 * GraalVM EE JDK 11 bits are not offered for download
+
 ## Version 0.5.2
 * Bug fixes
 * Repository moved

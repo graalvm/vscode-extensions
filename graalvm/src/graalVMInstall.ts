@@ -109,7 +109,7 @@ export async function uninstallGraalVMComponent(component: string | Component | 
     _callIdGVMHome(component, homeFolder, undefined, _uninstallGraalVMComponent);
 }
 
-const MACOS_JDK_SUBDIR: string = '/Contents/Home';
+const MACOS_JDK_SUBDIR: string = join('Contents', 'Home');
 export async function addExistingGraalVM(context: vscode.ExtensionContext): Promise<void> {
     const lastGraalVMParentDir: string | undefined = context.globalState.get(LAST_GRAALVM_PARENTDIR);
     let defaultDir: vscode.Uri | undefined;
@@ -133,7 +133,7 @@ export async function addExistingGraalVM(context: vscode.ExtensionContext): Prom
     if (uri && uri.length === 1) {
         let graalVMHome = uri[0].fsPath;
         if (graalVMHome) {
-            graalVMHome += process.platform === 'darwin' && !graalVMHome.endsWith(MACOS_JDK_SUBDIR) ? MACOS_JDK_SUBDIR : '';
+            graalVMHome = process.platform === 'darwin' && !fs.existsSync(join(graalVMHome, "bin", "java")) && !graalVMHome.endsWith(MACOS_JDK_SUBDIR) ? join(graalVMHome, MACOS_JDK_SUBDIR) : graalVMHome;
             updateGraalVMLocations(graalVMHome);
             const newGraalVMParentDir = vscode.Uri.file(dirname(uri[0].fsPath)).toString();
             await context.globalState.update(LAST_GRAALVM_PARENTDIR, newGraalVMParentDir);
