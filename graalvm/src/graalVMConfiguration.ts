@@ -14,6 +14,7 @@ import { checkForMissingComponents, getInstallConfigurations } from './graalVMIn
 import { getPythonConfigurations } from './graalVMPython';
 import { getRConfigurations } from './graalVMR';
 import { getRubyConfigurations } from './graalVMRuby';
+import { removeSDKmanUnclassifiedInstallation, setupSDKmanGVMInstallation } from './sdkmanSupport';
 
 let configurations: ConfigurationPickItem[];
 
@@ -309,6 +310,7 @@ async function removeConfigurations(graalVMHome: string) {
             } catch (_err) {}
         }
     }
+    await removeSDKmanUnclassifiedInstallation(graalVMHome);
 }
 
 async function configureInteractive(graalVMHome: string) {
@@ -368,6 +370,7 @@ async function defaultConfig(graalVMHome: string, gr: vscode.WorkspaceConfigurat
     let env: any = getTerminalEnv();
     env.GRAALVM_HOME = graalVMHome;
     await setTerminalEnv(env);
+    await setupSDKmanGVMInstallation(graalVMHome);
 }
 
 export class ConfigurationPickItem implements vscode.QuickPickItem {

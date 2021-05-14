@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.7
+* Support for SDKMAN installations
+
 ## Version 0.5.6
 * MacOS SDKMAN installation path support
 
