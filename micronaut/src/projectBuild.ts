@@ -56,14 +56,15 @@ export async function build(goal?: string, group?: string) {
         const command = await terminalCommandFor(goal);
         if (command) {
             let terminal: vscode.Terminal | undefined = vscode.window.terminals.find(terminal => terminal.name === MICRONAUT);
-            if (!terminal) {
-                const env: any = {};
-                if (javaHome) {
-                    env.JAVA_HOME = javaHome;
-                    env.PATH = `${path.join(javaHome, 'bin')}${path.delimiter}${process.env.PATH}`;
-                }
-                terminal = vscode.window.createTerminal({ name: MICRONAUT, env });
+            if (terminal) {
+                terminal.dispose();
             }
+            const env: any = {};
+            if (javaHome) {
+                env.JAVA_HOME = javaHome;
+                env.PATH = `${path.join(javaHome, 'bin')}${path.delimiter}${process.env.PATH}`;
+            }
+            terminal = vscode.window.createTerminal({ name: MICRONAUT, env });
             terminal.show();
             terminal.sendText(command);
         } else {
