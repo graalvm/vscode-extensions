@@ -940,6 +940,9 @@ function addPathToJava(folder: string, paths: string[], comparator = utils.isSam
         return;
     }
     folder = normalize(join(dirname(fs.realpathSync(executable)), '..'));
+    if (!utils.findExecutable('gu', folder)) {
+        return;
+    }
     if (!paths.find(comparator(folder))) {
         paths.push(folder);
     }
