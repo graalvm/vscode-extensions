@@ -36,35 +36,37 @@ export function startLanguageServer(graalVMHome?: string) {
 			if (!serverWorkDir) {
 				serverWorkDir = vscode.workspace.rootPath;
 			}
-			connectToLanguageServer(() => new Promise<StreamInfo>((resolve, reject) => {
-                lspArgs().then(args => {
-					const lspArg = args.find(arg => arg.startsWith('--lsp='));
-					const lsPort = lspArg ? parseInt(lspArg.substring(6)) : LSPORT;
-					const serverProcess = cp.spawn(re, args.concat(['--experimental-options', '--shell']), { cwd: serverWorkDir });
-					if (!serverProcess || !serverProcess.pid) {
-						reject(`Launching server using command ${re} failed.`);
-					} else {
-						languageServerPID = serverProcess.pid;
-						serverProcess.on('close', code => {
-							if (code) {
-								reject(`Server exited with exit code: ${code}`);
-							}
-						});
-						serverProcess.stdout.once('data', () => {
-							const socket = new net.Socket();
-							socket.once('error', (e) => {
-								reject(e);
+			if (serverWorkDir) {
+				connectToLanguageServer(() => new Promise<StreamInfo>((resolve, reject) => {
+					lspArgs().then(args => {
+						const lspArg = args.find(arg => arg.startsWith('--lsp='));
+						const lsPort = lspArg ? parseInt(lspArg.substring(6)) : LSPORT;
+						const serverProcess = cp.spawn(re, args.concat(['--experimental-options', '--shell']), { cwd: serverWorkDir });
+						if (!serverProcess || !serverProcess.pid) {
+							reject(`Launching server using command ${re} failed.`);
+						} else {
+							languageServerPID = serverProcess.pid;
+							serverProcess.on('close', code => {
+								if (code) {
+									reject(`Server exited with exit code: ${code}`);
+								}
 							});
-							socket.connect(lsPort, '127.0.0.1', () => {
-								resolve({
-									reader: socket,
-									writer: socket
+							serverProcess.stdout.once('data', () => {
+								const socket = new net.Socket();
+								socket.once('error', (e) => {
+									reject(e);
+								});
+								socket.connect(lsPort, '127.0.0.1', () => {
+									resolve({
+										reader: socket,
+										writer: socket
+									});
 								});
 							});
-						});
-					}
-				});
-			}));
+						}
+					});
+				}));
+			}
 		} else {
 			vscode.window.showErrorMessage('Cannot find runtime ' + POLYGLOT + ' within your GraalVM installation.');
 		}
