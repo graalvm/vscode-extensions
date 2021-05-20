@@ -15,6 +15,7 @@ import { basename, dirname, join, normalize, delimiter } from 'path';
 import { LicenseCheckPanel } from './graalVMLicenseCheck';
 import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName } from './graalVMConfiguration';
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
+import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
 
 const GITHUB_URL: string = 'https://github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/graalvm/graalvm-ce-builds/releases';
@@ -162,7 +163,7 @@ export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
     addPathToJava(normalize(getGVMHome()), paths, comparator);
     const installations = getGVMInsts().map(inst => normalize(inst));
     installations.forEach(installation => addPathToJava(installation, paths, comparator, true));
-    findImplicitGraalVMs(paths);
+    findImplicitGraalVMs(paths, comparator);
     const vms: {name: string, path: string}[] = [];
     for (let i = 0; i < paths.length; i++) {
         const version = await getGraalVMVersion(paths[i]);
@@ -173,8 +174,7 @@ export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
     return vms;
 }
 
-function findImplicitGraalVMs(paths: string[]) {
-    const comparator = utils.isSamePath();
+function findImplicitGraalVMs(paths: string[], comparator = utils.isSamePath()) {
     if (getConf('graalvm').get('systemDetect')) {
         addPathsToJavaIn('/opt', paths, comparator);
         if (process.env.GRAALVM_HOME) {
@@ -188,6 +188,8 @@ function findImplicitGraalVMs(paths: string[]) {
                 .filter(p => basename(p) === 'bin')
                 .forEach(p => addPathToJava(dirname(p), paths, comparator));
         }
+        obtainSDKmanGVMInstallations()
+            .forEach(p => addPathToJava(normalize(p[0]), paths, comparator));
     }
 }
 
@@ -263,7 +265,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
     ret.push(new ConfigurationPickItem(
         'Set as Java for Terminal',
         `(JAVA_HOME in ${section})`,
-        _graalVMHome => true,
+        _graalVMHome => !isSDKmanPresent(),
         graalVMHome => getTerminalEnv().JAVA_HOME === graalVMHome,
         async graalVMHome => {
             const env: any = getTerminalEnv();
@@ -280,7 +282,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
     ret.push(new ConfigurationPickItem(
         'Set as Java for Terminal',
         `(PATH in ${section})`,
-        _graalVMHome => true,
+        _graalVMHome => !isSDKmanPresent(),
         graalVMHome => {
             const env: any = getTerminalEnv();
             const path = env.PATH as string;

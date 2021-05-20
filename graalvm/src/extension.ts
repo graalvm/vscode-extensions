@@ -15,6 +15,7 @@ import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
 import { addNativeImageToPOM } from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
 import { runVisualVMForPID } from './graalVMVisualVM';
+import { removeSDKmanUnclassifiedInstallation } from './sdkmanSupport';
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectGraalVMHome', async (installation?: string | Installation, nonInteractive?: boolean) => {
@@ -99,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
 	if (!graalVMHome) {
 		setupGraalVM();
 	} else {
-		startLanguageServer(graalVMHome);
+		selectActiveGraalVM(graalVMHome, true).then(() => startLanguageServer(graalVMHome));
 	}
 	vscode.window.setStatusBarMessage('GraalVM extension activated', 3000);
 	
@@ -109,6 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 }
 
-export function deactivate() {
-	return stopLanguageServer();
+export async function deactivate() {
+	await stopLanguageServer();
+	return await removeSDKmanUnclassifiedInstallation(getGVMHome());
 }
