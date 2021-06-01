@@ -1,4 +1,6 @@
 # Change Log
+## Version 0.5.8
+* Added dependency on "asf.apache-netbeans-java" extension
 
 ## Version 0.5.8
 * Security: updated dependencies
