@@ -1,8 +1,8 @@
 {
 	"name": "graalvm",
-	"displayName": "GraalVM",
+	"displayName": "GraalVM Tools for Java",
 	"description": "Support for GraalVM",
-	"version": "0.5.8",
+	"version": "0.5.9",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",

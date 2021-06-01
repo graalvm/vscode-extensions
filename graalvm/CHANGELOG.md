@@ -1,9 +1,12 @@
 # Change Log
-## Version 0.5.8
+
+## Version 0.5.9
 * Added dependency on "asf.apache-netbeans-java" extension
+* Renamed to "GraalVM Tools for Java"
 
 ## Version 0.5.8
 * Security: updated dependencies
+
 ## Version 0.5.7
 * Support for SDKMAN installations
 
