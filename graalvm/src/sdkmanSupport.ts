@@ -36,9 +36,11 @@ export function obtainSDKmanGVMInstallations(): [string, string][] {
 }
 
 function _obtainSDKmanGVMInstallations(): [string, string][] {
-    return fs.readdirSync(SDKMAN_CANDIDATES_JAVA)
+    return fs.existsSync(SDKMAN_CANDIDATES_JAVA)
+    ? fs.readdirSync(SDKMAN_CANDIDATES_JAVA)
         .map<[string, string]>(c => [join(SDKMAN_CANDIDATES_JAVA, c), c])
-        .filter(c => !fs.lstatSync(c[0]).isSymbolicLink() && c[1].endsWith("grl"));
+        .filter(c => !fs.lstatSync(c[0]).isSymbolicLink() && c[1].endsWith("grl"))
+    : [];
 }
 
 export function obtainSDKmanUnclassifiedInstallations(): [string, string][] {
@@ -48,9 +50,11 @@ export function obtainSDKmanUnclassifiedInstallations(): [string, string][] {
 }
 
 function _obtainSDKmanUnclassifiedInstallations(): [string, string][] {
-    return fs.readdirSync(SDKMAN_CANDIDATES_JAVA)
+    return fs.existsSync(SDKMAN_CANDIDATES_JAVA)
+    ? fs.readdirSync(SDKMAN_CANDIDATES_JAVA)
         .map<[string, string]>(c => [join(SDKMAN_CANDIDATES_JAVA, c), c])
-        .filter(c => fs.lstatSync(c[0]).isSymbolicLink() && c[0] !== SDKMAN_CURRENT_JAVA);
+        .filter(c => fs.lstatSync(c[0]).isSymbolicLink() && c[0] !== SDKMAN_CURRENT_JAVA)
+    : [];
 }
 
 export function obtainSDKmanInstallations(): [string, string][] {
