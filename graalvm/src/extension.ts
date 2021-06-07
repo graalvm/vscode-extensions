@@ -12,7 +12,7 @@ import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMCompone
 import { onClientNotification, startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
-import { addNativeImageToPOM } from './graalVMNativeImage';
+import { addNativeImageToPOM, attachNativeImageAgent } from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
 import { runVisualVMForPID } from './graalVMVisualVM';
 import { removeSDKmanUnclassifiedInstallation } from './sdkmanSupport';
@@ -39,6 +39,9 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.addNativeImageToPOM', () => {
 		addNativeImageToPOM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.attachNativeImageAgent', async (): Promise<string> => {
+		return await attachNativeImageAgent();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleCodeCoverage', () => {
 		toggleCodeCoverage(context);

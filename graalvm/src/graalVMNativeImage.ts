@@ -243,3 +243,81 @@ function getBuild(baseIndent: string, indent: string, eol: string, version: stri
         `</build>${eol}${baseIndent}`
     ].join(`${eol}${baseIndent}${indent}`);
 }
+
+
+export async function attachNativeImageAgent(): Promise<string> {
+    const outputDir = await selectOutputDir();
+    if (outputDir) {
+        const agent = 'native-image-agent';
+        const parameter = 'config-output-dir';
+        return `-agentlib:${agent}=${parameter}=${outputDir}`;
+    } else {
+        return '';
+    }
+}
+
+async function selectOutputDir(): Promise<string | undefined> {
+    let choices: QuickPickTargetDir[] = [
+        new QuickPickTargetDir(path.join('META-INF', 'native-image'), 'Store configuration to project', () => { return getProjectConfigDir(); }),
+        new QuickPickTargetDir(process.platform === 'win32' ? 'Temp' : '/tmp', 'Store configuration to temporary directory', () => { return getTmpConfigDir(); }),
+        new QuickPickTargetDir('Custom directory...', 'Store configuration to custom directory', () => {  return getCustomConfigDir(); })
+    ];
+    let ret: string | undefined = undefined;
+    await vscode.window.showQuickPick(choices, {
+        placeHolder: 'Select native-image configuration output directory'
+    }).then(async e => { if (e) ret = await e.getTarget(); });
+    if (ret) {
+        vscode.window.showInformationMessage(`Configuration will be stored in ${ret}`);
+    }
+    return ret;
+}
+
+async function findResourcesRoot(): Promise<string | undefined> {
+    const roots = vscode.workspace.workspaceFolders;
+    if (roots && roots.length > 0) {
+        const project = roots[0].uri.toString();
+        const resources: string[] | undefined = await vscode.commands.executeCommand("java.get.project.source.roots", project, 'resources');
+        if (resources && resources.length > 0) {
+            return vscode.Uri.parse(resources[0]).fsPath;
+        }
+    }
+    return undefined;
+}
+
+async function getProjectConfigDir(): Promise<string | undefined> {
+    const resources = await findResourcesRoot();
+    if (resources) {
+        return path.join(resources, 'META-INF', 'native-image');
+    }
+    return undefined;
+}
+
+function getTmpConfigDir(): Promise<string | undefined> {
+    return new Promise<string | undefined>(resolve => {
+        const tmp = require('os').tmpdir();
+        const realtmp = require('fs').realpathSync(tmp);
+        resolve(path.join(realtmp, 'native-image'));
+    });
+}
+
+async function getCustomConfigDir(): Promise<string | undefined> {
+    const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+        title: 'Select Native Image Configuration Output Directory',
+        openLabel: 'Select'
+    });
+    if (location && location.length > 0) {
+        return location[0].fsPath;
+    }
+    return undefined;
+}
+
+class QuickPickTargetDir implements vscode.QuickPickItem{
+    constructor(
+        public readonly label: string,
+        public readonly detail: string,
+        public readonly getTarget: () => Promise<string | undefined>
+    ){}
+}
