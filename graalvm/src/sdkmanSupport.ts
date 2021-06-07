@@ -23,6 +23,9 @@ export function isSDKmanPresent(): boolean {
     if (SDKMAN_PRESENT === undefined) {
         SDKMAN_PRESENT = fs.existsSync(SDKMAN_INIT) && execSDKmanSync("v").includes("SDKMAN");
         if (SDKMAN_PRESENT) {
+            if (!fs.existsSync(SDKMAN_CANDIDATES_JAVA)) {
+                fs.mkdirSync(SDKMAN_CANDIDATES_JAVA);
+            }
             SDKMAN_LOADED_JAVA_VERSION = _currentSDKmanJavaInstallation();
         }
     }
@@ -112,8 +115,8 @@ export function currentSDKmanJavaInstallation(): string | undefined {
     return _currentSDKmanJavaInstallation();
 }
 
-function _currentSDKmanJavaInstallation(): string {
-    return fs.readlinkSync(SDKMAN_CURRENT_JAVA);
+function _currentSDKmanJavaInstallation(): string | undefined {
+    return fs.existsSync(SDKMAN_CURRENT_JAVA) ? fs.readlinkSync(SDKMAN_CURRENT_JAVA) : undefined;
 }
 
 export function resetSDKmanJavaVersion(): void {
@@ -123,12 +126,14 @@ export function resetSDKmanJavaVersion(): void {
 }
 
 function _resetSDKmanJavaVersion(): void {
-    setCurrent(SDKMAN_LOADED_JAVA_VERSION ?? "");
+    setCurrent(SDKMAN_LOADED_JAVA_VERSION);
 }
 
-function setCurrent(newCurrent: string) {
-    fs.unlinkSync(SDKMAN_CURRENT_JAVA);
-    fs.symlinkSync(newCurrent, SDKMAN_CURRENT_JAVA, "dir");
+function setCurrent(newCurrent?: string) {
+    if(fs.existsSync(SDKMAN_CURRENT_JAVA))
+        fs.unlinkSync(SDKMAN_CURRENT_JAVA);
+    if(newCurrent)
+        fs.symlinkSync(newCurrent, SDKMAN_CURRENT_JAVA, "dir");
 }
 
 function installLocalJava(localPath: string, version: string) {
