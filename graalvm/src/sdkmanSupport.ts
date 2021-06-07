@@ -23,6 +23,9 @@ export function isSDKmanPresent(): boolean {
     if (SDKMAN_PRESENT === undefined) {
         SDKMAN_PRESENT = fs.existsSync(SDKMAN_INIT) && execSDKmanSync("v").includes("SDKMAN");
         if (SDKMAN_PRESENT) {
+            if (!fs.existsSync(SDKMAN_CANDIDATES_JAVA)) {
+                fs.mkdirSync(SDKMAN_CANDIDATES_JAVA);
+            }
             SDKMAN_LOADED_JAVA_VERSION = _currentSDKmanJavaInstallation();
         }
     }
