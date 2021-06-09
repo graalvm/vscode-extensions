@@ -609,6 +609,17 @@
 							"localRoot": "${workspaceFolder}",
 							"remoteRoot": "${2:Absolute path to the remote directory containing the program}"
 						}
+					},
+					{
+						"label": "GraalVM: Launch Java 8+ Application With Native Image Agent",
+						"description": "Launch a Java 8+ application with the native-image agent",
+						"body": {
+							"type": "java8+",
+							"request": "launch",
+							"name": "Launch Native Image Agent & Java 8+ App",
+							"mainClass": "^\"${1:\\${file\\}}\"",
+							"vmArgs": "^\"${2:\\${command:extension.graalvm.attachNativeImageAgent\\}}\""
+						}
 					}
 				]
 			}
