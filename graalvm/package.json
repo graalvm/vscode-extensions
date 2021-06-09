@@ -616,9 +616,9 @@
 						"body": {
 							"type": "java8+",
 							"request": "launch",
-							"name": "Launch Native Image Agent & Java 8+ App",
+							"name": "Launch Native Image Agent & Java 8+ Application",
 							"mainClass": "^\"${1:\\${file\\}}\"",
-							"vmArgs": "^\"${2:\\${command:extension.graalvm.attachNativeImageAgent\\}}\""
+							"vmArgs": "^\"\\${command:extension.graalvm.attachNativeImageAgent\\}\""
 						}
 					}
 				]
