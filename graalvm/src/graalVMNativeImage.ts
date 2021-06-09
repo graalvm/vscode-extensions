@@ -13,6 +13,7 @@ import * as url from "url";
 import * as sax from "sax";
 import { getGVMHome } from "./graalVMConfiguration";
 import { getGraalVMVersion } from './graalVMInstall';
+import { findExecutable } from './utils';
 
 const URL_SEARCH: string = 'https://search.maven.org/solrsearch/select';
 const GID: string = 'org.graalvm.nativeimage';
@@ -246,37 +247,51 @@ function getBuild(baseIndent: string, indent: string, eol: string, version: stri
 
 
 export async function attachNativeImageAgent(): Promise<string> {
+    const graalVMHome = getGVMHome();
+    if (!graalVMHome) {
+        vscode.window.showWarningMessage('No active GraalVM installation found, launching without native-image agent.');
+        return '';
+    }
+    const nativeImage = findExecutable('native-image', graalVMHome);
+    if (!nativeImage) {
+        vscode.window.showWarningMessage('Native Image component not installed in active GraalVM installation, launching without native-image agent.');
+        return '';
+    }
+
     const outputDir = await selectOutputDir();
     if (outputDir) {
+        vscode.window.showInformationMessage(`Configuration will be stored in ${outputDir}`);
         const agent = 'native-image-agent';
         const parameter = 'config-output-dir';
         return `-agentlib:${agent}=${parameter}=${outputDir}`;
     } else {
+        vscode.window.showWarningMessage('No configuration output selected, launching without native-image agent.');
         return '';
     }
 }
 
 async function selectOutputDir(): Promise<string | undefined> {
-    let choices: QuickPickTargetDir[] = [
-        new QuickPickTargetDir(path.join('META-INF', 'native-image'), 'Store configuration to project', () => { return getProjectConfigDir(); }),
-        new QuickPickTargetDir(process.platform === 'win32' ? 'Temp' : '/tmp', 'Store configuration to temporary directory', () => { return getTmpConfigDir(); }),
-        new QuickPickTargetDir('Custom directory...', 'Store configuration to custom directory', () => {  return getCustomConfigDir(); })
-    ];
+    const project = await supportsResourcesRoot() ? new QuickPickTargetDir(path.join('META-INF', 'native-image'), 'Store configuration to project', getProjectConfigDir) : undefined;
+    const temp = new QuickPickTargetDir(process.platform === 'win32' ? 'Temp' : '/tmp', 'Store configuration to temporary directory', getTmpConfigDir);
+    const custom = new QuickPickTargetDir('Custom directory...', 'Store configuration to custom directory', getCustomConfigDir);
+    let choices: QuickPickTargetDir[] = project ? [ project, temp, custom ] : [temp, custom ];
     let ret: string | undefined = undefined;
     await vscode.window.showQuickPick(choices, {
         placeHolder: 'Select native-image configuration output directory'
     }).then(async e => { if (e) ret = await e.getTarget(); });
-    if (ret) {
-        vscode.window.showInformationMessage(`Configuration will be stored in ${ret}`);
-    }
     return ret;
+}
+
+async function supportsResourcesRoot(): Promise<boolean> {
+    const commands: string[] = await vscode.commands.getCommands();
+    return commands.includes('java.get.project.source.roots');
 }
 
 async function findResourcesRoot(): Promise<string | undefined> {
     const roots = vscode.workspace.workspaceFolders;
     if (roots && roots.length > 0) {
         const project = roots[0].uri.toString();
-        const resources: string[] | undefined = await vscode.commands.executeCommand("java.get.project.source.roots", project, 'resources');
+        const resources: string[] | undefined = await vscode.commands.executeCommand('java.get.project.source.roots', project, 'resources');
         if (resources && resources.length > 0) {
             return vscode.Uri.parse(resources[0]).fsPath;
         }
