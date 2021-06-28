@@ -1,5 +1,7 @@
 # Change Log
 
+## Version 0.5.8
+* Security: updated dependencies
 ## Version 0.5.7
 * Support for SDKMAN installations
 

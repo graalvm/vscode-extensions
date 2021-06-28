@@ -1,5 +1,6 @@
 # Change Log
-
+## Version 0.5.5
+* Security: updated dependencies
 ## Version 0.5.4
 * Deploy command added to deploy OCI
 ## Version 0.5.3
