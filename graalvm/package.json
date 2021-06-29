@@ -151,6 +151,138 @@
 				"title": "Open Process In VisualVM",
 				"icon": "$(run)",
 				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.startVisualVM",
+				"title": "Start VisualVM",
+				"icon": "$(run)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectOverviewVisualVM",
+				"title": "○ Preselect Overview view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectOverviewVisualVM_",
+				"title": "◉ Preselect Overview view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectMonitorVisualVM",
+				"title": "○ Preselect Monitor view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectMonitorVisualVM_",
+				"title": "◉ Preselect Monitor view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectThreadsVisualVM",
+				"title": "○ Preselect Threads view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectThreadsVisualVM_",
+				"title": "◉ Preselect Threads view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectSamplerVisualVM",
+				"title": "○ Preselect Sampler view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.preselectSamplerVisualVM_",
+				"title": "◉ Preselect Sampler view",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.toggleWindowToFrontVisualVM",
+				"title": "⠀   Bring VisualVM window to front",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.toggleWindowToFrontVisualVM_",
+				"title": "✓  Bring VisualVM window to front",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.toggleSourcesIntegrationVisualVM",
+				"title": "✓  Enable Go to Source integration",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.toggleSourcesIntegrationVisualVM_",
+				"title": "⠀   Enable Go to Source integration",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.selectProcessVisualVM",
+				"title": "Select process",
+				"icon": "$(search)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.threadDumpVisualVM",
+				"title": "Take thread dump",
+				"icon": "$(record)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.heapDumpVisualVM",
+				"title": "Take heap dump",
+				"icon": "$(record)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.startCPUSamplerVisualVM",
+				"title": "Start CPU sampling",
+				"icon": "$(run)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.startMemorySamplerVisualVM",
+				"title": "Start memory sampling",
+				"icon": "$(run)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.snapshotSamplerVisualVM",
+				"title": "Take snapshot of sampler results",
+				"icon": "$(record)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.stopSamplerVisualVM",
+				"title": "Stop sampling",
+				"icon": "$(stop)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.startJFRRecordingVisualVM",
+				"title": "Start flight recording",
+				"icon": "$(run)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.dumpJFRRecordingVisualVM",
+				"title": "Dump flight recording data",
+				"icon": "$(record)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.stopJFRRecordingVisualVM",
+				"title": "Stop flight recording",
+				"icon": "$(stop)",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.configureSettingVisualVM",
+				"title": "Configure",
+				"icon": "$(edit)",
+				"category": "VisualVM"
 			}
 		],
 		"viewsContainers": {
@@ -166,6 +298,10 @@
 			{
 				"view": "graalvm-installations",
 				"contents": "No GraalVM installation found.\n[Download & Install GraalVM](command:extension.graalvm.installGraalVM)\n[Add Existing GraalVM](command:extension.graalvm.addExistingGraalVM)"
+			},
+			{
+				"view": "visualvm-control-panel",
+				"contents": "Set active GraalVM installation to use VisualVM."
 			}
 		],
 		"views": {
@@ -175,10 +311,110 @@
 					"name": "Installations",
 					"icon": "resources/graalvm.svg",
 					"contextualTitle": "GraalVM Installations"
+				},
+				{
+					"id": "visualvm-control-panel",
+					"name": "VisualVM",
+					"icon": "resources/graalvm.svg",
+					"contextualTitle": "VisualVM"
 				}
 			]
 		},
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "extension.graalvm.preselectOverviewVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectOverviewVisualVM_",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectMonitorVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectMonitorVisualVM_",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectThreadsVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectThreadsVisualVM_",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectSamplerVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.preselectSamplerVisualVM_",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.toggleWindowToFrontVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.toggleWindowToFrontVisualVM_",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.toggleSourcesIntegrationVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.toggleSourcesIntegrationVisualVM_",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.selectProcessVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.threadDumpVisualVM",
+					"when": "visualvm.featureSet >= 2"
+				},
+				{
+					"command": "extension.graalvm.heapDumpVisualVM",
+					"when": "visualvm.featureSet >= 2"
+				},
+				{
+					"command": "extension.graalvm.startCPUSamplerVisualVM",
+					"when": "visualvm.featureSet >= 2"
+				},
+				{
+					"command": "extension.graalvm.startMemorySamplerVisualVM",
+					"when": "visualvm.featureSet >= 2"
+				},
+				{
+					"command": "extension.graalvm.snapshotSamplerVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.stopSamplerVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.startJFRRecordingVisualVM",
+					"when": "visualvm.featureSet >= 2"
+				},
+				{
+					"command": "extension.graalvm.dumpJFRRecordingVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.stopJFRRecordingVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.configureSettingVisualVM",
+					"when": "false"
+				}
+			],
 			"editor/context": [
 				{
 					"command": "extension.graalvm.toggleCodeCoverage",
@@ -200,6 +436,71 @@
 					"command": "extension.graalvm.refreshInstallations",
 					"when": "view == graalvm-installations",
 					"group": "navigation@3"
+				},
+				{
+					"command": "extension.graalvm.startVisualVM",
+					"when": "view == visualvm-control-panel && visualvm.featureSet >= 1",
+					"group": "navigation@1"
+				},
+				{
+					"command": "extension.graalvm.preselectOverviewVisualVM",
+					"when": "view == visualvm-control-panel && visualvm.preselectView != 1 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@1"
+				},
+				{
+					"command": "extension.graalvm.preselectOverviewVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.preselectView == 1 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@1"
+				},
+				{
+					"command": "extension.graalvm.preselectMonitorVisualVM",
+					"when": "view == visualvm-control-panel && visualvm.preselectView != 2 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@2"
+				},
+				{
+					"command": "extension.graalvm.preselectMonitorVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.preselectView == 2 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@2"
+				},
+				{
+					"command": "extension.graalvm.preselectThreadsVisualVM",
+					"when": "view == visualvm-control-panel && visualvm.preselectView != 3 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@3"
+				},
+				{
+					"command": "extension.graalvm.preselectThreadsVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.preselectView == 3 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@3"
+				},
+				{
+					"command": "extension.graalvm.preselectSamplerVisualVM",
+					"when": "view == visualvm-control-panel && visualvm.preselectView != 4 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@4"
+				},
+				{
+					"command": "extension.graalvm.preselectSamplerVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.preselectView == 4 && visualvm.featureSet >= 1",
+					"group": "vcp_group_1@4"
+				},
+				{
+					"command": "extension.graalvm.toggleWindowToFrontVisualVM",
+					"when": "view == visualvm-control-panel && !visualvm.windowToFront && visualvm.featureSet >= 2",
+					"group": "vcp_group_2@1"
+				},
+				{
+					"command": "extension.graalvm.toggleWindowToFrontVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.windowToFront && visualvm.featureSet >= 2",
+					"group": "vcp_group_2@2"
+				},
+				{
+					"command": "extension.graalvm.toggleSourcesIntegrationVisualVM",
+					"when": "view == visualvm-control-panel && visualvm.projectOpen && visualvm.sourcesIntegration && visualvm.featureSet >= 2",
+					"group": "vcp_group_3@1"
+				},
+				{
+					"command": "extension.graalvm.toggleSourcesIntegrationVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.projectOpen && !visualvm.sourcesIntegration && visualvm.featureSet >= 2",
+					"group": "vcp_group_3@2"
 				}
 			],
 			"view/item/context": [
@@ -227,6 +528,61 @@
 					"command": "extension.graalvm.removeInstallation",
 					"when": "view == graalvm-installations && viewItem == graalvmInstallation || viewItem == graalvmInstallationActive",
 					"group": "inline@2"
+				},
+				{
+					"command": "extension.graalvm.selectProcessVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.process",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.threadDumpVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.threadDump",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.heapDumpVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.heapDump",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.startCPUSamplerVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.cpuSampler",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.startMemorySamplerVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.memorySampler",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.snapshotSamplerVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.cpuSampler || viewItem == visualvm.memorySampler",
+					"group": "inline@2"
+				},
+				{
+					"command": "extension.graalvm.stopSamplerVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.cpuSampler || viewItem == visualvm.memorySampler",
+					"group": "inline@3"
+				},
+				{
+					"command": "extension.graalvm.startJFRRecordingVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.jfr",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.dumpJFRRecordingVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.jfr",
+					"group": "inline@2"
+				},
+				{
+					"command": "extension.graalvm.stopJFRRecordingVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.jfr",
+					"group": "inline@3"
+				},
+				{
+					"command": "extension.graalvm.configureSettingVisualVM",
+					"when": "view == visualvm-control-panel && viewItem == visualvm.configure",
+					"group": "inline@1"
 				}
 			]
 		},
@@ -619,6 +975,17 @@
 							"name": "Launch Native Image Agent & Java 8+ Application",
 							"mainClass": "^\"${1:\\${file\\}}\"",
 							"vmArgs": "^\"\\${command:extension.graalvm.attachNativeImageAgent\\}\""
+						}
+					},
+					{
+						"label": "GraalVM: Launch Java 8+ Application With VisualVM",
+						"description": "Launch a Java 8+ application and enable monitoring with VisualVM",
+						"body": {
+							"type": "java8+",
+							"request": "launch",
+							"name": "Launch VisualVM & Java 8+ Application",
+							"mainClass": "^\"${1:\\${file\\}}\"",
+							"vmArgs": "^\"\\${command:extension.graalvm.defineDisplayName\\} \\${command:extension.graalvm.attachVisualVM\\}\""
 						}
 					}
 				]

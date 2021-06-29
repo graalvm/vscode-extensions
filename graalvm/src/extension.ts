@@ -14,7 +14,7 @@ import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
 import { addNativeImageToPOM, attachNativeImageAgent } from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
-import { runVisualVMForPID } from './graalVMVisualVM';
+import * as visualvm from './graalVMVisualVM';
 import { removeSDKmanUnclassifiedInstallation } from './sdkmanSupport';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -67,9 +67,82 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.removeInstallation', (path?: string | Installation) => {
 		removeGraalVMInstallation(path instanceof Installation ? path.home : path);
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.runVisualVMForPID', (pid?: number) => {
-		runVisualVMForPID(pid);
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startVisualVM', () => {
+		visualvm.startVisualVM();
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectOverviewVisualVM', () => {
+		visualvm.preselectView(context, '1');
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectOverviewVisualVM_', () => {}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectMonitorVisualVM', () => {
+		visualvm.preselectView(context, '2');
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectMonitorVisualVM_', () => {}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectThreadsVisualVM', () => {
+		visualvm.preselectView(context, '3');
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectThreadsVisualVM_', () => {}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectSamplerVisualVM', () => {
+		visualvm.preselectView(context, '4');
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectSamplerVisualVM_', () => {}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleWindowToFrontVisualVM', () => {
+		visualvm.toggleWindowToFront(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleWindowToFrontVisualVM_', () => {
+		visualvm.toggleWindowToFront(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleSourcesIntegrationVisualVM', () => {
+		visualvm.toggleSourcesIntegration(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleSourcesIntegrationVisualVM_', () => {
+		visualvm.toggleSourcesIntegration(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.defineDisplayName', (): string => {
+		return visualvm.defineDisplayName();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.attachVisualVM', (): string => {
+		return visualvm.attachVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectProcessVisualVM', () => {
+		visualvm.selectProcessVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.runVisualVMForPID', () => {
+		visualvm.selectProcessVisualVM(true).then(selected => {
+			if (selected) visualvm.startVisualVM(); 
+		});
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.threadDumpVisualVM', () => {
+		visualvm.threadDumpVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.heapDumpVisualVM', () => {
+		visualvm.heapDumpVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startCPUSamplerVisualVM', () => {
+		visualvm.startCPUSamplerVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startMemorySamplerVisualVM', () => {
+		visualvm.startMemorySamplerVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.snapshotSamplerVisualVM', () => {
+		visualvm.snapshotSamplerVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.stopSamplerVisualVM', () => {
+		visualvm.stopSamplerVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startJFRRecordingVisualVM', () => {
+		visualvm.startJFRRecordingVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.dumpJFRRecordingVisualVM', () => {
+		visualvm.dumpJFRRecordingVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.stopJFRRecordingVisualVM', () => {
+		visualvm.stopJFRRecordingVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.configureSettingVisualVM', (...params: any[]) => {
+		visualvm.configureSettingVisualVM(context, params);
+	}));
+	context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
 
 	const nodeProvider = new InstallationNodeProvider();
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('graalvm-installations', nodeProvider));
@@ -83,6 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if (e.affectsConfiguration('graalvm.home')) {
 			vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
 			const graalVMHome = getGVMHome();
+			visualvm.initializeGraalVM(context, graalVMHome);
 			if (!graalVMHome) {
 				setupGraalVM();
 			}
@@ -105,6 +179,7 @@ export function activate(context: vscode.ExtensionContext) {
 	} else {
 		selectActiveGraalVM(graalVMHome, true).then(() => startLanguageServer(graalVMHome));
 	}
+	visualvm.initialize(context);
 	vscode.window.setStatusBarMessage('GraalVM extension activated', 3000);
 	
 	// Public API
