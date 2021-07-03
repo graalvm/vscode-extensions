@@ -46,6 +46,8 @@ The Micronaut extension provides:
 * editing and debugging capabilities for Micronaut projects
 * code completion and navigation for Micronaut configuration (yaml) files and java (available with Apache NetBeans Language Server extension).
 * the ability to build Micronaut projects ahead-of-time into native images with GraalVM
+* __Run main with Continuous Mode__ code lense runs Micronaut project and reloads it automatically when source code is changed. It is not available as Debugger. 
+    * __Launch Java: Continuous Mode__ is the name of launch configuration.
 
 ### Micronaut VS Code Commands
 
@@ -119,10 +121,5 @@ Read the [Oracle Privacy Policy](https://www.oracle.com/legal/privacy/privacy-po
 
 ## Known Issues
 
-The Micronaut extension 0.5.0 is Technology Preview, meaning the functionality may not be complete.
+The Micronaut extension 0.5.* is Technology Preview, meaning the functionality may not be complete.
 
-Please be informed that the subsequent runs of a Micronaut project may fail in this version.
-For example, you create a Gradle Micronaut project using GraalVM, run it with the Run / Run Without Debugging command (Ctrl+F5), and then terminate it. If you re-run the project again using the same Run / Run Without Debugging command (Ctrl+F5), startup may fail with this exception:
-```shell
-[main] ERROR i.m.h.server.netty.NettyHttpServer - Unable to start server. Port already 8080 in use.
-```

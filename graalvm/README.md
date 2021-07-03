@@ -3,14 +3,13 @@
 The [GraalVM Extension for Visual Studio Code (VS Code)](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) provides basic support for editing and debugging programs running on [GraalVM](http://www.graalvm.org).
 The extension is Technology Preview.
 
-The GraalVM extension on pair with [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=asf.apache-netbeans-java) extension will also enable a full-fledged support for Java 8 and higher, as well as Java to scripting languages polyglot debugging in VS Code.
-
-GraalVM VSCode Extension enables a polyglot environment in VSCode, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (Java, JS, Ruby, R, and Python).
+GraalVM for Java Extension enables a polyglot environment in VSCode, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (Java, JS, Ruby, R, and Python).
 
 #### Table of contents
 - [Features](#features)
 - [Installation and Setup](#installation-and-setup)
 - [Java Development and Debugging](#java-development-and-debugging)
+- [Native Image Debugger](#native-image-debugger)
 - [JavaScript and Node.js Debugging](#javascript-and-nodejs-debugging)
 - [Python Debugging](#python-debugging)
 - [R Debugging](#r-debugging)
@@ -28,23 +27,22 @@ GraalVM VSCode Extension enables a polyglot environment in VSCode, thus making i
 
 ## Features
 
-The installation wizard for the GraalVM VS Code Extension simplifies setting up the development environment.
+The installation wizard for the GraalVM for Java Extension simplifies setting up the development environment.
 You can now download and install any available GraalVM distribution right from the user interface, or, alternatively, you can select an existing GraalVM installation from your local disk.
 
-The GraalVM Extension brings support for Java projects development and debugging in VS Code.
+The GraalVM xtension brings support for Java projects development and debugging in VS Code.
 This extension for VS Code also provides editing and debugging capabilities for JavaScript and Node.js, Python, R, and Ruby applications running on GraalVM by default.
 
-The GraalVM VS Code Extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
+The GraalVM for Java Extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
 
-The future development of the extension should also enable generating native executables right from the VS Code console.
 The development team is actively working on further improvements and are focused on tne GraalVM Extension providing high usability to developers.
 
 ## Installation and Setup
 
-To install the GraalVM Extension in VS Code, navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
+To install the GraalVM for Java Extension in VS Code, navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
 Search for "GraalVM" in the search field.
 Once found, press Install.
-That action will install the GraalVM Extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
+That action will install the GraalVM for Java Extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
 Reload will be required.
 
 Once installed, notice the "Gr" icon in the left-hand side Activity Bar.
@@ -119,8 +117,6 @@ The "Download & Install GraalVM" action is a preferable way, as it eliminates th
 
 ## Java Development and Debugging
 
-To enable support for Java development with GraalVM in VS Code, you have to install the [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=asf.apache-netbeans-java) extension. Reload will be required.
-
 To start developping or debugging Java applications, ensure GraalVM is used as your Java runtime in VS Code.
 If the current path is not pointing to the GraalVM folder, go to the User Settings window and use the `netbeans.jdkhome` value in the _settings.json_ file.
 This configuration is then used to launch the Java Language Server.
@@ -134,9 +130,33 @@ The newly opened window will suggest you create a _launch.json_ file:
 ![Create Launch Configuration for Java](images/create_java_launch_configuration.png)
 
 Make sure to select the "Java 8+" environment. To start debugging, press F5 or navigate to Run > Start Debugging.
+
+### Available Launch Configurations
+1. Code lense in source code uses the __Java 8+...__ launch configuration (Debugger or Run) when `Run main | Debug main` code lense is selected in the code.
+2. When __Java 8+...__ is selected in __Run and Debug__ activity panel then following options are available:
+
+![Debug configurations](images/java_debuggers.png)
+
+* __Launch Java 8+ App__ - Debug or Run current Java project
+* __Attach to Port__ & __Attach to Process__ - Attach debugger actions. Available when __Java 8+ ...__ at the bottom of drop down list is selected.
+    * Select this configuration, then click the ![Run](images/run.png) 
+    * Select either from available process or enter the port to connect to JVM running with JDWP.
+    * __Attach to Shared Memory__ is available on Windows in addtion to above mentioned _Attach..._
+
 To add more launch configurations, navigate to Run > Add Configuration or open the _.vscode/launch.json_ file and press the Add Configuration button in the right-hand corner.
 
 ![Add Launch Configuration for Java](images/add_java_launch_configuration.png)
+Suggestions for launch configuration options are available using intellisense in `launch.json`.
+## Native Image Debugger
+Experimental Support
+
+GraalVM Extension Pack for Java provides Java like debugging of native images produced by GraalVM EE native-image tool. It is provided using GDB and via new Run configuration named __Launch Native Image__. This experimental feature works __now__ only on Linux with GDB 7.11 or GDB 10.1+ due to known issue [#26139](https://sourceware.org/bugzilla/show_bug.cgi?id=26139) in GDB 8 and 9.
+
+GraalVM Enterprise Edition is needed as it produces full debug information for native images.
+
+In order to debug native image applications it is necessary to build such native image with debug information available. It can be done by providing following switches for native-image tool: 
+- `-g -O0` or 
+- `-H:Debug=2 -H:Optimize=0`. 
 
 ## JavaScript and Node.js Debugging
 
@@ -484,7 +504,6 @@ The GraalVM Extension for VS Code recommends the following extensions:
 * [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) - the Python language support
 * [R](https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r) - a basic support for the R language
 * [Ruby](https://marketplace.visualstudio.com/items?itemName=rebornix.Ruby) - the Ruby language support
-* [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=asf.apache-netbeans-java) - the Java 8+ language support
 
 ## Feedback
 
