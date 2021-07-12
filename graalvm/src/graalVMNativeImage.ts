@@ -277,7 +277,8 @@ async function selectOutputDir(): Promise<string | undefined> {
     let choices: QuickPickTargetDir[] = project ? [ project, temp, custom ] : [temp, custom ];
     let ret: string | undefined = undefined;
     await vscode.window.showQuickPick(choices, {
-        placeHolder: 'Select native-image configuration output directory'
+        placeHolder: 'Select native-image configuration output directory',
+        ignoreFocusOut: true
     }).then(async e => { if (e) ret = await e.getTarget(); });
     return ret;
 }
