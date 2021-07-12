@@ -1,9 +1,11 @@
-# GraalVM Visual Studio Code Extension
+# GraalVM Tools for Java
 
-The [GraalVM Extension for Visual Studio Code (VS Code)](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) provides basic support for editing and debugging programs running on [GraalVM](http://www.graalvm.org).
+The [GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) is an extension for VS Code and provides basic support for editing and debugging programs running on [GraalVM](http://www.graalvm.org).
 The extension is Technology Preview.
 
-GraalVM for Java Extension enables a polyglot environment in VSCode, thus making it suitable and convenient to work with GraalVM from an integrated development environment, and to allow VS Code users to edit and debug applications written in any of the GraalVM supported languages (Java, JS, Ruby, R, and Python).
+GraalVM Tools for Java extension provides a full-edge support for the Java language and, additionally, enables
+a polyglot environment in VS Code, making it a comfortable and convenient integrated development environment to work with.
+Users can edit and debug applications written in the GraalVM supported languages (Java, JS, Ruby, R, and Python) without the need to install any other additional extensions.
 
 #### Table of contents
 - [Features](#features)
@@ -27,26 +29,26 @@ GraalVM for Java Extension enables a polyglot environment in VSCode, thus making
 
 ## Features
 
-The installation wizard for the GraalVM for Java Extension simplifies setting up the development environment.
+The installation wizard for the GraalVM for Java extension simplifies setting up the development environment.
 You can now download and install any available GraalVM distribution right from the user interface, or, alternatively, you can select an existing GraalVM installation from your local disk.
 
-The GraalVM xtension brings support for Java projects development and debugging in VS Code.
+GraalVM for Java brings support for Java projects development and debugging in VS Code.
 This extension for VS Code also provides editing and debugging capabilities for JavaScript and Node.js, Python, R, and Ruby applications running on GraalVM by default.
 
-The GraalVM for Java Extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
+The GraalVM for Java extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
 
 The development team is actively working on further improvements and are focused on tne GraalVM Extension providing high usability to developers.
 
 ## Installation and Setup
 
-To install the GraalVM for Java Extension in VS Code, navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
+To install the GraalVM for Java extension in VS Code, navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
 Search for "GraalVM" in the search field.
 Once found, press Install.
-That action will install the GraalVM for Java Extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
+That action will install the GraalVM for Java extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
 Reload will be required.
 
-Once installed, notice the "Gr" icon in the left-hand side Activity Bar.
-By clicking on the icon, a dialogue with the following choices displays:
+Once installed, notice the "Gr" icon in the Activity Bar on the left.
+When clicking on the icon, a dialogue with the following choices displays:
 * Download & Install GraalVM
 * Add Existing GraalVM
 
@@ -55,10 +57,10 @@ By clicking on the icon, a dialogue with the following choices displays:
 ### Download & Install GraalVM
 
 The Download & Install GraalVM action prompts you to:
-* Pick the GraalVM distribution: Community (free for all purposes) or Enterprise (free for evaluation and development).
-* Pick the GraalVM version: Current (20.3), Annual (19.3), Latest Snapshot (Nightly Build 21.0-dev).
-* Pick a Java version: 8 or 11.
-* Select the destination folder.
+* Pick the GraalVM distribution: Community (free for all purposes) or Enterprise (free for evaluation and development)
+* Pick the GraalVM version: Current (21.x), Annual (20.x), Latest Snapshot (Nightly Build)
+* Pick a Java version: 8, 11, or 16
+* Select the destination folder
 
 ![Download and Install GraalVM](images/download_install_graalvm_view.png)
 
@@ -111,17 +113,17 @@ All registered GraalVM instances for `java.home` will be listed in the configura
 This installation model greatly simplifies setting up the GraalVM development environment in VS Code:
 - It permits multiple GraalVM and components installations at the same time.
 - It allows an easy switch from one runtime version to another.
-- It enables quick removal of unnecessary GraalVM installations from VS Code global storage or even from your local disk.
+- It enables a quick removal of unnecessary GraalVM installations from VS Code global storage or even from your local disk.
 
 The "Download & Install GraalVM" action is a preferable way, as it eliminates the fuss around setting up environment variables and prepares the GraalVM runtime in VS Code for you.
 
 ## Java Development and Debugging
 
-To start developping or debugging Java applications, ensure GraalVM is used as your Java runtime in VS Code.
+To start developing or debugging Java applications, ensure GraalVM is used as your Java runtime in VS Code.
 If the current path is not pointing to the GraalVM folder, go to the User Settings window and use the `netbeans.jdkhome` value in the _settings.json_ file.
 This configuration is then used to launch the Java Language Server.
 
-The project you create from scratch or a Java project you open in VS Code will run in the GraalVM runtime.
+The project you create from scratch or a Java project you open in VS Code will run on GraalVM.
 
 To debug a Java application running on GraalVM, creating a launch configuration for the application is necessary.
 Having opened the file to be debugged or run in VS Code, switch to the Debug view by clicking on the "bug" icon in the left-hand side panel.
@@ -132,57 +134,63 @@ The newly opened window will suggest you create a _launch.json_ file:
 Make sure to select the "Java 8+" environment. To start debugging, press F5 or navigate to Run > Start Debugging.
 
 ### Available Launch Configurations
-1. Code lense in source code uses the __Java 8+...__ launch configuration (Debugger or Run) when `Run main | Debug main` code lense is selected in the code.
-2. When __Java 8+...__ is selected in __Run and Debug__ activity panel then following options are available:
+
+1. The CodeLens feature in the source code uses the __Java 8+...__ launch configuration (Debugger or Run) when `Run main | Debug main` CodeLens is selected in the code.
+2. When __Java 8+...__ is selected in the __Run and Debug__ activity panel then following options are available:
 
 ![Debug configurations](images/java_debuggers.png)
 
-* __Launch Java 8+ App__ - Debug or Run current Java project
+* __Launch Java 8+ App__ - Debug or Run a current Java project
 * __Attach to Port__ & __Attach to Process__ - Attach debugger actions. Available when __Java 8+ ...__ at the bottom of drop down list is selected.
-    * Select this configuration, then click the ![Run](images/run.png) 
-    * Select either from available process or enter the port to connect to JVM running with JDWP.
-    * __Attach to Shared Memory__ is available on Windows in addtion to above mentioned _Attach..._
+    * Select this configuration, then click [Run](images/run.png)
+    * Select either from the available processes or enter the port to connect to a JVM running with JDWP.
+    * __Attach to Shared Memory__ is available on Windows in addtion to above-mentioned _Attach..._
 
-To add more launch configurations, navigate to Run > Add Configuration or open the _.vscode/launch.json_ file and press the Add Configuration button in the right-hand corner.
+To add more launch configurations, navigate to Run > Add Configuration or open the _.vscode/launch.json_ file and press the "Add Configuration" button in the right-hand corner.
 
 ![Add Launch Configuration for Java](images/add_java_launch_configuration.png)
-Suggestions for launch configuration options are available using intellisense in `launch.json`.
+
+Suggestions for launch configuration options are available using code completion in `launch.json`.
+
 ## Native Image Debugger
-Experimental Support
 
-GraalVM Extension Pack for Java provides Java like debugging of native images produced by GraalVM EE native-image tool. It is provided using GDB and via new Run configuration named __Launch Native Image__. This experimental feature works __now__ only on Linux with GDB 7.11 or GDB 10.1+ due to known issue [#26139](https://sourceware.org/bugzilla/show_bug.cgi?id=26139) in GDB 8 and 9.
+GraalVM Extension Pack for Java provides Java like debugging of platform native executables produced by [GraalVM Native Image](https://www.graalvm.org/reference-manual/native-image/).
+It is provided using the GNU Debugger (GDB) and via a new Run configuration named __Launch Native Image__.
+GraalVM Enterprise Edition is required as it produces full debug information for a native image.
 
-GraalVM Enterprise Edition is needed as it produces full debug information for native images.
+> Note: This feature is experimental. It currently works only on Linux with GDB 7.11 or GDB 10.1+ due to known issue [#26139](https://sourceware.org/bugzilla/show_bug.cgi?id=26139) in GDB 8 and 9.
 
-In order to debug native image applications it is necessary to build such native image with debug information available. It can be done by providing following switches for native-image tool: 
-- `-g -O0` or 
-- `-H:Debug=2 -H:Optimize=0`. 
+In order to debug native images of Java applications, it is necessary to build such images with debug information available.
+It can be done by providing following switches for the `native-image` builder:
+- `-g -O0` or
+- `-H:Debug=2 -H:Optimize=0`.
+
+The resulting images will contain debug records in a format GDB understands.
 
 ## JavaScript and Node.js Debugging
 
-To debug a JavaScript or Node.js application running on GraalVM, creating a launch configuration for the application is necessary.
-To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
+To debug a JavaScript or Node.js application running on GraalVM, create a launch configuration for the application.
+To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel.
+The newly opened window will suggest you create a _launch.json_ file.
 
 If debugging is not yet configured (no `launch.json` has been created), select `GraalVM` from the list of available debug environmnets.
 
 The following techniques can be used to add a new configuration:
-* Use IntelliSense if your cursor is located inside the configurations array.
-* Press the Add Configuration button to invoke snippet IntelliSense at the start of the array.
-* Choose Add Configuration option in the Debug menu.
+* Use code completion if your cursor is located inside the configurations array.
+* Press the Add Configuration button to invoke IntelliSense snippet suggestions at the start of the array.
+* Choose the Add Configuration option in the Debug menu.
 
 ![Image Debug Configurations](images/debug-config.png)
 
-Note: The attributes available in launch configurations vary from configuration to configuration.
-You can use IntelliSense suggestions (_Ctrl+Space_) to find out which attributes exist for a specific debug configuration.
-Hover help is also available for all attributes.
+> Note: The attributes available in launch configurations vary from configuration to configuration. You can use IntelliSense suggestions (_Ctrl+Space_) to find out which attributes exist for a specific debug configuration. Hover help is also available for all attributes.
 
 ![Image Select Debug Configuration](images/select-debug-config.png)
 
 The GraalVM extension provides the following debug configurations that can be used to run and debug JavaScript and Node.js applications running on GraalVM:
-* __Launch Node.js Application__ - Launches a Node.js Application using GraalVM in a debug mode.
-* __Launch JavaScript__ - Launches a JavaScript using GraalVM in a debug mode.
-* __Attach__ - Attaches debugger to a locally running GraalVM runtime.
-* __Attach to Remote__ - Attaches debugger to the debug port of a remote GraalVM runtime.
+* __Launch Node.js Application__ - Launches a Node.js application with GraalVM in a debug mode.
+* __Launch JavaScript__ - Launches a JavaScript application with GraalVM in a debug mode.
+* __Attach__ - Attaches a debugger to a locally running GraalVM runtime.
+* __Attach to Remote__ - Attaches a debugger to the debug port of a remote GraalVM runtime.
 
 You now have the possibility to choose which debugging protocol to use ([Debug Adapter Protocol](https://www.graalvm.org/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/tools/chrome-debugger/)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the open Debug Adapter Protocol port, the content of the _launch.json_ should be:
@@ -204,23 +212,24 @@ For example, to connect to the open Debug Adapter Protocol port, the content of 
 
 In order to start a debug session, first select the proper configuration using the Configuration drop-down in the Debug view.
 Once you have your launch configuration set, start your debug session with F5.
-Alternatively, you can run your configuration through the Command Palette (Command Palette can be opened by pressing F1, or the _Ctrl+Shift+P_  hot keys combination for Linux, and _Command+Shift+P_ for macOS).
+Alternatively, you can run your configuration through View > Command Palette (Command Palette can be opened by pressing F1, or the _Ctrl+Shift+P_  hot keys combination for Linux, and _Command+Shift+P_ for macOS).
 Set filtering to Debug: Select and Start Debugging, or type "debug" and select the configuration you want to debug.
 
 ## Python Debugging
 
-To debug a Python application running on GraalVM, creating a launch configuration for the application is necessary.
+To debug a Python application running on GraalVM, create a launch configuration for the application.
 To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
 If debugging is not yet configured (no `launch.json` has been created), select `GraalVM` from the list of available debug environmnets.
+
 Once the `launch.json` file is opened in the editor, one of the following techniques can be used to add a new configuration:
-* Use IntelliSense if your cursor is located inside the configurations array.
-* Press the Add Configuration button to invoke snippet IntelliSense at the start of the array.
+* Use code completion if your cursor is located inside the configurations array.
+* Press the Add Configuration button to invoke IntelliSense snippet suggestions at the start of the array.
 * Choose Add Configuration option in the Debug menu.
 
 ![Image Debug Configurations](images/debug-config-python.png)
 
 The GraalVM Python extension provides the following debug configuration that can be used to debug Python applications/scripts running on GraalVM:
-* __Launch Python Script__ - Launches a Python script using GraalVM in a debug mode.
+* __Launch Python Script__ - Launches a Python script with GraalVM in a debug mode.
 
 You now have the possibility to choose which debugging protocol to use ([Debug Adapter Protocol](https://www.graalvm.org/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/tools/chrome-debugger/)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the Chrome Dev Tools protocol port, the content of the _launch.json_ should be:
@@ -247,16 +256,17 @@ Hover help is also available for all attributes.
 
 In order to start a debug session, first select the proper configuration using the Configuration drop-down in the Debug view.
 Once you have your launch configuration set, start your debug session with F5.
-Alternatively, you can run your configuration through the Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
+Alternatively, you can run your configuration through View > Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
 
 ## R Debugging
 
-To debug an R application running on GraalVM, creating a launch configuration for the application is necessary.
+To debug an R application running on GraalVM, create a launch configuration for the application.
 To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
 If debugging is not yet configured (no `launch.json` has been created), select `GraalVM` from the list of available debug environmnets.
+
 Once the `launch.json` file is opened in the editor, one of the following techniques can be used to add a new configuration:
-* Use IntelliSense if your cursor is located inside the configurations array.
-* Press the Add Configuration button to invoke snippet IntelliSense at the start of the array.
+* Use code completion if your cursor is located inside the configurations array.
+* Press the Add Configuration button to invoke IntelliSense snippet suggestions at the start of the array.
 * Choose Add Configuration option in the Debug menu.
 
 ![Image Debug Configurations](images/debug-config-r.png)
@@ -290,16 +300,17 @@ Hover help is also available for all attributes.
 
 In order to start a debug session, first select the proper configuration using the Configuration drop-down in the Debug view.
 Once you have your launch configuration set, start your debug session with F5.
-Alternatively, you can run your configuration through the Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
+Alternatively, you can run your configuration through View > Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
 
 ## Ruby Debugging
 
-To debug a Ruby application running on GraalVM, creating a launch configuration for the application is necessary.
+To debug a Ruby application running on GraalVM, create a launch configuration for the application.
 To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
 If debugging is not yet configured (no `launch.json` has been created), select `GraalVM` from the list of available debug environmnets.
+
 Once the `launch.json` file is opened in the editor, one of the following techniques can be used to add a new configuration:
-* Use IntelliSense if your cursor is located inside the configurations array.
-* Press the Add Configuration button to invoke snippet IntelliSense at the start of the array.
+* Use code completion if your cursor is located inside the configurations array.
+* Press the Add Configuration button to invoke IntelliSense snippet suggestions at the start of the array.
 * Choose Add Configuration option in the Debug menu.
 
 ![Image Debug Configurations](images/debug-config-ruby.png)
@@ -332,7 +343,7 @@ Hover help is also available for all attributes.
 
 In order to start a debug session, first select the proper configuration using the Configuration drop-down in the Debug view.
 Once you have your launch configuration set, start your debug session with F5.
-Alternatively, you can run your configuration through the Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
+Alternatively, you can run your configuration through View > Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
 
 ## Polyglot Applications Debugging
 
@@ -340,12 +351,13 @@ To run a polyglot application on GraalVM in VS Code, you have to either pass the
 The `polyglot` launcher does not require the `--polyglot` option, it is enabled by default.
 For more information see the [GraalVM polyglot documentation](https://www.graalvm.org/reference-manual/polyglot-programming/).
 
-To debug a polyglot application on GraalVM in VS Code, creating a launch configuration for the application is necessary.
+To debug a polyglot application on GraalVM in VS Code, create a launch configuration for the application.
 To do so, open the application project folder in VS Code (File > Open Folder), switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest to create a _launch.json_ file.
 If debugging is not yet configured (no `launch.json` has been created), select `GraalVM` from the list of available debug environmnets.
+
 Once the `launch.json` file is opened in the editor, one of the following techniques can be used to add a new configuration:
-* Use IntelliSense if your cursor is located inside the configurations array.
-* Press the Add Configuration button to invoke snippet IntelliSense at the start of the array.
+* Use code completion if your cursor is located inside the configurations array.
+* Press the Add Configuration button to invoke IntelliSense snippet suggestions at the start of the array.
 * Choose Add Configuration option in the Debug menu.
 
 ![Image Debug Configurations](images/debug-config-polyglot.png)
@@ -373,13 +385,14 @@ For example, to connect to the Chrome Dev Tools protocol port, the content of th
 
 Alternatively, to pass the `--polyglot` option to any of the existing application launchers, add the `runtimeArgs` attribute containing the `--polyglot` value to their respective debug configurations.
 
-Note: In some cases (polyglot application calls Java or R, or native launcher accesses languages installed with `gu` without [rebuilding images](https://www.graalvm.org/reference-manual/graalvm-updater/#component-uninstallation)), also passing the `--jvm` option is necessary.
+> Note: In some cases (polyglot application calls Java or R, or native launcher accesses languages installed with `gu` without [rebuilding images](https://www.graalvm.org/reference-manual/graalvm-updater/#component-uninstallation)), also passing the `--jvm` option is necessary.
 
 ![Image Debug Configuration for Python](images/polyglot-debug-config.png)
 
 ## Debug Adapter Protocol
 
-When creating the Run/Debug Configurations in VS Code, Chrome DevTools Protocol is provisioned by default. However, GraalVM provides a built-in implementation of the [Debug Adapter Protocol (DAP)](https://www.graalvm.org/tools/dap/) and, with the GraalVM Extention for VS Code, a user now can choose a protocol to use by setting the protocol attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
+When creating the Run/Debug Configurations in VS Code, Chrome DevTools Protocol is provisioned by default.
+However, GraalVM provides a built-in implementation of the [Debug Adapter Protocol (DAP)](https://www.graalvm.org/tools/dap/) and, with the GraalVM Extention for VS Code, a user now can choose a protocol to use by setting the protocol attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 
 To open a debugger port serving the Debug Adapter Protocol, you need to pass the `--dap` option to the command-line launcher.
 Other available options to pass to GraalVM's Debug Adapter Protocol are:
@@ -405,7 +418,7 @@ To connect to the open DAP port, the content of _launch.json_ for a Node.js appl
 }
 ```
 
-The advantage of using the Debug Adapter Protocol over Chrome Dev Tools is that (1) it is 'native' to Visual Studio Code (VS Code), meaning it does not require any intermediate translatation, and (2) it supports multithreading, which can be particually useful to debug, e.g., a Ruby application.
+The advantage of using the Debug Adapter Protocol over Chrome Dev Tools is that (1) it is "native" to Visual Studio Code (VS Code), meaning it does not require any intermediate translatation, and (2) it supports multithreading, which can be particually useful to debug, e.g., a Ruby application.
 
 ## Language Server Protocol Integration
 
@@ -422,7 +435,7 @@ Currently, [GraalVM's Language Server Protocol](https://www.graalvm.org/tools/ls
 * [Code Lens Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeLens)
 * [Execute Command Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_executeCommand)
 
-Note: The Language Server Protocol is offered as a technology preview and requires to pass the `--experimental-options` option for its activation.
+> Note: The Language Server Protocol is offered as a technology preview and requires to pass the `--experimental-options` option for its activation.
 
 To start the Language Server Protocol, pass the `--lsp` option to the command-line launcher as in the following example with a Node.js application:
 ```shell
@@ -431,8 +444,7 @@ node --experimental-options --lsp app.js
 Example app listening on port 3000!
 ```
 
-Note: GraalVM's Language Server Protocol itself does not provide the static data usually gathered by parsing the application sources (as these data are sometimes fuzzy in the case of dynamic languages).
-Instead, it was designed to provide the accurate dynamic data gathered from the application runtime.
+> Important: GraalVM's Language Server Protocol itself does not provide the static data usually gathered by parsing the application sources (as these data are sometimes fuzzy in the case of dynamic languages). Instead, it was designed to provide the accurate dynamic data gathered from the application runtime.
 
 ![Image Language Server Completion](images/lsp-dynamic-completion.png)
 
