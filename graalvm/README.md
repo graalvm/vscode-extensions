@@ -11,6 +11,7 @@ Users can edit and debug applications written in the GraalVM supported languages
 - [Features](#features)
 - [Installation and Setup](#installation-and-setup)
 - [Java Development and Debugging](#java-development-and-debugging)
+- [Native Image Agent](#native-image-agent)
 - [Native Image Debugger](#native-image-debugger)
 - [JavaScript and Node.js Debugging](#javascript-and-nodejs-debugging)
 - [Python Debugging](#python-debugging)
@@ -29,22 +30,22 @@ Users can edit and debug applications written in the GraalVM supported languages
 
 ## Features
 
-The installation wizard for the GraalVM for Java extension simplifies setting up the development environment.
+The installation wizard for the GraalVM Tools for Java extension simplifies setting up the development environment.
 You can now download and install any available GraalVM distribution right from the user interface, or, alternatively, you can select an existing GraalVM installation from your local disk.
 
 GraalVM for Java brings support for Java projects development and debugging in VS Code.
 This extension for VS Code also provides editing and debugging capabilities for JavaScript and Node.js, Python, R, and Ruby applications running on GraalVM by default.
 
-The GraalVM for Java extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
+The GraalVM Tools for Java extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
 
 The development team is actively working on further improvements and are focused on tne GraalVM Extension providing high usability to developers.
 
 ## Installation and Setup
 
-To install the GraalVM for Java extension in VS Code, navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
+To install the GraalVM Tools for Java extension in VS Code, navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
 Search for "GraalVM" in the search field.
 Once found, press Install.
-That action will install the GraalVM for Java extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
+That action will install the GraalVM Tools for Java extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
 Reload will be required.
 
 Once installed, notice the "Gr" icon in the Activity Bar on the left.
@@ -151,6 +152,42 @@ To add more launch configurations, navigate to Run > Add Configuration or open t
 ![Add Launch Configuration for Java](images/add_java_launch_configuration.png)
 
 Suggestions for launch configuration options are available using code completion in `launch.json`.
+
+## Native Image Agent
+
+GraalVM Tools for Java extension provides an the experimental support for the [Native Image Tracing Agent](https://www.graalvm.org/reference-manual/native-image/Agent/) tool to track all usages of dynamic features when executing a Java application on a JVM. This makes it easier to build native images from the VS Code projects.
+
+### Get Started
+
+Once you have download or selected the most recent GraalVM release, made it active, and installed the Native Image component, as described in [Installation and Setup](#installation-and-setup) section, you are ready to go.
+
+> Note: This feature was introduced with the GraalVM 21.2.0 release. Please make sure to get the latest GraalVM Tools for Java extension from the VS Code Marketplace, preferably by downloading the [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack).
+
+A special launch configuration **Launch Native Image Agent & Java 8+ Application** is provided by the GraalVM Tools for Java extension to start the project with the Native Image tracing agent.
+
+![Special Launch Native Image Agent & Java 8+ configuration](images/nia_launch-config.png)
+
+These are the steps to start the project with the agent from within the VS Code:
+
+1&#46; Create the _launch.json_ file. If not already created, create a new file from the Run and Debug activity using the _create a launch.json file_ link. Select the Java 8+ environment when asked.
+
+2&#46; Create the **Launch Native Image Agent & Java 8+ Application** launch configuration.
+Open the _launch.json_ file and click the Add Configuration... button in the bottom right corner of the editor. Select the **GraalVM: Launch Java 8+ Application with Native Image Agent** configuration. Make sure to save the _launch.json_ file after editing.
+
+3&#46; Select the **Launch Native Image Agent & Java 8+ Application** launch configuration in the Run and Debug activity. Use the Run Without Debugging action to start the current project.
+
+> Note: Do not use the Start Debugging action to start a project as the Native Image agent is not compatible with the debugger agent and running such a configuration would fail.
+
+4&#46; Specify the output directory for configuration files to be generated. During execution, the agent interfaces with the Java VM to intercept all calls that look up classes, methods, fields, resources, or request proxy accesses. The agent generates configuration files in JSON format which contain all intercepted dynamic accesses and will store them the output directory you specify. When starting the project, VS Code asks to select the desired location. The following choices are available:
+
+* `META-INF/native-image` - the default location in project sources to store the configuration files
+* `/tmp` - the configuration files will be stored to the `/tmp/native-image` directory
+* Custom directory - the configuration files will be stored to the provided custom directory
+
+5&#46; Generate load to the running process to invoke more code and generate the best configuration.
+Once all possible execution paths have been executed, terminate the process. At this point the Native Image agent dumps the collected configuration to the selected output directory.
+
+Once the configuration for Native Image has been generated, follow the documentation on how to [generate a native image for a project](https://www.graalvm.org/reference-manual/native-image/#build-a-native-image) from the command line, or how to [build native images right from VS Code](../micronaut/README.md#generate-native-images-of-micronaut-projects).
 
 ## Native Image Debugger
 

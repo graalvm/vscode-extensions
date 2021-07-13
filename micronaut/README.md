@@ -120,4 +120,4 @@ Read the [Oracle Privacy Policy](https://www.oracle.com/legal/privacy/privacy-po
 
 ### Known Issues
 
-The Micronaut extension 0.5.* is Technology Preview, meaning the functionality may not be complete.
+The GraalVM Tools for Micronaut Extension extension 0.5.* is Technology Preview, meaning the functionality may not be complete.
