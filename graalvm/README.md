@@ -13,6 +13,7 @@ Users can edit and debug applications written in the GraalVM supported languages
 - [Java Development and Debugging](#java-development-and-debugging)
 - [Native Image Agent](#native-image-agent)
 - [Native Image Debugger](#native-image-debugger)
+- [Integration with VisualVM](#integration-with-visualvm)
 - [JavaScript and Node.js Debugging](#javascript-and-nodejs-debugging)
 - [Python Debugging](#python-debugging)
 - [R Debugging](#r-debugging)
@@ -159,7 +160,7 @@ GraalVM Tools for Java extension provides an the experimental support for the [N
 
 ### Get Started
 
-Once you have download or selected the most recent GraalVM release, made it active, and installed the Native Image component, as described in [Installation and Setup](#installation-and-setup) section, you are ready to go.
+Once you have download or selected the most recent GraalVM release, made it active, and installed the Native Image component, as described in the [Installation and Setup](#installation-and-setup) section, you are ready to go.
 
 > Note: This feature was introduced with the GraalVM 21.2.0 release. Please make sure to get the latest GraalVM Tools for Java extension from the VS Code Marketplace, preferably by downloading the [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack).
 
@@ -203,6 +204,41 @@ It can be done by providing following switches for the `native-image` builder:
 - `-H:Debug=2 -H:Optimize=0`.
 
 The resulting images will contain debug records in a format GDB understands.
+
+## Integration with VisualVM
+
+As of GraalVM 21.2.0, the GraalVM Tools for Java extension introduced a new feature in this version - the integration with VisualVM (https://visualvm.github.io), which is the all-in-one Java (and polyglot) monitoring and troubleshooting tool.
+This brings the visual Java tooling to VS Code.
+
+![VisualVM and VS Code Integration](images/vscode_visualvm.png)
+
+To get started, you need to get the latest stable GraalVM release using the **Download & Install GraalVM** action from the **Gr** activity view, as described in the [Installation and Setup](README.md#installation-and-setup) section.
+Make sure the GraalVM is set as the **active**.
+
+Once a GraalVM installation is set as active, the Command Palette contains the following commands related to VisualVM:
+
+![VisualVM Commands available from Command Palette](images/visualvm_command_palette.png)
+
+### Launch Configuration
+
+A special launch configuration **Launch VisualVM & Java 8+ Application** is provided by the GraalVM Tools for Java extension to start VisualVM along with the project.
+Follow these steps to start VisualVM automatically from within the VS Code:
+
+![VisualVM and VS Code Integration](images/vscode_visualvm.png)
+
+1. Create the _launch.json_ file. If not already created, create a new launch.json file from the Run and Debug activity using the create a launch.json file link. Select the Java 8+ environment when asked.
+
+2. Open the launch.json file and click the Add Configuration... button in the bottom right corner of the editor. Select the **GraalVM: Launch Java 8+ Application with VisualVM** configuration. Make sure to save the launch.json file after editing.
+
+3. Select the action to perform when project starts. In the VisualVM pane of the **Gr** activity view, click the Configure action for the When started node to define the action to perform when the project is started.
+
+4. Select the **Launch VisualVM & Java 8+ Application** launch configuration in the Run and Debug activity. Use the Start Debugging or Run Without Debugging action to start the current project.
+
+While the project is starting, project name with a process ID (PID) pending label is displayed in the Process node in VisualVM pane. Once the project process starts, the Process node shows its PID and the action defined in step 3 is performed.
+
+> Note: This feature was introduced with the GraalVM 21.2.0 release. Please make sure to get the latest GraalVM Tools for Java extension from the VS Code Marketplace, preferably by downloading the [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack).
+
+For a more detailed feature description, go to [this page](visualvm-in-vscode.md).
 
 ## JavaScript and Node.js Debugging
 
