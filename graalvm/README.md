@@ -510,14 +510,14 @@ This extension contributes the following settings:
 * __graalvm.languageServer.startRLanguageServer__ - start the R Language Server
 * __graalvm.languageServer.startRubyLanguageServer__ - start the Ruby Language Server
 
-## Recommendations
+### Recommendations
 
 The GraalVM Extension for VS Code recommends the following extensions:
 * [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) - the Python language support
 * [R](https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r) - a basic support for the R language
 * [Ruby](https://marketplace.visualstudio.com/items?itemName=rebornix.Ruby) - the Ruby language support
 
-## Feedback
+### Feedback
 
 * [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
 * [File a bug](https://github.com/graalvm/vscode-extensions/issues/new?labels=bug)

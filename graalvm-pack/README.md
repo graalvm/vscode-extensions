@@ -25,7 +25,7 @@ The extension is Technology Preview.
 * [GraalVM Tools for Micronaut](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut) - an extension which adds support for the Micronaut framework in the VS Code development environment. The extension has been designed to cooperate with the GraalVM extension for a smooth Micronaut applications development, including debugging and building native images with GraalVM.
 * [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=asf.apache-netbeans-java) - an extension which uses the Apache NetBeans engine to deliver full support for Java 8 and higher in VS Code: code completion, hints, refactorings, go-to definition, Javadoc on hover, and full support for Maven and Gradle projects. The extension provides a Java 8+ debugger which is also capable of debugging polyglot calls to JavaScript, Python, Ruby or R when running on GraalVM.
 
-## Provide Feedback
+### Feedback
 
 * [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
 * [File a bug](https://github.com/graalvm/vscode-extensions/issues/new?labels=bug)
