@@ -3,7 +3,7 @@
 The [GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) is an extension for VS Code and provides basic support for editing and debugging programs running on [GraalVM](http://www.graalvm.org).
 The extension is Technology Preview.
 
-GraalVM Tools for Java extension provides a full-edge support for the Java language and, additionally, enables
+GraalVM Tools for Java extension provides a full-fledged support for the Java language and, additionally, enables
 a polyglot environment in VS Code, making it a comfortable and convenient integrated development environment to work with.
 Users can edit and debug applications written in the GraalVM supported languages (Java, JS, Ruby, R, and Python) without the need to install any other additional extensions.
 
