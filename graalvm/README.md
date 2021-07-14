@@ -224,8 +224,6 @@ Once a GraalVM installation is set as active, the Command Palette contains the f
 A special launch configuration **Launch VisualVM & Java 8+ Application** is provided by the GraalVM Tools for Java extension to start VisualVM along with the project.
 Follow these steps to start VisualVM automatically from within the VS Code:
 
-![VisualVM and VS Code Integration](images/vscode_visualvm.png)
-
 1. Create the _launch.json_ file. If not already created, create a new launch.json file from the Run and Debug activity using the create a launch.json file link. Select the Java 8+ environment when asked.
 
 2. Open the launch.json file and click the Add Configuration... button in the bottom right corner of the editor. Select the **GraalVM: Launch Java 8+ Application with VisualVM** configuration. Make sure to save the launch.json file after editing.
