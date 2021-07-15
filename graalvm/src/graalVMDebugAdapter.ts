@@ -14,7 +14,6 @@ import * as cp from 'child_process';
 import * as os from 'os';
 
 import { ILaunchRequestArguments, IAttachRequestArguments } from './graalVMDebugInterfaces';
-import { killProcess } from './utils';
 
 export class GraalVMDebugAdapter extends ChromeDebugAdapter {
     private static TIMEOUT = 5000;
@@ -102,7 +101,22 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
 
     private killChildProcess(): void {
         if (this._killChildProcess && this._childProcessId > 0 && !this._attachMode) {
-            killProcess(this._childProcessId);
+            if (process.platform === 'win32') {
+                try {
+                    cp.execSync(`${path.join(process.env['WINDIR'] || 'C:\\Windows', 'System32', 'taskkill.exe')} /f /t /pid ${this._childProcessId}`);
+                } catch (e) {}
+            } else {
+                const groupPID = -this._childProcessId;
+                try {
+                    process.kill(groupPID, 'SIGKILL');
+                } catch (e) {
+                    if (e.message === 'kill ESRCH') {
+                        try {
+                            process.kill(this._childProcessId, 'SIGKILL');
+                        } catch (e) {}
+                    }
+                }
+            }
             this._childProcessId = 0;
         }
     }

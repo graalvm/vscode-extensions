@@ -994,10 +994,10 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "webpack --mode production",
-		"compile": "webpack --mode development",
+		"compile": "tsc -p ./",
+		"webpack": "webpack --mode development",
 		"info": "webpack --display-modules",
 		"watch": "webpack --mode development --watch",
-		"test-compile": "tsc -p ./",
 		"lint": "tslint -p ./"
 	},
 	"dependencies": {
