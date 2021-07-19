@@ -303,8 +303,10 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
             } else {
                 appName = state.projectName;
             }
+            const version: string[] | null = state.javaVersion.label.match(/Java (\d+)/);
+            const javaVersion = version && version.length > 1 ? version[1] : '8'
             if (state.micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || state.micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
-                let query = '?javaVersion=JDK_8';
+                let query = `?javaVersion=JDK_${javaVersion}`;
                 query += `&lang=${state.language.value}`;
                 query += `&build=${state.buildTool.value}`;
                 query += `&test=${state.testFramework.value}`;
@@ -320,7 +322,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
                 };
             }
             let args = [state.applicationType.name];
-            args.push('--java-version=8');
+            args.push(`--java-version=${javaVersion}`);
             args.push(`--lang=${state.language.value}`);
             args.push(`--build=${state.buildTool.value}`);
             args.push(`--test=${state.testFramework.value}`);
