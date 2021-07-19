@@ -1,6 +1,8 @@
 # Change Log
 
 ## Version 0.5.9
+* Integration with VisualVM in GraalVM activity panel. Requires GraalVM 21.2.0 or newer
+* Support for running projects with Native Image Agent
 * Added dependency on "asf.apache-netbeans-java" extension
 * Renamed to "GraalVM Tools for Java"
 
