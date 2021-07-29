@@ -2,7 +2,7 @@
 	"name": "graalvm",
 	"displayName": "GraalVM Tools for Java",
 	"description": "Support for GraalVM",
-	"version": "0.5.9",
+	"version": "0.5.10",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
@@ -283,6 +283,11 @@
 				"title": "Configure",
 				"icon": "$(edit)",
 				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.debugKubernetes",
+				"title": "Debug (Attach to GraalVM)",
+				"category": "GraalVM"
 			}
 		],
 		"viewsContainers": {
@@ -412,6 +417,10 @@
 				},
 				{
 					"command": "extension.graalvm.configureSettingVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.debugKubernetes",
 					"when": "false"
 				}
 			],
@@ -583,6 +592,11 @@
 					"command": "extension.graalvm.configureSettingVisualVM",
 					"when": "view == visualvm-control-panel && viewItem == visualvm.configure",
 					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.debugKubernetes",
+					"group": "2@5",
+					"when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.pod/i"
 				}
 			]
 		},
@@ -1005,6 +1019,7 @@
 		"mustache": "4.0.1",
 		"sax": "^1.2.4",
 		"vscode-chrome-debug-core": "^6.8.8",
+		"vscode-kubernetes-tools-api": "^1.0.0",
 		"vscode-languageclient": "^5.2.1",
 		"xml2js": "^0.4.23"
 	},
