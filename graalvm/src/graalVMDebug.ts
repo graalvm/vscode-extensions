@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as fs from 'fs';
+import * as kubernetes from 'vscode-kubernetes-tools-api';
 import * as net from 'net';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
@@ -239,6 +240,131 @@ export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapter
 
 	dispose() {
 	}
+}
+
+export async function attachToKubernetes(target?: any): Promise<void> {
+    const explorer = await kubernetes.extension.clusterExplorer.v1;
+    if (!explorer.available) {
+        vscode.window.showErrorMessage(`Cluster Explorer not available: ${explorer.reason}.`);
+        return;
+    }
+    const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
+    if (!kubectl.available) {
+        vscode.window.showErrorMessage(`kubectl not available: ${kubectl.reason}.`);
+        return;
+    }
+    const node = explorer.api.resolveCommandTarget(target);
+    if (node && node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Pod') {
+		const namespace = node.namespace ? node.namespace : undefined;
+        const port = await getDebugPort(kubectl.api, node.name, namespace);
+        if (!port) {
+            utils.askYesNo(`Debug port not opened in selected pod. Restart pod with debug port opened?`, async () => {
+				let info: any = {name: node.name, kind: 'Pod'};
+				while (info && info.kind !== 'Deployment') {
+					info = await getOwner(kubectl.api, info.name, info.kind);
+				}
+				if (info) {
+					const success = await redeployWithDebugPortOpened(kubectl.api, info.name);
+					if (success) {
+						vscode.window.showInformationMessage(`Restarted. Refresh cluster explorer and invoke debug action again.`);
+						return;
+					}
+				}
+				vscode.window.showInformationMessage(`Cannot restart pod automatically. Try to restart the pod manually.`);
+			});
+            return;
+        }
+        const forward = await kubectl.api.portForward(node.name, namespace, port, port);
+        if (forward) {
+            const workspaceFolder = await selectWorkspaceFolder();
+            const debugConfig : vscode.DebugConfiguration = {
+                type: "java8+",
+                name: "Attach to Kubernetes",
+                request: "attach",
+                hostName: "localhost",
+                port: port.toString()
+            };
+            const ret = await vscode.debug.startDebugging(workspaceFolder, debugConfig);
+            if (ret) {
+                const listener = vscode.debug.onDidTerminateDebugSession(() => {
+                    listener.dispose();
+                    forward.dispose();
+                });
+            } else {
+                forward.dispose();
+            }
+        }
+		return;
+    }
+    vscode.window.showErrorMessage(`This command is available only on Kubernetes Node or Pod resources.`);
+}
+
+async function selectWorkspaceFolder(): Promise<vscode.WorkspaceFolder | undefined> {
+    if (!vscode.workspace.workspaceFolders) {
+        vscode.window.showErrorMessage('No open folder found.');
+        return undefined;
+    } else if (vscode.workspace.workspaceFolders.length === 1) {
+        return vscode.workspace.workspaceFolders[0];
+    }
+    return await vscode.window.showWorkspaceFolderPick();
+}
+
+async function getDebugPort(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<number | undefined> {
+    const envs = await getEnv(kubectl, podName, podNamespace);
+    if (envs) {
+        for (const env of envs) {
+            const matches = env.match(/^JAVA_TOOL_OPTIONS=(-agentlib|-Xrunjdwp):\S*(address=[^\s,]+)\S*/i);
+            if (matches && matches.length > 0) {
+                const addresses = matches[2].split("=")[1].split(":");
+                return Number(addresses[addresses.length - 1]);
+            }
+        }
+    }
+    return undefined;
+}
+
+async function getEnv(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<string[] | undefined> {
+    const namespaceArg = podNamespace ? `--namespace ${podNamespace}` : '';
+    const command = `exec ${podName} ${namespaceArg} -- env`;
+    const result: kubernetes.KubectlV1.ShellResult | undefined = await kubectl.invokeCommand(command);
+    if (result && result.code === 0) {
+        return result.stdout.split('\n');
+    }
+    return undefined;
+}
+
+async function getOwner(kubectl: kubernetes.KubectlV1, name: string, kind: string): Promise<any> {
+	let kindArg: string;
+	switch (kind) {
+		case 'Pod':
+			kindArg = 'po';
+			break;
+		case 'ReplicaSet':
+			kindArg = 'rs';
+			break;
+		default:
+			return undefined;
+	}
+	const command = `get ${kindArg}/${name} -o json`;
+	const result: kubernetes.KubectlV1.ShellResult | undefined = await kubectl.invokeCommand(command);
+	if (result && result.code === 0) {
+		const owners = JSON.parse(result.stdout)?.metadata?.ownerReferences;
+		if (owners && owners.length > 0) {
+			return owners[0];
+		}
+	}
+	return undefined;
+}
+
+async function redeployWithDebugPortOpened(kubectl: kubernetes.KubectlV1, appName?: string): Promise<boolean | undefined> {
+	let command = `set env deployment/${appName} JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005`;
+	let result: kubernetes.KubectlV1.ShellResult | undefined = await kubectl.invokeCommand(command);
+	if (result && result.code === 0) {
+		command = `rollout restart deployment ${appName}`;
+		result = await kubectl.invokeCommand(command);
+		return result && result.code === 0;
+	}
+	return false;
 }
 
 function updatePath(path: string | undefined, graalVMBin: string): string {

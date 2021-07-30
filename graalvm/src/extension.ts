@@ -7,7 +7,7 @@
 
 import * as vscode from 'vscode';
 import { toggleCodeCoverage, activeTextEditorChaged } from './graalVMCoverage';
-import { GraalVMConfigurationProvider, GraalVMDebugAdapterDescriptorFactory, GraalVMDebugAdapterTracker } from './graalVMDebug';
+import { GraalVMConfigurationProvider, GraalVMDebugAdapterDescriptorFactory, GraalVMDebugAdapterTracker, attachToKubernetes } from './graalVMDebug';
 import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMComponent, uninstallGraalVMComponent, selectActiveGraalVM, findGraalVMs, InstallationNodeProvider, Component, Installation, removeGraalVMInstallation } from './graalVMInstall';
 import { onClientNotification, startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
@@ -142,6 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.configureSettingVisualVM', (...params: any[]) => {
 		visualvm.configureSettingVisualVM(context, params);
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', attachToKubernetes));
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
 
 	const nodeProvider = new InstallationNodeProvider();
