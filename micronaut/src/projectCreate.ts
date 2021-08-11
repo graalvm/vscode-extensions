@@ -144,7 +144,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	}
 
     const title = 'Create Micronaut Project';
-    const totalSteps = graalVMs.length > 0 ? 9 : 8;
+    const totalSteps = 9;
 
 	async function pickMicronautVersion(input: MultiStepInput, state: Partial<State>) {
         const selected: any = await input.showQuickPick({
@@ -171,7 +171,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 			shouldResume: () => Promise.resolve(false)
         });
         state.applicationType = selected;
-		return (input: MultiStepInput) => graalVMs.length > 0 ? pickJavaVersion(input, state) : projectName(input, state);
+		return (input: MultiStepInput) => pickJavaVersion(input, state);
 	}
 
 	async function pickJavaVersion(input: MultiStepInput, state: Partial<State>) {
@@ -181,7 +181,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 			title,
 			step: 3,
 			totalSteps,
-			placeholder: 'Pick project Java',
+			placeholder: graalVMs.length > 0 ? 'Pick project Java' : 'Pick project Java (no GraalVM registered)',
 			items,
 			activeItems: state.javaVersion,
 			shouldResume: () => Promise.resolve(false)
@@ -193,7 +193,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function projectName(input: MultiStepInput, state: Partial<State>) {
 		state.projectName = await input.showInputBox({
 			title,
-			step: graalVMs.length > 0 ? 4 : 3,
+			step: 4,
 			totalSteps,
 			value: state.projectName || 'demo',
 			prompt: 'Provide project name',
@@ -206,7 +206,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function basePackage(input: MultiStepInput, state: Partial<State>) {
 		state.basePackage = await input.showInputBox({
 			title,
-			step: graalVMs.length > 0 ? 5 : 4,
+			step: 5,
 			totalSteps,
 			value: state.basePackage || 'com.example',
 			prompt: 'Provide base package',
@@ -219,7 +219,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickLanguage(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 6 : 5,
+			step: 6,
 			totalSteps,
             placeholder: 'Pick project language',
             items: getLanguages(),
@@ -233,7 +233,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickFeatures(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 7 : 6,
+			step: 7,
 			totalSteps,
             placeholder: 'Pick project features',
             items: state.micronautVersion && state.applicationType ? await getFeatures(state.micronautVersion, state.applicationType) : [],
@@ -248,7 +248,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickBuildTool(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 8 : 7,
+			step: 8,
 			totalSteps,
             placeholder: 'Pick build tool',
             items: getBuildTools(),
@@ -262,7 +262,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickTestFramework(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 9 : 8,
+			step: 9,
 			totalSteps,
             placeholder: 'Pick test framework',
             items: getTestFrameworks(),
@@ -303,8 +303,12 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
             } else {
                 appName = state.projectName;
             }
-            const version: string[] | null = state.javaVersion.label.match(/Java (\d+)/);
-            const javaVersion = version && version.length > 1 ? version[1] : '8'
+            const version: string[] | null = state.javaVersion ? state.javaVersion.label.match(/Java (\d+)/) : null;
+            const javaVersionDefined = version && version.length > 1;
+            const javaVersion = version && javaVersionDefined ? version[1] : '8'
+            if (!javaVersionDefined) {
+                vscode.window.showInformationMessage("Java version not selected. The project will target Java 8. Adjust the setting in the generated project file(s).");
+            }
             if (state.micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || state.micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
                 let query = `?javaVersion=JDK_${javaVersion}`;
                 query += `&lang=${state.language.value}`;
