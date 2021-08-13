@@ -144,13 +144,21 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	}
 
     const title = 'Create Micronaut Project';
-    const totalSteps = graalVMs.length > 0 ? 9 : 8;
+
+    /**
+     * Compute total steps based on state/selections made.
+     * @param state current state
+     * @returns total steps
+     */
+    function totalSteps(_ : Partial<State>) : number {
+        return 9;
+    }
 
 	async function pickMicronautVersion(input: MultiStepInput, state: Partial<State>) {
         const selected: any = await input.showQuickPick({
 			title,
 			step: 1,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			placeholder: 'Pick Micronaut version',
 			items: await getMicronautVersions(),
 			activeItems: state.micronautVersion,
@@ -164,14 +172,14 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 2,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			placeholder: 'Pick application type',
 			items: state.micronautVersion ? await getApplicationTypes(state.micronautVersion) : [],
 			activeItems: state.applicationType,
 			shouldResume: () => Promise.resolve(false)
         });
         state.applicationType = selected;
-		return (input: MultiStepInput) => graalVMs.length > 0 ? pickJavaVersion(input, state) : projectName(input, state);
+		return (input: MultiStepInput) => pickJavaVersion(input, state);
 	}
 
 	async function pickJavaVersion(input: MultiStepInput, state: Partial<State>) {
@@ -180,8 +188,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 3,
-			totalSteps,
-			placeholder: 'Pick project Java',
+			totalSteps: totalSteps(state),
+			placeholder: graalVMs.length > 0 ? 'Pick project Java' : 'Pick project Java (no GraalVM registered)',
 			items,
 			activeItems: state.javaVersion,
 			shouldResume: () => Promise.resolve(false)
@@ -193,8 +201,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function projectName(input: MultiStepInput, state: Partial<State>) {
 		state.projectName = await input.showInputBox({
 			title,
-			step: graalVMs.length > 0 ? 4 : 3,
-			totalSteps,
+			step: 4,
+			totalSteps: totalSteps(state),
 			value: state.projectName || 'demo',
 			prompt: 'Provide project name',
 			validate: () => Promise.resolve(undefined),
@@ -206,8 +214,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function basePackage(input: MultiStepInput, state: Partial<State>) {
 		state.basePackage = await input.showInputBox({
 			title,
-			step: graalVMs.length > 0 ? 5 : 4,
-			totalSteps,
+			step: 5,
+			totalSteps: totalSteps(state),
 			value: state.basePackage || 'com.example',
 			prompt: 'Provide base package',
 			validate: () => Promise.resolve(undefined),
@@ -219,8 +227,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickLanguage(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 6 : 5,
-			totalSteps,
+			step: 6,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick project language',
             items: getLanguages(),
             activeItems: state.language,
@@ -233,8 +241,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickFeatures(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 7 : 6,
-			totalSteps,
+			step: 7,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick project features',
             items: state.micronautVersion && state.applicationType ? await getFeatures(state.micronautVersion, state.applicationType) : [],
             activeItems: state.features,
@@ -248,8 +256,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickBuildTool(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 8 : 7,
-			totalSteps,
+			step: 8,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick build tool',
             items: getBuildTools(),
             activeItems: state.buildTool,
@@ -262,8 +270,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	async function pickTestFramework(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: graalVMs.length > 0 ? 9 : 8,
-			totalSteps,
+			step: 9,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick test framework',
             items: getTestFrameworks(),
             activeItems: state.testFramework,
@@ -303,8 +311,12 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
             } else {
                 appName = state.projectName;
             }
-            const version: string[] | null = state.javaVersion.label.match(/Java (\d+)/);
-            const javaVersion = version && version.length > 1 ? version[1] : '8'
+            const version: string[] | null = state.javaVersion ? state.javaVersion.label.match(/Java (\d+)/) : null;
+            const javaVersionDefined = version && version.length > 1;
+            const javaVersion = version && javaVersionDefined ? version[1] : '8'
+            if (!javaVersionDefined) {
+                vscode.window.showInformationMessage("Java version not selected. The project will target Java 8. Adjust the setting in the generated project file(s).");
+            }
             if (state.micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || state.micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
                 let query = `?javaVersion=JDK_${javaVersion}`;
                 query += `&lang=${state.language.value}`;
