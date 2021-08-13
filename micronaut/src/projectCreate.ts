@@ -144,13 +144,21 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	}
 
     const title = 'Create Micronaut Project';
-    const totalSteps = 9;
+
+    /**
+     * Compute total steps based on state/selections made.
+     * @param state current state
+     * @returns total steps
+     */
+    function totalSteps(_ : Partial<State>) : number {
+        return 9;
+    }
 
 	async function pickMicronautVersion(input: MultiStepInput, state: Partial<State>) {
         const selected: any = await input.showQuickPick({
 			title,
 			step: 1,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			placeholder: 'Pick Micronaut version',
 			items: await getMicronautVersions(),
 			activeItems: state.micronautVersion,
@@ -164,7 +172,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 2,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			placeholder: 'Pick application type',
 			items: state.micronautVersion ? await getApplicationTypes(state.micronautVersion) : [],
 			activeItems: state.applicationType,
@@ -180,7 +188,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 3,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			placeholder: graalVMs.length > 0 ? 'Pick project Java' : 'Pick project Java (no GraalVM registered)',
 			items,
 			activeItems: state.javaVersion,
@@ -194,7 +202,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		state.projectName = await input.showInputBox({
 			title,
 			step: 4,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			value: state.projectName || 'demo',
 			prompt: 'Provide project name',
 			validate: () => Promise.resolve(undefined),
@@ -207,7 +215,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		state.basePackage = await input.showInputBox({
 			title,
 			step: 5,
-			totalSteps,
+			totalSteps: totalSteps(state),
 			value: state.basePackage || 'com.example',
 			prompt: 'Provide base package',
 			validate: () => Promise.resolve(undefined),
@@ -220,7 +228,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 6,
-			totalSteps,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick project language',
             items: getLanguages(),
             activeItems: state.language,
@@ -234,7 +242,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 7,
-			totalSteps,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick project features',
             items: state.micronautVersion && state.applicationType ? await getFeatures(state.micronautVersion, state.applicationType) : [],
             activeItems: state.features,
@@ -249,7 +257,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 8,
-			totalSteps,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick build tool',
             items: getBuildTools(),
             activeItems: state.buildTool,
@@ -263,7 +271,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 9,
-			totalSteps,
+			totalSteps: totalSteps(state),
             placeholder: 'Pick test framework',
             items: getTestFrameworks(),
             activeItems: state.testFramework,
