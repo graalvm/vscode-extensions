@@ -31,6 +31,7 @@ const LAST_GRAALVM_PARENTDIR: string = 'lastGraalVMInstallationParentDir';
 const INSTALL_GRAALVM: string = 'Install GraalVM';
 const SELECT_EXISTING_GRAALVM: string = 'Select Existing GraalVM';
 const SELECT_ACTIVE_GRAALVM: string = 'Set Active GraalVM';
+const NO_GU_FOUND: string = 'Cannot find runtime \'gu\' within your GraalVM installation.';
 
 const lockedComponentIds: string[] = [];
 
@@ -731,7 +732,7 @@ async function getGU(graalVMHome?: string): Promise<string> {
     if (executablePath) {
         return makeGUProxy(executablePath, getConf('http').get('proxy'));
     }
-    throw new Error("Cannot find runtime 'gu' within your GraalVM installation.");
+    throw new Error(NO_GU_FOUND);
 }
 
 function makeGUProxy(executable:string, proxy?: string): string {
@@ -940,9 +941,6 @@ function addPathToJava(folder: string, paths: string[], comparator = utils.isSam
         return;
     }
     folder = normalize(join(dirname(fs.realpathSync(executable)), '..'));
-    if (!utils.findExecutable('gu', folder)) {
-        return;
-    }
     if (!paths.find(comparator(folder))) {
         paths.push(folder);
     }
@@ -1113,7 +1111,11 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
                         ret.push(new Component(element, comp.detail, comp.label, comp.installed)));
                     ret.push(new ConnectionError('Could not resolve components', out?.error?.message));
                 } else {
-                    ret.push(new GUError('Component resolution failed', out?.message));
+                    if (out?.message === NO_GU_FOUND && process.platform === 'linux') {
+                        ret.push(new NoGU('Components managed by package manager', 'Use the package manager used to install this GraalVM instance to manage its components.'));
+                    } else {
+                        ret.push(new GUError('Component resolution failed', out?.message));
+                    }
                 }
                 return ret;
             });
@@ -1197,4 +1199,17 @@ class GUError extends vscode.TreeItem {
     
     iconPath = new vscode.ThemeIcon("error");
     contextValue = 'graalvmGUError';
+}
+
+class NoGU extends vscode.TreeItem {
+
+    constructor(
+        public readonly label: string,
+        public readonly tooltip?: string,
+	) {
+        super(label);
+    }
+    
+    iconPath = new vscode.ThemeIcon("extensions");
+    contextValue = 'graalVMNoGU';
 }
