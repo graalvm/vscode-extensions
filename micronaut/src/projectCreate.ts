@@ -57,7 +57,7 @@ export async function createProject(context: vscode.ExtensionContext) {
         if (options.url.startsWith(HTTP_PROTOCOL) || options.url.startsWith(HTTPS_PROTOCOL)) {
             try {
                 const downloadedFile = await downloadProject(options);
-                const files = await decompress(downloadedFile, options.target);
+                const files = await decompress(downloadedFile, options.target, { strip: 1 });
                 fs.unlinkSync(downloadedFile);
                 created = files.length > 0;
             } catch (e) {
