@@ -19,6 +19,7 @@ const HTTPS_PROTOCOL: string = 'https://';
 const MICRONAUT_LAUNCH_URL: string = 'https://launch.micronaut.io';
 const MICRONAUT_SNAPSHOT_URL: string = 'https://snapshot.micronaut.io';
 const APPLICATION_TYPES: string = '/application-types';
+const SELECT_OPTIONS: string = '/select-options';
 const FEATURES: string = '/features';
 const VERSIONS: string = '/versions';
 const CREATE: string = '/create';
@@ -128,7 +129,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
     interface State {
 		micronautVersion: {label: string, serviceUrl: string};
 		applicationType: {label: string, name: string};
-        javaVersion: {label: string, value: string};
+        javaVersion: {label: string, value: string, target: string};
         projectName: string;
         basePackage: string;
         language: {label: string, value: string};
@@ -194,7 +195,18 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 			activeItems: state.javaVersion,
 			shouldResume: () => Promise.resolve(false)
         });
-        state.javaVersion = selected;
+        const version: string[] | null = selected ? selected.label.match(/Java (\d+)/) : null;
+        const resolvedVersion = version && version.length > 1 ? version[1] : undefined;
+        const supportedVersions = state.micronautVersion ? await getJavaVersions(state.micronautVersion) : [];
+        const javaVersion = normalizeJavaVersion(resolvedVersion, supportedVersions);
+        state.javaVersion = {
+            label: selected.label,
+            value: selected.value,
+            target: javaVersion
+        }
+        if (!resolvedVersion) {
+            vscode.window.showInformationMessage('Java version not selected. The project will target Java 8. Adjust the setting in the generated project file(s).');
+        }
 		return (input: MultiStepInput) => projectName(input, state);
 	}
 
@@ -244,7 +256,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 			step: 7,
 			totalSteps: totalSteps(state),
             placeholder: 'Pick project features',
-            items: state.micronautVersion && state.applicationType ? await getFeatures(state.micronautVersion, state.applicationType) : [],
+            items: state.micronautVersion && state.applicationType && state.javaVersion ? await getFeatures(state.micronautVersion, state.applicationType, state.javaVersion) : [],
             activeItems: state.features,
             canSelectMany: true,
 			shouldResume: () => Promise.resolve(false)
@@ -311,14 +323,8 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
             } else {
                 appName = state.projectName;
             }
-            const version: string[] | null = state.javaVersion ? state.javaVersion.label.match(/Java (\d+)/) : null;
-            const javaVersionDefined = version && version.length > 1;
-            const javaVersion = version && javaVersionDefined ? version[1] : '8'
-            if (!javaVersionDefined) {
-                vscode.window.showInformationMessage("Java version not selected. The project will target Java 8. Adjust the setting in the generated project file(s).");
-            }
             if (state.micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || state.micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
-                let query = `?javaVersion=JDK_${javaVersion}`;
+                let query = `?javaVersion=JDK_${state.javaVersion.target}`;
                 query += `&lang=${state.language.value}`;
                 query += `&build=${state.buildTool.value}`;
                 query += `&test=${state.testFramework.value}`;
@@ -334,7 +340,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
                 };
             }
             let args = [state.applicationType.name];
-            args.push(`--java-version=${javaVersion}`);
+            args.push(`--java-version=${state.javaVersion.target}`);
             args.push(`--lang=${state.language.value}`);
             args.push(`--build=${state.buildTool.value}`);
             args.push(`--test=${state.testFramework.value}`);
@@ -386,6 +392,32 @@ async function getApplicationTypes(micronautVersion: {label: string, serviceUrl:
     return getMNApplicationTypes(micronautVersion.serviceUrl);
 }
 
+async function getJavaVersions(micronautVersion: {label: string, serviceUrl: string}): Promise<string[]> {
+    if (micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
+        return get(micronautVersion.serviceUrl + SELECT_OPTIONS).then(data => {
+            return JSON.parse(data).jdkVersion.options.map((version: any) => (version.label));
+        });
+    }
+    return []; // Listing supported Java versions not available using CLI
+}
+
+function normalizeJavaVersion(version: string | undefined, supportedVersions: string[]): string {
+    if (!version) {
+        return '8';
+    }
+    if (!supportedVersions || supportedVersions.length == 0) {
+        return version;
+    }
+    let versionN = parseInt(version);
+    for (let supportedVersion of supportedVersions.reverse()) {
+        const supportedN = parseInt(supportedVersion);
+        if (versionN >= supportedN) {
+            return supportedVersion;
+        }
+    }
+    return '8';
+}
+
 function getLanguages(): {label: string, value: string}[] {
     return [
         { label: 'Java', value: 'JAVA'},
@@ -409,13 +441,36 @@ function getTestFrameworks() {
     ];
 }
 
-async function getFeatures(micronautVersion: {label: string, serviceUrl: string}, applicationType: {label: string, name: string}): Promise<{label: string, detail?: string, name: string}[]> {
+async function getFeatures(micronautVersion: {label: string, serviceUrl: string}, applicationType: {label: string, name: string}, javaVersion: {target: string}): Promise<{label: string, detail?: string, name: string}[]> {
     if (micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
         return get(micronautVersion.serviceUrl + APPLICATION_TYPES + '/' + applicationType.name + FEATURES).then(data => {
             return JSON.parse(data).features.map((feature: any) => ({label: `${feature.category}: ${feature.title}`, detail: feature.description, name: feature.name})).sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
         });
     }
-    return getMNFeatures(micronautVersion.serviceUrl, applicationType.name).sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
+    try {
+        // will throw an error if javaVersion.target is not supported by the CLI
+        const features: {label: string, detail?: string, name: string}[] = getMNFeatures(micronautVersion.serviceUrl, applicationType.name, javaVersion.target);
+        return features.sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
+    } catch (e) {
+        let msg = e.message.toString();
+        const err = `Unsupported JDK version: ${javaVersion.target}. Supported values are `;
+        const idx = msg.indexOf(err);
+        if (idx != 0) {
+            // javaVersion.target not supported by the CLI
+            // list of the supported versions is part of the error message
+            const supportedVersions = msg.substring(idx + err.length + 1, msg.length - 3).split(', ');
+            const supportedVersion = normalizeJavaVersion(javaVersion.target, supportedVersions);
+            try {
+                const features: {label: string, detail?: string, name: string}[] = getMNFeatures(micronautVersion.serviceUrl, applicationType.name, supportedVersion);
+                javaVersion.target = supportedVersion; // update the target platform
+                return features.sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
+            } catch (e) {
+                msg = e.message.toString();
+            }
+        }
+        vscode.window.showErrorMessage(`Cannot get Micronaut features: ${msg}`);
+        return [];
+    }
 }
 
 async function get(url: string): Promise<string> {
@@ -472,32 +527,28 @@ function getMNApplicationTypes(mnPath: string): {label: string, name: string}[] 
     return types;
 }
 
-function getMNFeatures(mnPath: string, applicationType: string): {label: string, detail?: string, name: string}[] {
+function getMNFeatures(mnPath: string, applicationType: string, javaVersion: string): {label: string, detail?: string, name: string}[] {
     const features: {label: string, detail?: string, name: string}[] = [];
-    try {
-        let header: boolean = true;
-        let category: string | undefined;
-        cp.execFileSync(mnPath, [applicationType, '--list-features'], { env: { JAVA_HOME: getJavaHome() } }).toString().split('\n').map(line => line.trim()).forEach(line => {
-            if (header) {
-                if (line.startsWith('------')) {
-                    header = false;
+    let header: boolean = true;
+    let category: string | undefined;
+    cp.execFileSync(mnPath, [applicationType, '--list-features', `--java-version=${javaVersion}`]).toString().split('\n').map(line => line.trim()).forEach(line => {
+        if (header) {
+            if (line.startsWith('------')) {
+                header = false;
+            }
+        } else {
+            if (line.length === 0) {
+                category = undefined;
+            } else if (category) {
+                const info: string[] | null = line.match(/(\S*)\s*(\[PREVIEW\]|\(\*\))?\s*(.*)/);
+                if (info && info.length >= 4) {
+                    features.push({ label: `${category}: ${info[1]}`, detail: info[3], name: info[1] });
                 }
             } else {
-                if (line.length === 0) {
-                    category = undefined;
-                } else if (category) {
-                    const info: string[] | null = line.match(/(\S*)\s*(\[PREVIEW\]|\(\*\))?\s*(.*)/);
-                    if (info && info.length >= 4) {
-                        features.push({ label: `${category}: ${info[1]}`, detail: info[3], name: info[1] });
-                    }
-                } else {
-                    category = line;
-                }
+                category = line;
             }
-        });
-    } catch (e) {
-        vscode.window.showErrorMessage(`Cannot get Micronaut features: ${e}`);
-    }
+        }
+    });
     return features;
 }
 
