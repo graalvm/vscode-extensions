@@ -1,4 +1,8 @@
 # Change Log
+# Version 0.5.11
+* Added remote K8s debugger
+* Support GraalVM installations without GU, e.g. yum managed
+* Other improvements in GraalVM installations handling
 
 ## Version 0.5.9
 * Integration with VisualVM in GraalVM activity panel. Requires GraalVM 21.2.0 or newer

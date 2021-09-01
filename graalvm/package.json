@@ -1,8 +1,8 @@
 {
 	"name": "graalvm",
 	"displayName": "GraalVM Tools for Java",
-	"description": "Support for GraalVM",
-	"version": "0.5.10",
+	"description": "Support for Java, JavaScript, Python, Ruby and R on GraalVM, native image and more...",
+	"version": "0.5.11",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
@@ -26,6 +26,13 @@
 		"Debuggers",
 		"Snippets",
 		"Other"
+	],
+	"keywords": [
+		"java",
+		"polyglot",
+		"graalvm",
+		"truffle",
+		"native image"
 	],
 	"activationEvents": [
 		"*"
