@@ -657,7 +657,7 @@ function computeProcName(): string {
         else return `Java process (pid ${PID.toString()})`;
     }
 
-    if (!ID) return '<not selected>';
+    if (!ID) return '<not selected, select...>';
 
     if (awaitingProgress == 1) return `${processName} (pid pending).`;
     if (awaitingProgress == 2) return `${processName} (pid pending)..`;
