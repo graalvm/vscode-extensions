@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 0.5.7
+* Project can be created even if no Java is present on the system
+* Extra directory from Micronaut wizard fixed for project creation
+
 ## Version 0.5.6
 * Renamed to "GraalVM Tools for Micronaut"
 

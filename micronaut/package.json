@@ -2,7 +2,7 @@
 	"name": "micronaut",
 	"displayName": "GraalVM Tools for Micronaut",
 	"description": "Micronaut support for VS Code",
-	"version": "0.5.6",
+	"version": "0.5.7",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
@@ -28,6 +28,11 @@
 	"categories": [
 		"Programming Languages",
 		"Other"
+	],
+	"keywords": [
+		"native image",
+		"microservices",
+		"java"
 	],
 	"activationEvents": [
 		"onCommand:extension.micronaut.showWelcomePage",
