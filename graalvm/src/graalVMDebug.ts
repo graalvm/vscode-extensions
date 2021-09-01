@@ -286,6 +286,7 @@ export async function attachToKubernetes(target?: any): Promise<void> {
             };
             const ret = await vscode.debug.startDebugging(workspaceFolder, debugConfig);
             if (ret) {
+				printAppUrl(kubectl.api, node.name, namespace);
                 const listener = vscode.debug.onDidTerminateDebugSession(() => {
                     listener.dispose();
                     forward.dispose();
@@ -297,6 +298,33 @@ export async function attachToKubernetes(target?: any): Promise<void> {
 		return;
     }
     vscode.window.showErrorMessage(`This command is available only on Kubernetes Node or Pod resources.`);
+}
+
+async function printAppUrl(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<void> {
+	const namespaceArg = podNamespace ? `--namespace ${podNamespace}` : '';
+	let url = [""]
+	let command = `get nodes -o jsonpath='{ $.items[*].status.addresses[?(@.type=="InternalIP")].address }'`;
+	let result: kubernetes.KubectlV1.ShellResult | undefined = await kubectl.invokeCommand(command);
+	if (result && result.code === 0) {
+		url.push(result.stdout)
+	} else {
+		return;
+	}
+	command = `get pod ${podName} ${namespaceArg} -o jsonpath='{.metadata.labels.app}'`;
+	result = await kubectl.invokeCommand(command);
+	var appLabel;
+	if (result && result.code === 0) {
+		appLabel = result.stdout;
+	} else {
+		return;
+	}
+	command = `get -o jsonpath='{..spec.ports[0].nodePort}' services --selector=app=${appLabel}`;
+	result = await kubectl.invokeCommand(command);
+	if (result && result.code === 0) {
+		url.push(':');
+		url.push(result.stdout);
+		vscode.debug.activeDebugConsole.appendLine(`Application is listening at http://${url.join("")} with debugger enabled`);
+	} 
 }
 
 async function selectWorkspaceFolder(): Promise<vscode.WorkspaceFolder | undefined> {
