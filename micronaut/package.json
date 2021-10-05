@@ -87,6 +87,26 @@
 				"command": "extension.micronaut.buildNativeImage",
 				"title": "Build Native Image",
 				"category": "Micronaut"
+			},
+			{
+				"command": "extension.micronaut.kubernetes.createDeploy",
+				"title": "Create Kubernetes Deployment Resource",
+				"category": "Micronaut"
+			},
+			{
+				"command": "extension.micronaut.kubernetes.deploy",
+				"title": "Deploy to Kubernetes",
+				"category": "Micronaut"
+			},
+			{
+				"command": "extension.micronaut.kubernetes.createService",
+				"title": "Create Kubernetes Service Resource",
+				"category": "Micronaut"
+			},
+			{
+				"command": "extension.micronaut.kubernetes.run",
+				"title": "Run in Kubernetes",
+				"category": "Micronaut"
 			}
 		],
 		"menus": {
@@ -116,6 +136,7 @@
 	},
 	"dependencies": {
 		"decompress": "4.2.1",
+		"vscode-kubernetes-tools-api": "^1.0.0",
 		"mustache": "4.0.1"
 	},
 	"devDependencies": {

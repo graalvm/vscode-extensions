@@ -10,6 +10,9 @@ import { micronautProjectExists, getJavaHome } from "./utils";
 import { WelcomePanel } from './welcome';
 import { creatorInit, createProject } from './projectCreate';
 import { builderInit, build } from './projectBuild';
+import { createDeployment } from './kubernetes/kubernetesDeployment';
+import { deployProject } from './kubernetes/kubernetesDeploy';
+import { runProject, createService } from './kubernetes/kubernetesRun';
 
 export function activate(context: vscode.ExtensionContext) {
 	if (vscode.workspace.getConfiguration().get<boolean>('micronaut.showWelcomePage')) {
@@ -29,6 +32,18 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.buildNativeImage', () => {
 		vscode.commands.executeCommand('extension.micronaut.build', 'nativeImage');
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.createDeploy', () => {
+		createDeployment(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.deploy', () => {
+		deployProject();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.createService', () => {
+		createService(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.run', () => {
+		runProject();
 	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 		if (e.affectsConfiguration('micronaut.home')) {
