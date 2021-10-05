@@ -89,22 +89,22 @@
 				"category": "Micronaut"
 			},
 			{
-				"command": "extension.micronaut.createDeploy",
+				"command": "extension.micronaut.kubernetes.createDeploy",
 				"title": "Create Kubernetes Deployment Resource",
 				"category": "Micronaut"
 			},
 			{
-				"command": "extension.micronaut.deployToKubernetes",
+				"command": "extension.micronaut.kubernetes.deploy",
 				"title": "Deploy to Kubernetes",
 				"category": "Micronaut"
 			},
 			{
-				"command": "extension.micronaut.createServiceResource",
+				"command": "extension.micronaut.kubernetes.createService",
 				"title": "Create Kubernetes Service Resource",
 				"category": "Micronaut"
 			},
 			{
-				"command": "extension.micronaut.runInKubernetes",
+				"command": "extension.micronaut.kubernetes.run",
 				"title": "Run in Kubernetes",
 				"category": "Micronaut"
 			}

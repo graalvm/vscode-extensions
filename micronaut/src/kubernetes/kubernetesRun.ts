@@ -7,7 +7,7 @@
 
 import * as vscode from 'vscode';
 import * as kubernetes from 'vscode-kubernetes-tools-api';
-import { askToExecCommand, createWrapper, findResourceFileByKind } from "./kubernetesUtil";
+import { askToExecCommand, createWrapper, findResourceFileByKind, createContent, createNewFile } from "./kubernetesUtil";
 import { deploy } from "./kubernetesDeploy";
 import { kubernetesChannel } from './kubernetesChannel';
 import * as readline from 'readline'; 
@@ -95,4 +95,31 @@ async function run(name: string, resourceFile: string) {
         kubernetesChannel.appendLine(`You can access ${pods[0]} on http://localhost:${port}`);
     }
         
+}
+
+export async function createService(context: vscode.ExtensionContext) {
+    const title = 'Create Kubernetes Service File';
+
+    let wrapper =  await createWrapper();
+
+    let projectInfo  = await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification, 
+        title,
+        cancellable: true},
+        async progress => {
+          progress.report({ message: 'Retrieving project info' });
+          return await wrapper.getProjectInfo();
+        }
+    );
+    const deployment = await findResourceFileByKind('Deployment');
+    if (!deployment) {
+        askToExecCommand(
+            'extension.micronaut.createDeploy',
+            'Deployment file is not present. Would you like to create it?');
+        return;
+    }
+
+    let text = createContent(context.extensionPath, 'service.yaml', projectInfo.name);
+    createNewFile(projectInfo.root, "service", "yaml", text);
+    
 }
