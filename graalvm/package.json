@@ -293,7 +293,7 @@
 			},
 			{
 				"command": "extension.graalvm.debugKubernetes",
-				"title": "Debug (Attach to GraalVM)",
+				"title": "Debug (Attach using Java 8+)",
 				"category": "GraalVM"
 			}
 		],
