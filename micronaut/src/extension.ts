@@ -43,7 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
 		createService(context);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.run', () => {
-		runProject();
+		runProject(false);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.debug', () => {
+		runProject(true);
 	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 		if (e.affectsConfiguration('micronaut.home')) {

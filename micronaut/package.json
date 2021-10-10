@@ -107,6 +107,11 @@
 				"command": "extension.micronaut.kubernetes.run",
 				"title": "Run in Kubernetes",
 				"category": "Micronaut"
+			},
+			{
+				"command": "extension.micronaut.kubernetes.debug",
+				"title": "Debug in Kubernetes",
+				"category": "Micronaut"
 			}
 		],
 		"menus": {
