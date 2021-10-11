@@ -14,19 +14,28 @@ import { MultiStepInput } from "../utils";
 const LOCAL = "<local>";
 
 export async function createDeployment(context: vscode.ExtensionContext) {
+    const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
+    if (!kubectl.available) {
+        vscode.window.showErrorMessage(`kubectl not available: ${kubectl.reason}.`);
+        return;;
+    }
     const title = 'Create Kubernetes Deployment File';
 
     let wrapper =  await createWrapper();
 
-    let secretsPromise = getSecrets();
+    let secretsPromise = getSecrets(kubectl.api);
+    let namespacesPromise = getNamespaces(kubectl.api);
 
-    let [projectInfo, secrets]  = await vscode.window.withProgress({
+    let [projectInfo, secrets, namespaces]  = await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification, title, cancellable: true},
         async progress => {
           progress.report({ message: 'Retrieving project info' });
           const projectInfo = await wrapper.getProjectInfo();
+          progress.report({ message: 'Retrieving Namespaces' });
+          const namespaces = await namespacesPromise;
           progress.report({ message: 'Retrieving Docker Secret Resources' });
-          return [projectInfo, await secretsPromise];  
+
+          return [projectInfo, await secretsPromise, namespaces];  
         }
     );
 
@@ -34,6 +43,7 @@ export async function createDeployment(context: vscode.ExtensionContext) {
 		dockerRegistry: string;
 		imageName: string;
         dockerSecret: string;
+        namespace: string;
 	}
 
     async function collectInputs(): Promise<State> {
@@ -51,9 +61,9 @@ export async function createDeployment(context: vscode.ExtensionContext) {
         const regex = /([^\/]+\.[^\/.]+)\/[^\/.]+\/?[^\/.]+(:.+)?/m;
         let match = state.imageName?.match(regex);
         if (match && secrets) {
-            return 3;
+            return 4;
         }
-        return 2;
+        return 3;
     }
 
     async function pickDockerRegistry(input: MultiStepInput, state: Partial<State>) {
@@ -86,7 +96,20 @@ export async function createDeployment(context: vscode.ExtensionContext) {
 			shouldResume: () => Promise.resolve(false)
 		});
         
-        if (totalSteps(state) == 3) {
+        return (input: MultiStepInput) => pickNamespace(input, state);
+	}
+
+    async function pickNamespace(input: MultiStepInput, state: Partial<State>) {
+		const selected: any = await input.showQuickPick({
+			title,
+			step: 3,
+			totalSteps: totalSteps(state),
+            placeholder: `Select Namespace ${state.namespace}`,
+            items: namespaces,
+			shouldResume: () => Promise.resolve(false)
+        });
+        state.namespace = selected.label;
+        if (totalSteps(state) == 4) {
 		    return (input: MultiStepInput) => pickDockerSecret(input, state);
         } else {
             return undefined;
@@ -96,7 +119,7 @@ export async function createDeployment(context: vscode.ExtensionContext) {
     async function pickDockerSecret(input: MultiStepInput, state: Partial<State>) {
 		const selected: any = await input.showQuickPick({
 			title,
-			step: 3,
+			step: 4,
 			totalSteps: totalSteps(state),
             placeholder: `Select Docker Registry Secret for ${state.imageName}`,
             items: secrets,
@@ -107,32 +130,42 @@ export async function createDeployment(context: vscode.ExtensionContext) {
 
     const state = await collectInputs();
     if (state.dockerRegistry  && state.imageName) {
-        let text = createContent(context.extensionPath, 'deploy.yaml', projectInfo.name, state.imageName, state.dockerSecret);
+        let text = createContent(context.extensionPath, 'deploy.yaml', projectInfo.name, state.namespace, state.imageName, state.dockerSecret);
         createNewFile(projectInfo.root, "deploy", "yaml", text);
     }
 }
 
-async function getSecrets(): Promise<{label: string}[]> {
-    const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
+async function getSecrets(kubectl: kubernetes.KubectlV1): Promise<{label: string}[]> {
     return new Promise<vscode.QuickPickItem[]> ((resolve) => {
-        if (kubectl.available) {
-            let command = `get secrets -o jsonpath='{range .items[*]}{@.metadata.name}{\"\\t\"}{@.type}{\"\\n\"}{end}'`;
-            let secrets: vscode.QuickPickItem[] = [];
-            console.log(command);
-            kubectl.api.invokeCommand(command).then((result) => {
-                result?.stdout.split("\n").forEach(line => {
-                    let str = line.split("\t");
-                    if (str[1] === 'kubernetes.io/dockerconfigjson') {
-                        secrets.push({label: str[0]});
-                    }
-                });
-                resolve(secrets);
+        let command = `get secrets -o jsonpath='{range .items[*]}{@.metadata.name}{\"\\t\"}{@.type}{\"\\n\"}{end}'`;
+        let secrets: vscode.QuickPickItem[] = [];
+        console.log(command);
+        kubectl.invokeCommand(command).then((result) => {
+            result?.stdout.split("\n").forEach(line => {
+                let str = line.split("\t");
+                if (str[1] === 'kubernetes.io/dockerconfigjson') {
+                    secrets.push({label: str[0]});
+                }
             });
-        } 
+            resolve(secrets);
+        });
     });
 }
  
-
+async function getNamespaces(kubectl: kubernetes.KubectlV1): Promise<vscode.QuickPickItem[]> {
+    const command = "get namespace -o jsonpath='{.items[*].metadata.name}'";
+    let namespaces: vscode.QuickPickItem[] = [];
+    kubectl.invokeCommand(command)
+        .then((result) => {
+            if (result?.code === 0) {
+                let parts = result.stdout.trim().split(' ');
+                parts.forEach(ns => {
+                    namespaces.push({label: ns});
+                });
+            }
+        })
+    return namespaces;
+}
 
 function normalizeRegistryUrl(repo: string): string {
     if (repo == LOCAL) {
