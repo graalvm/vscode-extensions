@@ -197,10 +197,10 @@ async function spawnWithOutput(command: string, args?: readonly string[] | undef
     });
 }
 
-export function createContent(extensionPath: string, template: string, name: string, image?: string, dockerSecret?: string) {
+export function createContent(extensionPath: string, template: string, name: string, namespace?: string, image?: string, dockerSecret?: string) {
     let templatePath = path.join(extensionPath, templatesFolder, template);
     return mustache.render(fs.readFileSync(templatePath).toString(), {
-        name, image, dockerSecret
+        name, image, dockerSecret, namespace
     });
 }
 
