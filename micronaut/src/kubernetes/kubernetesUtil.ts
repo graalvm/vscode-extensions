@@ -12,10 +12,21 @@ import * as fs from 'fs';
 import * as readline from 'readline'; 
 import * as path from 'path';
 import * as mustache from 'mustache';
+import * as kubernetes from 'vscode-kubernetes-tools-api';
 
 enum ProjectType {
     Maven = 'pom.xml',
     Gradle = 'build.gradle'
+}
+
+export interface RunInfo {
+    appName: string,
+    deploymentFile: string;
+    kubectl: kubernetes.KubectlV1;
+    port: number;
+    debugPort?: number;
+    podName?: string;
+    debug?: boolean;
 }
 
 const YES: string = 'Yes';
@@ -26,6 +37,38 @@ export interface ProjectInfo {
     name: string;   
     version: string;
     root: string;
+}
+
+export async function collectInfo(appName: string, debug?: boolean): Promise<RunInfo> {
+    const deploymentFile = await findResourceFileByKind('Deployment');
+    if (!deploymentFile) {
+        askToExecCommand(
+            'extension.micronaut.createServiceResource',
+            'Deployment file is not present. Would you like to create it?');
+        return Promise.reject();
+    }
+    const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
+    if (!kubectl.available) {
+        vscode.window.showErrorMessage(`kubectl not available: ${kubectl.reason}.`);
+        return Promise.reject();
+    }
+    const port = await getPort(deploymentFile);
+    if (!port) {
+        vscode.window.showErrorMessage(`containerPort was not found in  ${deploymentFile}.`);
+        return Promise.reject()
+    }
+    let podName: string | undefined;
+    if (appName) {
+        podName = await getPod(kubectl.api, appName);
+    } 
+    return {
+        appName,
+        deploymentFile,
+        kubectl: kubectl.api,
+        port,
+        debug,
+        podName
+    };
 }
 
 export interface WrapperHelper {
@@ -220,4 +263,40 @@ export async function askToExecCommand(command: string, message: string) {
             vscode.commands.executeCommand(command);
         }
     });
+}
+
+async function getPort(deploymentFile: string): Promise<number | undefined> {
+    let rl = readline.createInterface({
+        input: fs.createReadStream(deploymentFile),
+    })
+    let ports = [];
+    for await (const line of rl) {
+        let matches = line.match(/\s*containerPort:\s+(\d+)/);
+        if (matches) {
+            ports.push(matches[1]);
+        }
+    }
+    let port: number | undefined;
+    if (ports.length > 1) {
+        port = Number(await vscode.window.showQuickPick(ports));
+    } else if (ports.length == 1) {
+        port = Number(ports[0]);
+    }
+    return port;
+}
+
+export async function getPod(kubectl: kubernetes.KubectlV1, appName: string) {
+    let command = `get pods --selector=app=${appName} -o jsonpath='{..items[*].metadata.name}'`
+    let result = await  kubectl.invokeCommand(command);
+    let pods: string[] = [];
+    if (result && result.code == 0) {
+        let parts = result.stdout.split(' ');
+        parts.forEach(pod => {
+            pods.push(pod);
+        });
+    }
+    if (pods.length > 0) {
+        return Promise.resolve(pods[0]);
+    } 
+    return Promise.reject();
 }

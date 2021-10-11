@@ -256,48 +256,52 @@ export async function attachToKubernetes(target?: any): Promise<void> {
     const node = explorer.api.resolveCommandTarget(target);
     if (node && node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Pod') {
 		const namespace = node.namespace ? node.namespace : undefined;
-        const port = await getDebugPort(kubectl.api, node.name, namespace);
-        if (!port) {
-            utils.askYesNo(`Debug port not opened in selected pod. Restart pod with debug port opened?`, async () => {
-				let info: any = {name: node.name, kind: 'Pod'};
-				while (info && info.kind !== 'Deployment') {
-					info = await getOwner(kubectl.api, info.name, info.kind);
-				}
-				if (info) {
-					const success = await redeployWithDebugPortOpened(kubectl.api, info.name);
-					if (success) {
-						vscode.window.showInformationMessage(`Restarted. Refresh cluster explorer and invoke debug action again.`);
-						return;
-					}
-				}
-				vscode.window.showInformationMessage(`Cannot restart pod automatically. Try to restart the pod manually.`);
-			});
-            return;
-        }
-        const forward = await kubectl.api.portForward(node.name, namespace, port, port, { showInUI: { location: 'status-bar' }});
-        if (forward) {
-            const workspaceFolder = await selectWorkspaceFolder();
-            const debugConfig : vscode.DebugConfiguration = {
-                type: "java8+",
-                name: "Attach to Kubernetes",
-                request: "attach",
-                hostName: "localhost",
-                port: port.toString()
-            };
-            const ret = await vscode.debug.startDebugging(workspaceFolder, debugConfig);
-            if (ret) {
-				forwardAndPrintAppUrl(kubectl.api, node.name, namespace);
-                const listener = vscode.debug.onDidTerminateDebugSession(() => {
-                    listener.dispose();
-                    forward.dispose();
-                });
-            } else {
-                forward.dispose();
-            }
-        }
-		return;
+		attachToPod(kubectl.api, node.name, namespace);
     }
     vscode.window.showErrorMessage(`This command is available only on Kubernetes Node or Pod resources.`);
+}
+
+export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string, namespace?: string) {
+	const port = await getDebugPort(kubectl, podName, namespace);
+	if (!port) {
+		utils.askYesNo(`Debug port not opened in selected pod. Restart pod with debug port opened?`, async () => {
+			let info: any = {name: podName, kind: 'Pod'};
+			while (info && info.kind !== 'Deployment') {
+				info = await getOwner(kubectl, info.name, info.kind);
+			}
+			if (info) {
+				const success = await redeployWithDebugPortOpened(kubectl, info.name);
+				if (success) {
+					vscode.window.showInformationMessage(`Restarted. Refresh cluster explorer and invoke debug action again.`);
+					return;
+				}
+			}
+			vscode.window.showInformationMessage(`Cannot restart pod automatically. Try to restart the pod manually.`);
+		});
+		return;
+	}
+	const forward = await kubectl.portForward(podName, namespace, port, port, { showInUI: { location: 'status-bar' }});
+	if (forward) {
+		const workspaceFolder = await selectWorkspaceFolder();
+		const debugConfig : vscode.DebugConfiguration = {
+			type: "java8+",
+			name: "Attach to Kubernetes",
+			request: "attach",
+			hostName: "localhost",
+			port: port.toString()
+		};
+		const ret = await vscode.debug.startDebugging(workspaceFolder, debugConfig);
+		if (ret) {
+			forwardAndPrintAppUrl(kubectl, podName, namespace);
+			const listener = vscode.debug.onDidTerminateDebugSession(() => {
+				listener.dispose();
+				forward.dispose();
+			});
+		} else {
+			forward.dispose();
+		}
+	}
+	return;
 }
 
 async function forwardAndPrintAppUrl(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<void> {

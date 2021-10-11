@@ -7,7 +7,8 @@
 
 import * as vscode from 'vscode';
 import { toggleCodeCoverage, activeTextEditorChaged } from './graalVMCoverage';
-import { GraalVMConfigurationProvider, GraalVMDebugAdapterDescriptorFactory, GraalVMDebugAdapterTracker, attachToKubernetes } from './graalVMDebug';
+import * as kubernetes from 'vscode-kubernetes-tools-api';
+import * as debug from './graalVMDebug';
 import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMComponent, uninstallGraalVMComponent, selectActiveGraalVM, findGraalVMs, InstallationNodeProvider, Component, Installation, removeGraalVMInstallation } from './graalVMInstall';
 import { onClientNotification, startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
@@ -142,17 +143,24 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.configureSettingVisualVM', (...params: any[]) => {
 		visualvm.configureSettingVisualVM(context, params);
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', attachToKubernetes));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', debug.attachToKubernetes));
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			'extension.graalvm.debugPod', 
+			(kubectl: kubernetes.KubectlV1, podName: string, namespace?: string) => {
+				debug.attachToPod(kubectl, podName, namespace);
+			})
+	);
 
 	const nodeProvider = new InstallationNodeProvider();
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('graalvm-installations', nodeProvider));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.refreshInstallations', () => nodeProvider.refresh()));
-	const configurationProvider = new GraalVMConfigurationProvider();
+	const configurationProvider = new debug.GraalVMConfigurationProvider();
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('graalvm', configurationProvider));
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('node', configurationProvider));
-	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('graalvm', new GraalVMDebugAdapterDescriptorFactory()));
-	context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('graalvm', new GraalVMDebugAdapterTracker()));
+	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('graalvm', new debug.GraalVMDebugAdapterDescriptorFactory()));
+	context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('graalvm', new debug.GraalVMDebugAdapterTracker()));
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 		if (e.affectsConfiguration('graalvm.home')) {
 			vscode.commands.executeCommand('extension.graalvm.refreshInstallations');

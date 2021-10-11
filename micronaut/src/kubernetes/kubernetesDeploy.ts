@@ -8,68 +8,62 @@
 import * as vscode from 'vscode';
 
 import * as kubernetes from 'vscode-kubernetes-tools-api';
-import { askToExecCommand, createWrapper, findResourceFileByKind } from "./kubernetesUtil";
+import { collectInfo, createWrapper, RunInfo } from "./kubernetesUtil";
 import { kubernetesChannel } from './kubernetesChannel';
 
 const MAX_WAIT_CYCLES = 60;
 const WAIT_TIMEOUT = 500; //ms
 
 export async function deployProject() {
-    const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
-    if (!kubectl.available) {
-        vscode.window.showInformationMessage("kubectl not found");
-        return;
-    }
-    const deploymentFile = await findResourceFileByKind('Deployment');
-    if (!deploymentFile) {
-        askToExecCommand(
-            'extension.micronaut.createDeploy',
-            'Deployment file is not present. Would you like to create it?');
-        return;
-    }
-    
     let wrapper =  await createWrapper();
+    let info = await collectInfo((await wrapper.getProjectInfo()).name);
     kubernetesChannel.clearAndShow();
     wrapper.buildAll()
-        .then(() => deploy(deploymentFile))
+        .then(() => deploy(info))
         .catch((error) => kubernetesChannel.appendLine(error));
 }
 
-export async function deploy(deploymentFile: string) {
-    
-    const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
-    if (kubectl.available) {
-        let command = `get -f ${deploymentFile} -o jsonpath='{.metadata.name}'`;
-        let result = await kubectl.api.invokeCommand(command);
-        let deploymentName: string | undefined;
-        if (result?.code == 0) {
-            deploymentName = result?.stdout.trim();
-            command = `rollout restart deployment/${deploymentName}`;
-        } else {
-            command = `apply -f ${deploymentFile}`;
+async function setEnvDebug(info: RunInfo) {
+    let command = `set env deployment/${info.appName} JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005`;
+	return info.kubectl.invokeCommand(command);
+}
+
+export async function deploy(info: RunInfo) {
+    let command = `get -f ${info.deploymentFile} -o jsonpath='{.metadata.name}'`;
+    let result = await info.kubectl.invokeCommand(command);
+    let deploymentName: string | undefined;
+    if (result?.code !== 0) {
+        command = `apply -f ${info.deploymentFile}`;
+        result = await info.kubectl.invokeCommand(command);
+        if (result?.code !== 0) {
+            vscode.window.showErrorMessage(`Deploy of ${info.appName} failed.`);
+            return;
         }
-        let oldRs = deploymentName ? await getLatestRs(kubectl.api, deploymentName) : undefined;
-        kubernetesChannel.appendLine(`> kubectl ${command}`);
-        result = await kubectl.api.invokeCommand(command);
-        if (result) {
-            if (result.code == 0) {
-                kubernetesChannel.appendLine(result.stdout);
-                if (deploymentName && oldRs) {
-                    let repeat = MAX_WAIT_CYCLES;
-                    while (oldRs == await getLatestRs(kubectl.api, deploymentName) && repeat-- > 0) {
-                        await new Promise(resolve => setTimeout(resolve, WAIT_TIMEOUT));
-                    }
-                    if (repeat > -1) {
-                        kubernetesChannel.appendLine(`APPLICATION DEPLOYED`);
-                    }
+        deploymentName = result?.stdout.trim();
+    } 
+    setEnvDebug(info);
+    command = `rollout restart deployment/${info.appName}`;
+    let oldRs = deploymentName ? await getLatestRs(info.kubectl, deploymentName) : undefined;
+    kubernetesChannel.appendLine(`> kubectl ${command}`);
+    result = await info.kubectl.invokeCommand(command);
+    if (result) {
+        if (result.code == 0) {
+            kubernetesChannel.appendLine(result.stdout);
+            if (deploymentName && oldRs) {
+                let repeat = MAX_WAIT_CYCLES;
+                while (oldRs == await getLatestRs(info.kubectl, deploymentName) && repeat-- > 0) {
+                    await new Promise(resolve => setTimeout(resolve, WAIT_TIMEOUT));
                 }
-                return Promise.resolve();
-            } else {
-                return Promise.reject(result.stderr);
+                if (repeat > -1) {
+                    kubernetesChannel.appendLine(`APPLICATION DEPLOYED`);
+                }
             }
+            return Promise.resolve();
+        } else {
+            return Promise.reject(result.stderr);
         }
-        return Promise.reject();
     }
+    return Promise.reject();
 }
 
 async function getLatestRs(kubectl: kubernetes.KubectlV1, label: string) {
