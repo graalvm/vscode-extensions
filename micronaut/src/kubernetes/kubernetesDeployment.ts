@@ -141,7 +141,7 @@ async function getSecrets(kubectl: kubernetes.KubectlV1): Promise<{label: string
     return new Promise<vscode.QuickPickItem[]> ((resolve) => {
         let command = `get secrets -o jsonpath='{range .items[*]}{@.metadata.name}{\"\\t\"}{@.type}{\"\\n\"}{end}'`;
         let secrets: vscode.QuickPickItem[] = [];
-        console.log(command);
+        secrets.push({label: NO_SECRET});
         kubectl.invokeCommand(command).then((result) => {
             result?.stdout.split("\n").forEach(line => {
                 let str = line.split("\t");
@@ -149,9 +149,8 @@ async function getSecrets(kubectl: kubernetes.KubectlV1): Promise<{label: string
                     secrets.push({label: str[0]});
                 }
             });
+            resolve(secrets);
         });
-        secrets.push({label: NO_SECRET});
-        resolve(secrets);
     });
 }
  
