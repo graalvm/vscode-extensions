@@ -10,8 +10,8 @@ import { createWrapper, createContent, createNewFile } from "./kubernetesUtil";
 import * as kubernetes from 'vscode-kubernetes-tools-api';
 import { MultiStepInput } from "../utils";
 
-
 const LOCAL = "<local>";
+const NO_SECRET = "<public repository>";
 
 export async function createDeployment(context: vscode.ExtensionContext) {
     const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
@@ -125,7 +125,9 @@ export async function createDeployment(context: vscode.ExtensionContext) {
             items: secrets,
 			shouldResume: () => Promise.resolve(false)
         });
-        state.dockerSecret = selected.label;
+        if (selected.label !== NO_SECRET) {
+            state.dockerSecret = selected.label;
+        }
 	}
 
     const state = await collectInputs();
@@ -139,7 +141,7 @@ async function getSecrets(kubectl: kubernetes.KubectlV1): Promise<{label: string
     return new Promise<vscode.QuickPickItem[]> ((resolve) => {
         let command = `get secrets -o jsonpath='{range .items[*]}{@.metadata.name}{\"\\t\"}{@.type}{\"\\n\"}{end}'`;
         let secrets: vscode.QuickPickItem[] = [];
-        console.log(command);
+        secrets.push({label: NO_SECRET});
         kubectl.invokeCommand(command).then((result) => {
             result?.stdout.split("\n").forEach(line => {
                 let str = line.split("\t");
