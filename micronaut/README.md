@@ -16,6 +16,7 @@ In combination with the [GraalVM Tools for Java extension](https://marketplace.v
 - [Create Micronaut Project](#create-micronaut-project)
 - [Generate Native Images of Micronaut Projects](#generate-native-images-of-micronaut-projects)
 - [Deploy Micronaut Projects](#deploy-micronaut-projects)
+- [Deploy Micronaut Applications to Kubernetes](#deploy-micronaut-applications-to-kubernetes)
 - [Feedback](#feedback)
 - [Privacy Policy](#privacy-policy)
 - [Known Issues](#known-issues)

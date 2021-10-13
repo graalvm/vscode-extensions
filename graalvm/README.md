@@ -118,7 +118,7 @@ The "Download & Install GraalVM" action is a preferable way, as it eliminates th
 
 ## Java Development and Debugging
 
-To start developing or debugging Java applications, ensure GraalVM is used as your Java runtime in VS Code.
+To start developing Java applications, ensure GraalVM is used as your Java runtime in VS Code.
 If the current path is not pointing to the GraalVM folder, go to the User Settings window and use the `netbeans.jdkhome` value in the _settings.json_ file.
 This configuration is then used to launch the Java Language Server.
 
@@ -187,11 +187,14 @@ Once all possible execution paths have been executed, terminate the process. At 
 
 Once the configuration for Native Image has been generated, follow the documentation on how to [generate a native image for a project](https://www.graalvm.org/reference-manual/native-image/#build-a-native-image) from the command line, or how to [build native images right from VS Code](../micronaut/README.md#generate-native-images-of-micronaut-projects).
 
-## Native Image Debugger
+## Native Image Debugging
 
 GraalVM Extension Pack for Java provides Java like debugging of platform native executables produced by [GraalVM Native Image](https://www.graalvm.org/reference-manual/native-image/).
 It is provided using the GNU Debugger (GDB) and via a new Run configuration named __Launch Native Image__.
 GraalVM Enterprise Edition is required as it produces full debug information for a native image.
+You can attach the debugger to a Native Image process and step over the image “real” code.
+
+![Native Image debugging](images/ni_debugging.png)
 
 > Note: This feature is experimental. It currently works only on Linux with GDB 7.11 or GDB 10.1+ due to known issue [#26139](https://sourceware.org/bugzilla/show_bug.cgi?id=26139) in GDB 8 and 9.
 
@@ -234,7 +237,7 @@ Once the project process starts, the Process node is updated to show its process
 
 > Note: This feature was introduced with the GraalVM 21.2.0 release. Please make sure to get the latest GraalVM Tools for Java extension from the VS Code Marketplace, preferably by downloading the [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack).
 
-For a more detailed feature description, go to [this page](visualvm-in-vscode.md).
+For a more detailed feature description, go to [this page](https://www.graalvm.org/tools/vscode/visualvm-integration/).
 
 ## JavaScript and Node.js Debugging
 
