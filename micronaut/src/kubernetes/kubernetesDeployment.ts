@@ -11,7 +11,7 @@ import * as kubernetes from 'vscode-kubernetes-tools-api';
 import { MultiStepInput } from "../utils";
 
 const LOCAL = "<local>";
-const NO_SECRET = "<don't use secret>";
+const NO_SECRET = "<public repository>";
 
 export async function createDeployment(context: vscode.ExtensionContext) {
     const kubectl: kubernetes.API<kubernetes.KubectlV1> = await kubernetes.extension.kubectl.v1;
