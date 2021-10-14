@@ -127,6 +127,26 @@
 				{
 					"command": "extension.micronaut.buildNativeImage",
 					"when": "micronautProjectExists && javaHomeSet"
+				},
+				{
+					"command": "extension.micronaut.kubernetes.createDeploy",
+					"when": "kubectl.available"
+				},
+				{
+					"command": "extension.micronaut.kubernetes.deploy",
+					"when": "kubectl.available"
+				},
+				{
+					"command": "extension.micronaut.kubernetes.createService",
+					"when": "kubectl.available"
+				},
+				{
+					"command": "extension.micronaut.kubernetes.run",
+					"when": "kubectl.available"
+				},
+				{
+					"command": "extension.micronaut.kubernetes.debug",
+					"when": "kubectl.available"
 				}
 			]
 		}
