@@ -73,7 +73,7 @@ export async function collectInfo(appName: string, debug?: boolean): Promise<Run
 
 export interface WrapperHelper {
     getProjectInfo: () => Promise<ProjectInfo>;
-    buildAll: () => Promise<void>;
+    buildAll: (runInfo: RunInfo) => Promise<RunInfo>;
 }
 
 export async function createWrapper(): Promise<WrapperHelper> {
@@ -127,10 +127,15 @@ class MavenHelper implements WrapperHelper {
         return Promise.reject();
     }
 
-    async buildAll() {
-        return spawnWithOutput(this.wrapper, 
-            ['-f', `${await this.projectRoot}/pom.xml`, 'compile', 'jib:dockerBuild'], 
-            {cwd: await this.projectRoot}
+    async buildAll(runInfo: RunInfo): Promise<RunInfo> {
+        const projectRoot = await this.projectRoot;
+        return new Promise((resolve, reject) => 
+            spawnWithOutput(this.wrapper, 
+                ['-f', `${projectRoot}/pom.xml`, 'compile', 'jib:dockerBuild'], 
+                {cwd: projectRoot}
+            )
+            .then(() => resolve(runInfo))
+            .catch(reject)
         );
     }
 }
@@ -168,12 +173,15 @@ class GradleHelper implements WrapperHelper {
         return Promise.reject();
     }
 
-    async buildAll() {
-        return spawnWithOutput(this.wrapper, 
-            ['-b', `${await this.projectRoot}/build.gradle`, 'build', 'dockerBuild', 'dockerPush'], 
-            {cwd: await this.projectRoot}
+    async buildAll(runInfo: RunInfo): Promise<RunInfo> {
+        const projectRoot = await this.projectRoot;
+        return new Promise((resolve, reject) => 
+            spawnWithOutput(this.wrapper, 
+            ['-b', `${projectRoot}/build.gradle`, 'build', 'dockerBuild', 'dockerPush'], 
+            {cwd: projectRoot}
+            ).then(() => resolve(runInfo))
+            .catch(reject)
         );
-       
     }
 }
 
