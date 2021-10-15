@@ -207,16 +207,22 @@ To create a a Kubernetes deployment and deploy a Micronaut application to OKE, t
 
 ![Kubernetes quick actions](images/k8s_quick_actions.png)
 
-You should start by creating a `deploy.yml` script that will be applied at the deployment stage.
+You should start by creating a Kubernetes deployment file that will be applied at the deployment stage.
 
-1. Go to View > Command Palette, search for "Kubernetes" and invoke the **Micronaut: Create Kubernetes Deployment Resource** action.
+1. Go to View > Command Palette, search for "Kubernetes" and invoke the **Micronaut: Create Kubernetes Deployment Resource** action.  It will start the "Create Kubernetes Deployment File" process.
 
-2. You will be prompted to select which Docker image to be used:
-    ![Select a Docker image](images/select_docker_image.png)
-    Currently, images available are not automatically detected, so you need to type it manually.
-    Grab the image location from _gradle.build_ or _pom.xml_ you specified in the **Specify the Location for Docker Image in Oracle Container Registry** step.
+2. Pick the Docker repository. Since you are using Oracle Container Registry, select **OCIR + region name**. For example:
+   ![Pick Docker repository](images/pick_docker_repository.png)
 
-3. Then select a secret for a container registry in OCI (needed only if the Docker registry is private, described in the **Preparation** > **Log in to Docker** section):
+3. Provide your Docker image name and version:
+   ![Provide Docker image name and version](images/provide_image_name_version.png)
+   Currently, images available are not automatically detected, so you need to type it manually.
+   Grab the image location from _gradle.build_ or _pom.xml_ you specified in the **Specify the Location for Docker Image in Oracle Container Registry** step.
+
+4. Then you are prompted to select the namespace. Choose default:
+   ![Select namespace](images/select_namespace.png)
+
+5. Lartly, select a secret for your container registry in OCI (needed only if the Docker registry is private, described in the **Preparation** > **Log in to Docker** section):
 
     ![Select a secret for Docker registry](images/select_secret.png)
 
