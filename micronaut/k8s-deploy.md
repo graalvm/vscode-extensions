@@ -1,4 +1,4 @@
-# Deploy Micronaut Applications to Kubernetes Cluster
+# Deploy Micronaut Applications to Oracle Container Engine for Kubernetes
 
 GraalVM Tools for Micronaut Extension added support for working with Kubernetes clusters based on Microsofts’s [Visual Studio Code Kubernetes Tools](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools).
 
@@ -90,7 +90,7 @@ If you used Maven to build your Micronaut project, open _pom.xml_, find the `doc
     ```xml
     ```
 
-## Deploy a Micronaut application to OKE
+## Deploy a Micronaut Application to OKE
 
 To create a a Kubernetes deployment and deploy a Micronaut application to OKE, the following quick actions for Micronaut are available:
 
@@ -126,7 +126,7 @@ All this can be tracked in the Output window.
 
 You can work on other projects, deploy them to another Kubernetes clusters, and they will all be deployed and running from Oracle Container Registry.
 
-## Attach to Remote Debugger from OKE
+## Debug Micronaut Applications in Remote Kubernetes Cluster
 
 In addition to being able to deploy Micronaut applications to a Kubernetes cluster directly from VS, you can also debug your Java application in a remote Kubernetes cluster.
 
