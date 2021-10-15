@@ -15,11 +15,12 @@ const MAX_WAIT_CYCLES = 60;
 const WAIT_TIMEOUT = 500; //ms
 
 export async function deployProject() {
-    let wrapper =  await createWrapper();
-    let info = await collectInfo((await wrapper.getProjectInfo()).name);
     kubernetesChannel.clearAndShow();
-    wrapper.buildAll()
-        .then(() => deploy(info))
+    kubernetesChannel.appendLine(`Starting deploy of project`);
+    let wrapper =  await createWrapper();
+    collectInfo((await wrapper.getProjectInfo()).name)
+        .then((runInfo) => wrapper.buildAll(runInfo))
+        .then((runInfo) => deploy(runInfo))
         .catch((error) => kubernetesChannel.appendLine(error));
 }
 
@@ -37,7 +38,7 @@ export async function deploy(info: RunInfo) {
         result = await info.kubectl.invokeCommand(command);
         if (result?.code !== 0) {
             vscode.window.showErrorMessage(`Deploy of ${info.appName} failed.`);
-            return;
+            return Promise.reject(result?.stderr);
         }
         deploymentName = result?.stdout.trim();
     } 
@@ -58,7 +59,7 @@ export async function deploy(info: RunInfo) {
                     kubernetesChannel.appendLine(`APPLICATION DEPLOYED`);
                 }
             }
-            return Promise.resolve();
+            return Promise.resolve(info);
         } else {
             return Promise.reject(result.stderr);
         }

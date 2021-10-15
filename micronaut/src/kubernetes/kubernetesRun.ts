@@ -13,8 +13,9 @@ import { kubernetesChannel } from './kubernetesChannel';
 let forwardSession: vscode.Disposable | undefined;
 
 export async function runProject(debug: boolean) {
-    let wrapper =  await createWrapper();
     kubernetesChannel.clearAndShow();
+    kubernetesChannel.appendLine(`Starting ${debug ? 'debug' : 'run'} of project`);
+    let wrapper =  await createWrapper();
     let proj = await wrapper.getProjectInfo();
 
     if (forwardSession) {
@@ -22,11 +23,9 @@ export async function runProject(debug: boolean) {
     }
 
     collectInfo(proj.name, debug)
-        .then((runInfo) => {
-            wrapper.buildAll()
-            .then(() => deploy(runInfo))
-            .then(() => run(runInfo))     
-        });
+        .then((runInfo) => wrapper.buildAll(runInfo))
+        .then((runInfo) => deploy(runInfo))
+        .then((runInfo) => run(runInfo));
 }
         
 async function run(info: RunInfo) {
