@@ -13,6 +13,7 @@ import { builderInit, build } from './projectBuild';
 import { createDeployment } from './kubernetes/kubernetesDeployment';
 import { deployProject } from './kubernetes/kubernetesDeploy';
 import { runProject, createService } from './kubernetes/kubernetesRun';
+import * as kubernetes from 'vscode-kubernetes-tools-api';
 
 export function activate(context: vscode.ExtensionContext) {
 	if (vscode.workspace.getConfiguration().get<boolean>('micronaut.showWelcomePage')) {
@@ -61,6 +62,11 @@ export function activate(context: vscode.ExtensionContext) {
 		if (javaHome) {
 			vscode.commands.executeCommand('setContext', 'javaHomeSet', true);
 		}
+		kubernetes.extension.kubectl.v1.then((kubectl => {
+			if (kubectl.available) {
+				vscode.commands.executeCommand('setContext', 'kubectl.available', true);
+			}
+		}));
 	}
 }
 
