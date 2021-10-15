@@ -1,5 +1,8 @@
 # Change Log
 
+# Version 0.5.12
+* Add GraalVM installed by system utility like yum
+* Number of stability improvements
 # Version 0.5.11
 * Guess the GraalVM target directory before download of binary starts
 # Version 0.5.10
