@@ -9,7 +9,7 @@ The extension is Technology Preview.
 - [Installation and Setup](#installation-and-setup)
 - [Java Development and Debugging](#java-development-and-debugging)
 - [Native Image Agent](#native-image-agent)
-- [Native Image Debugger](#native-image-debugger)
+- [Native Image Debugging](#native-image-debugging)
 - [Integration with VisualVM](#integration-with-visualvm)
 - [JavaScript and Node.js Debugging](#javascript-and-nodejs-debugging)
 - [Python Debugging](#python-debugging)
@@ -192,18 +192,32 @@ Once the configuration for Native Image has been generated, follow the documenta
 GraalVM Extension Pack for Java provides Java like debugging of platform native executables produced by [GraalVM Native Image](https://www.graalvm.org/reference-manual/native-image/).
 It is provided using the GNU Debugger (GDB) and via a new Run configuration named __Launch Native Image__.
 GraalVM Enterprise Edition is required as it produces full debug information for a native image.
-You can attach the debugger to a Native Image process and step over the image “real” code.
 
 ![Native Image debugging](images/ni_debugging.png)
 
-> Note: This feature is experimental. It currently works only on Linux with GDB 7.11 or GDB 10.1+ due to known issue [#26139](https://sourceware.org/bugzilla/show_bug.cgi?id=26139) in GDB 8 and 9.
+> Note: Native Image debugging requires `gdb` debugger (GDB 7.11 or GDB 10.1+), it currently works only on Linux. The feature is experimental.
 
 In order to debug native images of Java applications, it is necessary to build such images with debug information available.
 It can be done by providing following switches for the `native-image` builder:
 - `-g -O0` or
 - `-H:Debug=2 -H:Optimize=0`.
 
-The resulting images will contain debug records in a format GDB understands.
+
+The resulting images will contain debug records in a format `gdb` debugger understands.
+
+### Debug Native Image “Real” Code
+
+Since recently you can attach the debugger to a Native Image process and step over the image “real” code.
+
+Attaching of debugger to a Native Image process is done via adding a configuration into the _launch.json_ file.
+
+1. Select **Native Image: Attach to Process** from the configurations autocompletion in _launch.json_. It generates the **Attach to Native Image** configuration. When that configuration is selected and executed, a list of running processes opens.
+2. Select the running process that corresponds to the Native Image you intend to debug.
+3. when the source file opens, start debugging:
+   ![Native Image debugging source code](images/NativeImageExecutableLocations.png)
+
+The step over the image “real” code” is mostly about UI differentiation of code which is compiled in the native image and which is not used.
+The shaded code is not a part of the Native Image.
 
 ## Integration with VisualVM
 
