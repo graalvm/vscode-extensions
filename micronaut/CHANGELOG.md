@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 0.5.8
+* Deploy, run and debug Micronaut apps in Kubernetes
+   * Works for OCI and minikube
+* Fixes and other improvements
 ## Version 0.5.7
 * Project can be created even if no Java is present on the system
 * Extra directory from Micronaut wizard fixed for project creation
