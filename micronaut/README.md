@@ -121,7 +121,7 @@ This guide will walk you through the process of deploying a Micronaut applicatio
 ### Prerequisites
 - [Visual Studio Code Kubernetes Tools](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)
 - [Docker](https://docs.docker.com/engine/reference/run/)
-- [Oracle Cloud Account][https://www.oracle.com/uk/cloud/free/]
+- [Oracle Cloud Account](https://www.oracle.com/uk/cloud/free/)
 - [Access to Oracle Container Engine for Kubernetes (OKE)](https://oracle.github.io/learning-library/oci-library/oci-hol/OKE/workshops/freetier/index.html?lab=intro)
 
 ## Preparation
