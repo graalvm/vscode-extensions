@@ -236,7 +236,7 @@ You should start by creating a Kubernetes deployment file that will be applied a
 
 Now you are ready to deploy your Micronaut application to OKE.
 
-1. Go to View > Command Palette, search for **Micronaut: Deploy to Kubernetes Cluster** action and invoke it.
+1. Go to View > Command Palette, search for **Micronaut: Deploy to Kubernetes** action and invoke it.
    You could have skipped steps 1-3 from above, but if no Kubernetes deployment file exists, VS Code will suggest you to create one at this step.
 
 2. Once you invoke the action, the Output window will open and the "Starting deploy of project" message will be printed.
