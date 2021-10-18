@@ -136,7 +136,6 @@ The Kubernetes extension starts port forwarding to connect to the server running
 A direct URL to access your Micronaut REST application from a browser is printed.
 Read more on Kubernetes port forwarding [here](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/).
 
-
 All this can be tracked in the Output window.
 If the deployment succeeds, you should see a similar status bar:
 
