@@ -99,14 +99,14 @@ That will run the `mvnw package -Dpackaging=native-image` job.
 
 For more details, continue reading to the [Micronaut documentation](https://guides.micronaut.io/micronaut-creating-first-graal-app/guide/index.html#creatingGraalImage).
 
-## Deploy Micronaut Projects to Docker Registry
+## Deploy Micronaut Projects to a Docker Registry
 
-The Micronaut support in VS Code allows to build and deploy Docker images to Docker registry.
+The Micronaut support in VS Code allows to build and deploy Docker images to a Docker registry.
 Use action **View** > **Command Palette** > **Micronaut: Deploy...** and select **dockerPush** to deploy a dockerized Micronaut application or **dockerPushNative** to build and push docker with a native executable of Micronaut application.
 
 ![Micronaut Deploy Commands](images/micronaut-deploy-commands.png)
 
-Besides that, you can also push a Micronaut application or a native executable to the Docker Registry from the VS Code Terminal window.
+Besides that, you can also push a Micronaut application or a native executable to a Docker Registry from the VS Code Terminal window.
 A particular Docker Registry can be configured in the build, see the [Micronaut Deploying Application](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/examples/deploy.html) documentation.
 
 ## Deploy Micronaut Applications to Oracle Container Engine for Kubernetes
