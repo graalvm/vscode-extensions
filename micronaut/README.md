@@ -212,14 +212,18 @@ You should start by creating a Kubernetes deployment file that will be applied a
 1. Go to View > Command Palette, search for "Kubernetes" and invoke the **Micronaut: Create Kubernetes Deployment Resource** action. It will start the "Create Kubernetes Deployment File" process.
 
 2. Pick the Docker repository. Since you are using Oracle Container Registry, select **OCIR + region name**. For example:
+
    ![Pick Docker repository](images/pick_docker_repository.png)
 
 3. Provide your Docker image name and version:
+
    ![Provide Docker image name and version](images/provide_image_name_version.png)
+
    Currently, available images are not automatically detected, so you need to type it manually.
    Grab the image location from _gradle.build_ or _pom.xml_ you specified in the **Specify the Location for Docker Image in Oracle Container Registry** step.
 
 4. Then you are prompted to select the namespace. Choose default:
+
    ![Select namespace](images/select_namespace.png)
 
 5. Lastly, select a secret for your container registry in OCI (needed only if the Docker registry is private, described in the **Preparation** > **Log in to Docker** section):
@@ -260,19 +264,16 @@ You can work on other projects, deploy them to another Kubernetes clusters, and 
 
 In addition to being able to deploy and run Micronaut applications in Kubernetes, you can also debug your Java application in a cluster directly from VS.
 
-> Note: [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) is required.
-
-To allow complete Java debugging experience, you need to ensure the [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) is installed.
-It is not needed if you have installed [GraalVM Tools for Java Extension pack](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack), it already includes a full-fledged support for the Java and Micronaut.
+> Note: To allow complete Java debugging experience, you need to ensure the [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) is installed. It is not needed if you have installed [GraalVM Tools for Java Extension pack](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack), it already includes a full-fledged support for the Java and Micronaut.
 
 With the connection made to a local port (thanks to [Kubernetes port forwarding feature](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)), you can use your local workstation to debug the application that is running in the Pod.
 Having set some breakpoints in your applciation, do the following to start debugging:
 
-To debug a Java application, creating a launch configuration for the application is necessary.
 1. Go to View > Command Palette, search for **Micronaut: Debug in Kubernetes** action and invoke it.
-2. First time you start debugging in Kubernetes, a popup window will open in the right bottom corner asking to confirm port forwarding. Confirm it. This will setup a `JAVA_TOOLS_OPTIONS` environment variable in the deployment script file.
+2. Confirm port forwarding. First time you start debugging your application deployed in Kubernetes, a popup window will open in the right bottom corner asking to confirm port forwarding. This will setup a `JAVA_TOOLS_OPTIONS` environment variable in the deployment script file.
 3. Then you will be prompted to choose a port forwarding session:
-   ![Choose a port forwarding session](images/k8s_port_forwarding)
+
+   ![Choose a port forwarding session](images/k8s_port_forwarding.png)
 
 4. Connect the Kubernetes extension to your Kubernetes cluster using **Set Kubeconfig** action.
 5. Click on Kubernetes icon in the left sidebar and select the node you are developing.
