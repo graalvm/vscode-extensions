@@ -166,13 +166,11 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
-		"@types/mocha": "^5.2.6",
 		"@types/node": "^12.12.0",
 		"@types/vscode": "^1.49.0",
 		"@types/decompress": "4.2.3",
 		"@types/mustache": "^4.0.1",
 		"glob": "^7.1.4",
-		"mocha": "^6.1.4",
 		"typescript": "^3.3.1",
 		"tslint": "^5.12.1",
 		"ts-loader": "^6.2.1",

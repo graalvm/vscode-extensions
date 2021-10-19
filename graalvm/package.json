@@ -1032,7 +1032,6 @@
 	},
 	"devDependencies": {
 		"@types/decompress": "^4.2.3",
-		"@types/mocha": "^7.0.2",
 		"@types/mustache": "^4.0.1",
 		"@types/node": "^12.12.30",
 		"@types/sax": "^1.2.1",
