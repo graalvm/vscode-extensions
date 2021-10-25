@@ -257,8 +257,9 @@ export async function attachToKubernetes(target?: any): Promise<void> {
     if (node && node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Pod') {
 		const namespace = node.namespace ? node.namespace : undefined;
 		attachToPod(kubectl.api, node.name, namespace);
-    }
-    vscode.window.showErrorMessage(`This command is available only on Kubernetes Node or Pod resources.`);
+    } else {
+		vscode.window.showErrorMessage(`This command is available only on Kubernetes Node or Pod resources.`);
+	}
 }
 
 export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string, namespace?: string) {
