@@ -17,13 +17,13 @@ import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraa
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
 
-const GITHUB_URL: string = 'https://github.com';
-const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/graalvm/graalvm-ce-builds/releases';
-const GRAALVM_DEV_RELEASES_URL: string = GITHUB_URL + '/graalvm/graalvm-ce-dev-builds/releases';
+const GITHUB_URL: string = 'https://api.github.com';
+const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-builds/releases';
+const GRAALVM_DEV_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-dev-builds/releases';
 const GDS_URL: string = 'https://oca.opensource.oracle.com/gds/meta-data.json';
-const LINUX_LINK_REGEXP: RegExp = /<a href="\/graalvm\/graalvm-\S*-builds\/releases\/download\/\S*\/graalvm-ce-java\S*-linux-amd64-\S*"/gmi;
-const MAC_LINK_REGEXP: RegExp = /<a href="\/graalvm\/graalvm-\S*-builds\/releases\/download\/\S*\/graalvm-ce-java\S*-(darwin|macos)-amd64-\S*"/gmi;
-const WINDOWS_LINK_REGEXP: RegExp = /<a href="\/graalvm\/graalvm-\S*-builds\/releases\/download\/\S*\/graalvm-ce-java\S*-windows-amd64-\S*"/gmi;
+const LINUX_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-amd64-\S*/gmi;
+const MAC_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-amd64-\S*/gmi;
+const WINDOWS_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-windows-amd64-\S*/gmi;
 const INSTALL: string = 'Install ';
 const OPTIONAL_COMPONENTS: string = 'Optional GraalVM Components';
 const GRAALVM_EE_LICENSE: string = 'GraalVM Enterprise Edition License';
@@ -864,32 +864,45 @@ async function getGraalVMEEReleases(): Promise<any> {
 }
 
 async function getGraalVMReleaseURLs(releasesURL: string): Promise<string[]> {
-    return get(releasesURL, /^text\/html/).then(rawData => {
+    const USER_AGENT_OPTIONS: https.RequestOptions = {
+        headers: {
+            'User-Agent': 'vscode-ext',
+        }
+    };
+    return getWithOptions(releasesURL, USER_AGENT_OPTIONS, /^application\/json/).then(rawData => {
         const ret: string[] = [];
         if(!rawData) {
             return ret;
         }
-        let regex;
+        let regex: RegExp;
         if (process.platform === 'linux') {
             regex = LINUX_LINK_REGEXP;
         } else if (process.platform === 'darwin') {
             regex = MAC_LINK_REGEXP;
         } else if (process.platform === 'win32') {
             regex = WINDOWS_LINK_REGEXP;
+        } else {
+            return ret;
         }
-        if (regex) {
-            let match;
-            while ((match = regex.exec(rawData)) !== null) {
-                ret.push(GITHUB_URL + match[0].substring(9, match[0].length - 1));
-            }
-        }
+        const data: { assets?: { browser_download_url?: string }[] }[] = JSON.parse(rawData);
+        data.forEach(release => {
+            release.assets?.forEach(asset => {
+                if (asset.browser_download_url?.match(regex)) {
+                    ret.push(asset.browser_download_url);
+                }
+            });
+        });
         return ret;
     });
 }
 
 async function get(url: string, contentTypeRegExp: RegExp, file?: fs.WriteStream): Promise<string | undefined> {
+    return getWithOptions(url, {}, contentTypeRegExp, file);
+}
+
+async function getWithOptions(url: string, options: https.RequestOptions, contentTypeRegExp: RegExp, file?: fs.WriteStream): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve, reject) => {
-        https.get(url, res => {
+        https.get(url, options, res => {
             const { statusCode } = res;
             const contentType = res.headers['content-type'] || '';
             let error;
