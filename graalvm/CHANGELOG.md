@@ -1,11 +1,16 @@
 # Change Log
 
-# Version 0.5.12
+## Version 0.5.13
+* Read GraalVM CE releases using GitHub API
+
+## Version 0.5.12
 * Add GraalVM installed by system utility like yum
 * Number of stability improvements
-# Version 0.5.11
+
+## Version 0.5.11
 * Guess the GraalVM target directory before download of binary starts
-# Version 0.5.10
+
+## Version 0.5.10
 * Added remote K8s debugger
 * Support GraalVM installations without GU, e.g. yum managed
 * Other improvements in GraalVM installations handling
