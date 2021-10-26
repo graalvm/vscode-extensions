@@ -264,6 +264,10 @@ export async function attachToKubernetes(target?: any): Promise<void> {
 export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string, namespace?: string) {
 	const port = await getDebugPort(kubectl, podName, namespace);
 	if (!port) {
+		vscode.window.showErrorMessage(`Error checking pod state`);
+		return;
+	}
+	if (port == -1) {
 		utils.askYesNo(`Debug port not opened in selected pod. Restart pod with debug port opened?`, async () => {
 			let info: any = {name: podName, kind: 'Pod'};
 			while (info && info.kind !== 'Deployment') {
@@ -332,7 +336,7 @@ async function selectWorkspaceFolder(): Promise<vscode.WorkspaceFolder | undefin
     return await vscode.window.showWorkspaceFolderPick();
 }
 
-async function getDebugPort(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<number | undefined> {
+async function getDebugPort(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<number> {
     const envs = await getEnv(kubectl, podName, podNamespace);
     if (envs) {
         for (const env of envs) {
@@ -342,18 +346,22 @@ async function getDebugPort(kubectl: kubernetes.KubectlV1, podName: string, podN
                 return Number(addresses[addresses.length - 1]);
             }
         }
+		return -1;
     }
-    return undefined;
+    return Promise.reject();
 }
 
-async function getEnv(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<string[] | undefined> {
+async function getEnv(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<string[]> {
     const namespaceArg = podNamespace ? `--namespace ${podNamespace}` : '';
     const command = `exec ${podName} ${namespaceArg} -- env`;
     const result: kubernetes.KubectlV1.ShellResult | undefined = await kubectl.invokeCommand(command);
     if (result && result.code === 0) {
         return result.stdout.split('\n');
     }
-    return undefined;
+	if (result) {
+		vscode.window.showErrorMessage(result.stderr);
+	}
+    return Promise.reject();
 }
 
 async function getOwner(kubectl: kubernetes.KubectlV1, name: string, kind: string): Promise<any> {
