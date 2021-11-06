@@ -744,7 +744,7 @@ function execCancellable(cmd: string, token: vscode.CancellationToken, options?:
         let resolved: boolean = false;
         const child = cp.exec(cmd, options, (error, _stdout, _stderr) => {
             if (error || _stderr) {
-                if (!resolved) reject(error ?? new Error(_stderr.toString()));
+                if (!resolved) {reject(error ?? new Error(_stderr.toString()));}
             } else {
                 resolve(true);
             }
@@ -1124,7 +1124,7 @@ function processsGUOutput(stdout: string): {label: string, detail: string}[] {
             }
         } else {
             const info: string[] | null = line.match(reg);
-            if(info && info.length == maxLength) {
+            if(info && info.length === maxLength) {
                 components.push({ label: info[0], detail: info[2] });
             }
         }

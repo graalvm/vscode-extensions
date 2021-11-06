@@ -33,8 +33,8 @@ export function isSDKmanPresent(): boolean {
 }
 
 export function obtainSDKmanGVMInstallations(): [string, string][] {
-    if (!isSDKmanPresent())
-        return [];
+    if (!isSDKmanPresent()){
+        return [];}
     return _obtainSDKmanGVMInstallations();
 }
 
@@ -45,8 +45,8 @@ function _obtainSDKmanGVMInstallations(): [string, string][] {
 }
 
 export function obtainSDKmanUnclassifiedInstallations(): [string, string][] {
-    if (!isSDKmanPresent())
-        return [];
+    if (!isSDKmanPresent()){
+        return [];}
     return _obtainSDKmanUnclassifiedInstallations();
 }
 
@@ -57,8 +57,8 @@ function _obtainSDKmanUnclassifiedInstallations(): [string, string][] {
 }
 
 export function obtainSDKmanInstallations(): [string, string][] {
-    if (!isSDKmanPresent())
-        return [];
+    if (!isSDKmanPresent()){
+        return [];}
     return _obtainSDKmanInstallations();
 }
 
@@ -67,8 +67,8 @@ function _obtainSDKmanInstallations(): [string, string][] {
 }
 
 export async function setupSDKmanGVMInstallation(graalVMhome: string): Promise<void> {
-    if (!isSDKmanPresent())
-        return;
+    if (!isSDKmanPresent()){
+        return;}
     return _setupSDKmanGVMInstallation(graalVMhome);
 }
 
@@ -88,8 +88,8 @@ async function _setupSDKmanGVMInstallation(graalVMhome: string): Promise<void> {
 }
 
 export async function removeSDKmanUnclassifiedInstallation(graalVMhome: string): Promise<void> {
-    if (!isSDKmanPresent())
-        return;
+    if (!isSDKmanPresent()){
+        return;}
     return _removeSDKmanUnclassifiedInstallation(graalVMhome);
 }
 
@@ -110,8 +110,8 @@ async function _removeSDKmanUnclassifiedInstallation(graalVMhome: string): Promi
 }
 
 export function currentSDKmanJavaInstallation(): string | undefined {
-    if (!isSDKmanPresent())
-        return undefined;
+    if (!isSDKmanPresent()){
+        return undefined;}
     return _currentSDKmanJavaInstallation();
 }
 
@@ -120,8 +120,8 @@ function _currentSDKmanJavaInstallation(): string | undefined {
 }
 
 export function resetSDKmanJavaVersion(): void {
-    if (!isSDKmanPresent())
-        return;
+    if (!isSDKmanPresent()){
+        return;}
     _resetSDKmanJavaVersion();
 }
 
@@ -130,16 +130,16 @@ function _resetSDKmanJavaVersion(): void {
 }
 
 function setCurrent(newCurrent?: string) {
-    if(fs.existsSync(SDKMAN_CURRENT_JAVA))
-        fs.unlinkSync(SDKMAN_CURRENT_JAVA);
-    if(newCurrent)
-        fs.symlinkSync(newCurrent, SDKMAN_CURRENT_JAVA, "dir");
+    if(fs.existsSync(SDKMAN_CURRENT_JAVA)){
+        fs.unlinkSync(SDKMAN_CURRENT_JAVA);}
+    if(newCurrent){
+        fs.symlinkSync(newCurrent, SDKMAN_CURRENT_JAVA, "dir");}
 }
 
 function installLocalJava(localPath: string, version: string) {
     const candidate = join(SDKMAN_CANDIDATES_JAVA, version);
-    if(fs.existsSync(candidate))
-        fs.unlinkSync(candidate);
+    if(fs.existsSync(candidate)){
+        fs.unlinkSync(candidate);}
     fs.symlinkSync(localPath, candidate, "dir");
 }
 
@@ -156,7 +156,7 @@ function execSDKmanSync(command: string): string {
 
 async function createSDKmanGVMVersionName(graalVMhome: string): Promise<string | undefined> {
     const version: string[] | undefined = (await getGraalVMVersion(graalVMhome))?.split(" ");
-    if (version)
-        return `${version[2].slice(0, version[2].length-1)}-${version[1]}-J${version[version.length-1]}`;
+    if (version){
+        return `${version[2].slice(0, version[2].length-1)}-${version[1]}-J${version[version.length-1]}`;}
     return undefined;
 }

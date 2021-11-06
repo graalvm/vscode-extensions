@@ -279,7 +279,7 @@ async function selectOutputDir(): Promise<string | undefined> {
     await vscode.window.showQuickPick(choices, {
         placeHolder: 'Select native-image configuration output directory',
         ignoreFocusOut: true
-    }).then(async e => { if (e) ret = await e.getTarget(); });
+    }).then(async e => { if (e) {ret = await e.getTarget();} });
     return ret;
 }
 
