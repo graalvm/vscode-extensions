@@ -110,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.runVisualVMForPID', () => {
 		visualvm.selectProcessVisualVM(true).then(selected => {
-			if (selected) visualvm.startVisualVM(); 
+			if (selected) {visualvm.startVisualVM();} 
 		});
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.threadDumpVisualVM', () => {

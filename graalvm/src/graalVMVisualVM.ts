@@ -194,7 +194,7 @@ function configureWhenStarted(context: vscode.ExtensionContext) {
     let choices: QuickPickAction[] = getWhenStartedChoices();
     vscode.window.showQuickPick(choices, {
         placeHolder: 'Select action when process is started (use "Launch VisualVM & Java 8+ Application" configuration)'
-    }).then(selection => { if (selection) setWhenStarted(context, selection.code); });
+    }).then(selection => { if (selection) {setWhenStarted(context, selection.code);} });
 }
 
 function initializeCpuSamplingFilter(context: vscode.ExtensionContext) {
@@ -215,7 +215,7 @@ function configureCpuSamplingFilter(context: vscode.ExtensionContext) {
     let choices: QuickPickAsyncString[] = getCpuSamplerFilters();
     vscode.window.showQuickPick(choices, {
         placeHolder: 'Select CPU sampling filter'
-    }).then(selection => { if (selection) setCpuSamplingFilter(context, selection.code); });
+    }).then(selection => { if (selection) {setCpuSamplingFilter(context, selection.code);} });
 }
 
 function initializeCpuSamplingRate(context: vscode.ExtensionContext) {
@@ -236,7 +236,7 @@ function configureCpuSamplingRate(context: vscode.ExtensionContext) {
     let choices: QuickPickNumber[] = getCpuSamplingFrequencies();
     vscode.window.showQuickPick(choices, {
         placeHolder: 'Select CPU sampling rate'
-    }).then(selection => { if (selection) setCpuSamplingRate(context, selection.code); });
+    }).then(selection => { if (selection) {setCpuSamplingRate(context, selection.code);} });
 }
 
 function initializeMemorySamplingRate(context: vscode.ExtensionContext) {
@@ -257,7 +257,7 @@ function configureMemorySamplingRate(context: vscode.ExtensionContext) {
     let choices: QuickPickNumber[] = getMemorySamplingFrequencies();
     vscode.window.showQuickPick(choices, {
         placeHolder: 'Select memory sampling rate'
-    }).then(selection => { if (selection) setMemorySamplingRate(context, selection.code); });
+    }).then(selection => { if (selection) {setMemorySamplingRate(context, selection.code);} });
 }
 
 function initializeJfrSettings(context: vscode.ExtensionContext) {
@@ -278,12 +278,12 @@ function configureJfrSettings(context: vscode.ExtensionContext) {
     let choices: QuickPickString[] = getJfrSettingsChoices();
     vscode.window.showQuickPick(choices, {
         placeHolder: 'Select JFR settings'
-    }).then(selection => { if (selection) setJfrSettings(context, selection.code); });
+    }).then(selection => { if (selection) {setJfrSettings(context, selection.code);} });
 }
 
 
 async function getLaunchCommand(openPID: boolean = false): Promise<string | undefined> {
-    if (!graalVMHome || featureSet == 0) {
+    if (!graalVMHome || featureSet === 0) {
         setupGraalVM(true);
         return;
     }
@@ -314,14 +314,14 @@ async function getLaunchCommand(openPID: boolean = false): Promise<string | unde
         if (projectName !== undefined && sourcesIntegration) {
             let sourceViewer = '';
             const vsCodeLauncher = findVSCodeLauncher();
-            if (vsCodeLauncher) sourceViewer = `${vsCodeLauncher} -g {file}:{line}:{column}`;
+            if (vsCodeLauncher) {sourceViewer = `${vsCodeLauncher} -g {file}:{line}:{column}`;}
 
             let sourceRoots = '';
             const projectSourceRoots = await supportsProjectSourceRoots() ? await findProjectSourceRoots() : undefined;
             const javaSourceRoots = findJavaSourceRoots(graalVMHome);
             if (projectSourceRoots || javaSourceRoots) {
                 sourceRoots = `${projectSourceRoots ? projectSourceRoots : javaSourceRoots}`;
-                if (projectSourceRoots && javaSourceRoots) sourceRoots += path.delimiter + javaSourceRoots;
+                if (projectSourceRoots && javaSourceRoots) {sourceRoots += path.delimiter + javaSourceRoots;}
             }
 
             if (sourceViewer.length + sourceRoots.length < 200) {
@@ -343,7 +343,7 @@ async function getLaunchCommand(openPID: boolean = false): Promise<string | unde
     // Optionally open predefined view for the process
     if (openPID && PID) {
         command += ` --openpid ${PID?.toString()}`;
-        if (preselect !== '1') command += `@${preselect}`
+        if (preselect !== '1') {command += `@${preselect}`;}
     }
     
     return command;
@@ -390,9 +390,9 @@ async function findProjectSourceRoots(): Promise<string | undefined> {
             let roots: string[] | undefined = await vscode.commands.executeCommand('java.get.project.source.roots', folder.uri.toString());
             if (roots) {
                 for (const root of roots) {
-                    if (ret === undefined) ret = ''; else ret += path.delimiter;
+                    if (ret === undefined) {ret = '';} else {ret += path.delimiter;}
                     ret += encode(vscode.Uri.parse(root).fsPath);
-                };
+                }
             }
         }
         return ret;
@@ -440,9 +440,9 @@ async function getProjectPackages(): Promise<string | undefined> {
             let packages: string[] | undefined = await vscode.commands.executeCommand('java.get.project.packages', folder.uri.toString(), true);
             if (packages) {
                 for (const packg of packages) {
-                    if (ret === undefined) ret = ''; else ret += ', ';
+                    if (ret === undefined) {ret = '';} else {ret += ', ';}
                     ret += packg + '.*';
-                };
+                }
             }
         }
         return encode(ret);
@@ -492,21 +492,21 @@ export function attachVisualVM(): string {
 }
 
 async function searchForProcess(searchID: string, iterations: number, onFound: (searchID: string, foundPID: number) => void, onTimeout: (searchID: string) => void, onCanceled: (searchID: string) => void) {
-    if (ID == searchID && iterations > 0) {
+    if (ID === searchID && iterations > 0) {
         const found = await findProcessByID(searchID);
         if (found) {
             onFound(searchID, found);
         } else {
             setTimeout(() => {
-                awaitingProgress = awaitingProgress == 3 ? 0 : ++awaitingProgress;
+                awaitingProgress = awaitingProgress === 3 ? 0 : ++awaitingProgress;
                 processNode.updateProcName();
                 searchForProcess(searchID, --iterations, onFound, onTimeout, onCanceled);
             }, 1000);
         }
     } else if (iterations > 0) {
-        if (onCanceled) onCanceled(searchID);
+        if (onCanceled) {onCanceled(searchID);}
     } else {
-        if (onTimeout) onTimeout(searchID);
+        if (onTimeout) {onTimeout(searchID);}
     }
 }
 
@@ -626,7 +626,7 @@ class QuickPickProcess implements vscode.QuickPickItem{
             const suffixIdx = info1.indexOf(DISPLAY_NAME_SUFFIX);
             if (prefixIdx === -1 || suffixIdx === -1) {
                 this.label = info1.split(' ')[0];
-                if (this.label.length == 0) this.label = 'Java process';
+                if (this.label.length === 0) {this.label = 'Java process';}
             } else {
                 this.label = info1.substring(prefixIdx + DISPLAY_NAME_PREFIX.length, suffixIdx);
             }
@@ -634,7 +634,7 @@ class QuickPickProcess implements vscode.QuickPickItem{
             this.label = 'Java process';
         }
         this.description = `(pid ${pid})`;
-        if (info2) this.detail = info2;
+        if (info2) {this.detail = info2;}
     }
 }
 
@@ -653,14 +653,14 @@ export function configureSettingVisualVM(context: vscode.ExtensionContext, ...pa
 
 function computeProcName(): string {
     if (PID) {
-        if (processName) return `${processName} (pid ${PID.toString()})`;
-        else return `Java process (pid ${PID.toString()})`;
+        if (processName) {return `${processName} (pid ${PID.toString()})`;}
+        else {return `Java process (pid ${PID.toString()})`;}
     }
 
-    if (!ID) return '<not selected, select...>';
+    if (!ID) {return '<not selected, select...>';}
 
-    if (awaitingProgress == 1) return `${processName} (pid pending).`;
-    if (awaitingProgress == 2) return `${processName} (pid pending)..`;
+    if (awaitingProgress === 1) {return `${processName} (pid pending).`;}
+    if (awaitingProgress === 2) {return `${processName} (pid pending)..`;}
     return `${processName} (pid pending)...`;
 }
 
@@ -805,7 +805,7 @@ export async function stopJFRRecordingVisualVM() {
 }
 
 function encode(text: string | undefined): string {
-    if (!text) return 'undefined';
+    if (!text) {return 'undefined';}
     text = text.replace(/\'/g, '%27');
     text = text.replace(/\"/g, '%22');
     text = text.replace(/\s/g, '%20');
@@ -1000,7 +1000,7 @@ class WhenStartedNode extends VisualVMNode implements Configurable {
         const value = getWhenStartedChoices()[performWhenStarted].label;
         this.description = value.charAt(0).toLowerCase() + value.slice(1);
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1060,7 +1060,7 @@ class CpuSamplingFilterNode extends VisualVMNode implements Configurable {
         const value = getCpuSamplerFilters()[cpuSamplingFilter].label;
         this.description = value.charAt(0).toLowerCase() + value.slice(1);
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1079,9 +1079,9 @@ class CpuSamplingRateNode extends VisualVMNode implements Configurable {
 
     updateSamplingRate() {
         const frequency = getCpuSamplingFrequencies()[cpuSamplingRate];
-        this.description = `${frequency.label} ${frequency.description}`
+        this.description = `${frequency.label} ${frequency.description}`;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1109,9 +1109,9 @@ class MemorySamplerRateNode extends VisualVMNode implements Configurable {
 
     updateSamplingRate() {
         const frequency = getMemorySamplingFrequencies()[memorySamplingRate];
-        this.description = `${frequency.label} ${frequency.description}`
+        this.description = `${frequency.label} ${frequency.description}`;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1140,7 +1140,7 @@ class JfrSettingsNode extends VisualVMNode implements Configurable {
     updateSettings() {
         this.description = getJfrSettingsChoices()[jfrSettings].label;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1166,7 +1166,7 @@ class ProcessNode extends VisualVMNode {
     updateProcName() {
         this.description = computeProcName();
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
     updateFeatures() {
@@ -1198,7 +1198,7 @@ export class VisualVMNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 
 	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
         if (!element) {
-            if (featureSet == 0) {
+            if (featureSet === 0) {
                 return [];
             } else if (featureSet === 1) {
                 return [ processNode, emptyNode, latestGralVMNode ];
