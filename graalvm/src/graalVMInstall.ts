@@ -1118,7 +1118,7 @@ function processsGUOutput(stdout: string): {label: string, detail: string}[] {
             }
         } else {
             const info: string[] | null = line.match(reg);
-            if(info && info.length == maxLength) {
+            if(info && info.length === maxLength) {
                 components.push({ label: info[0], detail: info[2] });
             }
         }

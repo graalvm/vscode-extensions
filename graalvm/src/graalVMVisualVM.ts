@@ -283,7 +283,7 @@ function configureJfrSettings(context: vscode.ExtensionContext) {
 
 
 async function getLaunchCommand(openPID: boolean = false): Promise<string | undefined> {
-    if (!graalVMHome || featureSet == 0) {
+    if (!graalVMHome || featureSet === 0) {
         setupGraalVM(true);
         return;
     }
@@ -492,13 +492,13 @@ export function attachVisualVM(): string {
 }
 
 async function searchForProcess(searchID: string, iterations: number, onFound: (searchID: string, foundPID: number) => void, onTimeout: (searchID: string) => void, onCanceled: (searchID: string) => void) {
-    if (ID == searchID && iterations > 0) {
+    if (ID === searchID && iterations > 0) {
         const found = await findProcessByID(searchID);
         if (found) {
             onFound(searchID, found);
         } else {
             setTimeout(() => {
-                awaitingProgress = awaitingProgress == 3 ? 0 : ++awaitingProgress;
+                awaitingProgress = awaitingProgress === 3 ? 0 : ++awaitingProgress;
                 processNode.updateProcName();
                 searchForProcess(searchID, --iterations, onFound, onTimeout, onCanceled);
             }, 1000);
@@ -626,7 +626,7 @@ class QuickPickProcess implements vscode.QuickPickItem{
             const suffixIdx = info1.indexOf(DISPLAY_NAME_SUFFIX);
             if (prefixIdx === -1 || suffixIdx === -1) {
                 this.label = info1.split(' ')[0];
-                if (this.label.length == 0) this.label = 'Java process';
+                if (this.label.length === 0) this.label = 'Java process';
             } else {
                 this.label = info1.substring(prefixIdx + DISPLAY_NAME_PREFIX.length, suffixIdx);
             }
@@ -659,8 +659,8 @@ function computeProcName(): string {
 
     if (!ID) return '<not selected, select...>';
 
-    if (awaitingProgress == 1) return `${processName} (pid pending).`;
-    if (awaitingProgress == 2) return `${processName} (pid pending)..`;
+    if (awaitingProgress === 1) return `${processName} (pid pending).`;
+    if (awaitingProgress === 2) return `${processName} (pid pending)..`;
     return `${processName} (pid pending)...`;
 }
 
@@ -1198,7 +1198,7 @@ export class VisualVMNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 
 	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
         if (!element) {
-            if (featureSet == 0) {
+            if (featureSet === 0) {
                 return [];
             } else if (featureSet === 1) {
                 return [ processNode, emptyNode, latestGralVMNode ];
