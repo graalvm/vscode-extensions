@@ -241,21 +241,15 @@ export async function getGraalVMVersion(homeFolder: string): Promise<string | un
                     if (stderr) {
                         let javaVersion: string | undefined;
                         let graalVMVersion: string | undefined;
-                        stderr.split('\n').forEach((line, idx) => {
-                            switch (idx) {
-                                case 0:
-                                    const javaInfo: string[] | null = line.match(/version\s+\"(\S+)\"/);
-                                    if (javaInfo && javaInfo.length > 1) {
-                                        javaVersion = javaInfo[1];
-                                    }
-                                    break;
-                                case 2:
-                                    const vmInfo = line.match(/(GraalVM.*)\s+\(/);
-                                    if (vmInfo && vmInfo.length > 1) {
-                                        graalVMVersion = vmInfo[1];
-                                    }
-                                    break;
-                            }
+                        stderr.split('\n').forEach((line: string) => {
+							const javaInfo: string[] | null = line.match(/version\s+"(\S+)"/);
+							const vmInfo = line.match(/(GraalVM.*)\s+\(/);
+							if (javaInfo && javaInfo.length > 1) {
+								javaVersion = javaInfo[1];
+							}
+							if (vmInfo && vmInfo.length > 1) {
+								graalVMVersion = vmInfo[1];
+							}
                         });
                         if (javaVersion && graalVMVersion) {
                             if (javaVersion.startsWith('1.')) {
