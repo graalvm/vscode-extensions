@@ -268,7 +268,7 @@ export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string
 		vscode.window.showErrorMessage(`Error checking pod state`);
 		return;
 	}
-	if (port == -1) {
+	if (port === -1) {
 		utils.askYesNo(`Debug port not opened in selected pod. Restart pod with debug port opened?`, async () => {
 			let info: any = {name: podName, kind: 'Pod'};
 			while (info && info.kind !== 'Deployment') {
