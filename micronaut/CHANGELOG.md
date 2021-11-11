@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.9
+* Micronaut 'Build Native Image' uses nativeCompile command and GraalVM Gradle plugin for Micronaut 3.2.0 and newer
+
 ## Version 0.5.8
 * Deploy, run and debug Micronaut apps in Kubernetes
    * Works for OCI and minikube
