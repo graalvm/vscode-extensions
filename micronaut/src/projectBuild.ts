@@ -8,6 +8,8 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as path from 'path';
+import { createReadStream } from 'fs';
+import { createInterface } from 'readline';
 import { getJavaHome, findExecutable } from "./utils";
 
 const MICRONAUT: string = 'Micronaut';
@@ -73,10 +75,10 @@ export async function build(goal?: string, group?: string) {
     }
 }
 
-async function buildWrapper<T>(gradle?: (wrapper: vscode.Uri, ...args: any[]) => T, maven?: (wrapper: vscode.Uri, ...args: any[]) => T, ...args: any[]): Promise<T | undefined> {
+async function buildWrapper<T>(gradle?: (wrapper: vscode.Uri, ...args: any[]) => Promise<T>, maven?: (wrapper: vscode.Uri, ...args: any[]) => T, ...args: any[]): Promise<T | undefined> {
     let wrapper: vscode.Uri[] = await vscode.workspace.findFiles(process.platform === 'win32' ? '**/gradlew.bat' : '**/gradlew', '**/node_modules/**');
     if (gradle && wrapper && wrapper.length > 0) {
-        return gradle(wrapper[0], ...args);
+        return await gradle(wrapper[0], ...args);
     }
     wrapper = await vscode.workspace.findFiles(process.platform === 'win32' ? '**/mvnw.bat' : '**/mvnw', '**/node_modules/**');
     if (maven && wrapper && wrapper.length > 0) {
@@ -89,10 +91,40 @@ async function terminalCommandFor(goal: string): Promise<string | undefined> {
     return buildWrapper(terminalGradleCommandFor, terminalMavenCommandFor, goal);
 }
 
-function terminalGradleCommandFor(wrapper: vscode.Uri, goal: string): string | undefined {
+async function terminalGradleCommandFor(wrapper: vscode.Uri, goal: string): Promise<string | undefined> {
+    if (goal === 'nativeImage') {
+        const microVersion = await getMicronautVersion();
+        if (microVersion && microVersion.length > 1) {
+            const major = parseInt(microVersion[0]);
+            // Micronaut uses nativeCompile instead of nativeImage starting from 3.2.0
+            if (major > 3 || (major === 3 && parseInt(microVersion[1]) >= 2)) {
+                goal = 'nativeCompile';
+            }
+        }
+    }
     const exec = wrapper.fsPath.replace(/(\s+)/g, '\\$1');
     if (exec) {
-        return `${exec} ${goal} --no-daemon`;
+        return `${exec} ${goal}`;
+    }
+    return undefined;
+}
+
+async function getMicronautVersion(): Promise<string[] | undefined> {
+    const properties: vscode.Uri[] = await vscode.workspace.findFiles('**/gradle.properties', '**/node_modules/**', 1);
+    if (properties?.length == 1) {
+        const fileStream = createReadStream(properties[0].fsPath);
+        const rl = createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+        for await (const line of rl) {
+            const key = 'micronautVersion=';
+            const str: string = line.toString();
+            const idx = str.indexOf(key);
+            if (idx >= 0) {
+                return str.substr(idx + key.length).trim().split('.');
+            }
+        }
     }
     return undefined;
 }
@@ -131,11 +163,11 @@ function terminalMavenCommandFor(wrapper: vscode.Uri, goal: string): string | un
     return undefined;
 }
 
-function getAvailableGradleGoals(wrapper: vscode.Uri): Goals {
-    const out = cp.execFileSync(wrapper.fsPath, ['tasks', '--no-daemon', `--project-dir=${path.dirname(wrapper.fsPath)}`]);
+function getAvailableGradleGoals(wrapper: vscode.Uri): Promise<Goals> {
+    const out = cp.execFileSync(wrapper.fsPath, ['tasks', `--project-dir=${path.dirname(wrapper.fsPath)}`]);
     const buildGoals: vscode.QuickPickItem[] = parseAvailableGradleGoals(out.toString(), 'Build tasks');
     const deployGoals: vscode.QuickPickItem[] = parseAvailableGradleGoals(out.toString(), 'Upload tasks');
-    return { build: buildGoals, deploy: deployGoals };
+    return Promise.resolve({ build: buildGoals, deploy: deployGoals });
 }
 
 function parseAvailableGradleGoals(out: string, category: string): vscode.QuickPickItem[] {
