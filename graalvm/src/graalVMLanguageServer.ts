@@ -56,12 +56,14 @@ export function startLanguageServer(graalVMHome?: string) {
 								socket.once('error', (e) => {
 									reject(e);
 								});
-								socket.connect(lsPort, '127.0.0.1', () => {
-									resolve({
-										reader: socket,
-										writer: socket
+								setTimeout(() => {
+									socket.connect(lsPort, '127.0.0.1', () => {
+										resolve({
+											reader: socket,
+											writer: socket
+										});
 									});
-								});
+								}, 1000);
 							});
 						}
 					});
