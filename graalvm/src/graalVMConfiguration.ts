@@ -220,7 +220,7 @@ async function updateMavenProxy(proxy: string | undefined) {
     if (foundProxy) {
         foundProxy.active = true;
     } else {
-        const gvmProxyIndex = mavenProxies.findIndex(p => p.id == ID_GRAALVM_VSCODE);
+        const gvmProxyIndex = mavenProxies.findIndex(p => p.id === ID_GRAALVM_VSCODE);
         if (gvmProxyIndex < 0) {
             mavenProxies.push(createMavenProxy(proxy));
         } else {

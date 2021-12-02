@@ -130,16 +130,18 @@ function _resetSDKmanJavaVersion(): void {
 }
 
 function setCurrent(newCurrent?: string) {
-    if(fs.existsSync(SDKMAN_CURRENT_JAVA))
+    try {
         fs.unlinkSync(SDKMAN_CURRENT_JAVA);
+    } catch (_) {}
     if(newCurrent)
         fs.symlinkSync(newCurrent, SDKMAN_CURRENT_JAVA, "dir");
 }
 
 function installLocalJava(localPath: string, version: string) {
     const candidate = join(SDKMAN_CANDIDATES_JAVA, version);
-    if(fs.existsSync(candidate))
+    try {
         fs.unlinkSync(candidate);
+    } catch (_) {}
     fs.symlinkSync(localPath, candidate, "dir");
 }
 
