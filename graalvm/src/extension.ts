@@ -143,6 +143,15 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.configureSettingVisualVM', (...params: any[]) => {
 		visualvm.configureSettingVisualVM(context, params);
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSThreadDump', () => {
+		visualvm.troubleshootNBLSThreadDump();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSHeapDump', () => {
+		visualvm.troubleshootNBLSHeapDump();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSCpuSampler', () => {
+		visualvm.troubleshootNBLSCpuSampler();
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', debug.attachToKubernetes));
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
 	context.subscriptions.push(

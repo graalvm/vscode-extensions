@@ -292,6 +292,21 @@
 				"category": "VisualVM"
 			},
 			{
+				"command": "extension.graalvm.troubleshootNBLSThreadDump",
+				"title": "Thread Dump",
+				"category": "Troubleshoot Language Server"
+			},
+			{
+				"command": "extension.graalvm.troubleshootNBLSHeapDump",
+				"title": "Heap Dump",
+				"category": "Troubleshoot Language Server"
+			},
+			{
+				"command": "extension.graalvm.troubleshootNBLSCpuSampler",
+				"title": "CPU Sampler",
+				"category": "Troubleshoot Language Server"
+			},
+			{
 				"command": "extension.graalvm.debugKubernetes",
 				"title": "Debug (Attach using Java 8+)",
 				"category": "GraalVM"
