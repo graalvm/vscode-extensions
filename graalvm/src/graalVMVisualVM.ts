@@ -529,6 +529,33 @@ async function findProcessByID(searchID: string): Promise<number | undefined> {
     return ret;
 }
 
+async function findProcessByParams(searchParams: string[]): Promise<number | undefined> {
+    const executable = utils.findExecutable('jps', graalVMHome);
+    if (!executable) {
+        return;
+    }
+    const parts = await processCommand(`"${executable}" -v`);
+    let ret: number | undefined;
+    parts.some(p => {
+        if (includesAll(p.rest, searchParams)) {
+            ret = p.pid;
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    return ret;
+}
+
+function includesAll(string: string | undefined, strings: string[]) {
+    if (!string || string.length === 0) return false;
+    for (const search of strings) {
+        if (!string.includes(search)) return false;
+    }
+    return true;
+}
+
 async function setProcessVisualVM(pid: number) {
     awaitingProgress = 0;
     PID = pid;
@@ -802,6 +829,176 @@ export async function stopJFRRecordingVisualVM() {
             exec(command);
         }
     }
+}
+
+export async function troubleshootNBLSThreadDump() {
+    const threaddump = (pid: number) => {
+        return ` --threaddump ${pid.toString()} --window-to-front`;
+    };
+    troubleshootNBLS(threaddump);
+}
+
+export async function troubleshootNBLSHeapDump() {
+    const threaddump = (pid: number) => {
+        return ` --heapdump ${pid.toString()} --window-to-front`;
+    };
+    troubleshootNBLS(threaddump);
+}
+
+let nblsSampling: boolean = false;
+export async function troubleshootNBLSCpuSampler() {
+    if (nblsSampling) {
+        vscode.window.showWarningMessage('Troubleshoot Language Server: CPU sampling already in progress!')
+        return;
+    } else {
+        nblsSampling = true;
+    }
+    try {
+        let delay: number;
+        const delayChoices: QuickPickNumber[] = getTroubleshootNBLSCpuSamplerDelays();
+        const delaySelection = await vscode.window.showQuickPick(delayChoices, {
+            placeHolder: 'Select the delay before starting CPU sampler'
+        });
+        if (delaySelection) {
+            delay = delaySelection.value;
+        } else {
+            return;
+        }
+        
+        let duration: number;
+        const durationChoices: QuickPickNumber[] = getTroubleshootNBLSCpuSamplerDurations();
+        const durationSelection = await vscode.window.showQuickPick(durationChoices, {
+            placeHolder: 'Select the duration of CPU sampling'
+        });
+        if (durationSelection) {
+            duration = durationSelection.value;
+        } else {
+            return;
+        }
+
+        if (delay > 0) {
+            await troubleshootNBLS(); // start VisualVM in advance to be ready for sampling after the delay
+            await waitWithProgress('Troubleshoot Language Server: waiting for CPU sampler...', delay);
+        }
+        let nblspid: number | undefined = undefined;
+        const startSampler = (pid: number) => {
+            nblspid = pid;
+            let toFront = duration > 0 ? '' : ' --window-to-front';
+            return ` --start-cpu-sampler ${pid}@include-classes=,sampling-rate=20${toFront}`;
+        };
+        await troubleshootNBLS(startSampler);
+        if (nblspid !== undefined && duration > 0) {
+            if (!checkNBLSProcessIsRunning(nblspid)) {
+                return;
+            }
+            await waitWithProgress('Troubleshoot Language Server: CPU sampling in progress...', duration);
+            if (!checkNBLSProcessIsRunning(nblspid)) {
+                return;
+            }
+            const stopSampler = () => {
+                return ` --snapshot-sampler ${nblspid} --stop-sampler ${nblspid} --window-to-front`;                
+            };
+            await troubleshootNBLS(stopSampler, nblspid);
+        }
+    } finally {
+        nblsSampling = false;
+    }
+}
+
+function checkNBLSProcessIsRunning(pid: number): boolean {
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch (e) {
+        vscode.window.showWarningMessage('Troubleshoot Language Server: the LS process already terminated');
+        return false;
+    }
+}
+
+async function waitWithProgress(message: string, ms: number) {
+    if (ms < 1000) return;
+    async function wait(time: number) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(undefined);
+            }, time);
+        })
+    }
+    async function waiter(progress: vscode.Progress<{ message?: string; increment?: number }>) {
+        progress.report({
+            increment: 1
+        });
+        const steps = ms / 1000;
+        const incr = 100 / steps;
+        for (let i = 0; i < steps; i++) {
+            await wait(1000);
+            progress.report({
+                increment: incr
+            });
+        }
+    }
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: message,
+        cancellable: false
+    }, (progress) => {
+        return waiter(progress);
+    });
+}
+
+function getTroubleshootNBLSCpuSamplerDelays(): QuickPickNumber[] {
+    return [
+        new QuickPickNumber('3', 's', 3000, 0),
+        new QuickPickNumber('5', 's', 5000, 1),
+        new QuickPickNumber('10', 's', 10000, 2),
+        new QuickPickNumber('30', 's', 30000, 3),
+        new QuickPickNumber('1', 'm', 60000, 4),
+        new QuickPickNumber('Start immediately', '', 0, 5)
+    ];
+}
+
+function getTroubleshootNBLSCpuSamplerDurations(): QuickPickNumber[] {
+    return [
+        new QuickPickNumber('5', 's', 5000, 0),
+        new QuickPickNumber('10', 's', 10000, 1),
+        new QuickPickNumber('30', 's', 30000, 2),
+        new QuickPickNumber('1', 'm', 60000, 3),
+        new QuickPickNumber('3', 'm', 180000, 4),
+        new QuickPickNumber('5', 'm', 300000, 5),
+        new QuickPickNumber('Start only', '(manual snapshot & stop sampling in VisualVM)', 0, 6)
+    ];
+}
+
+async function troubleshootNBLS(parameters: ((pid: number) => string) | undefined = undefined, nblsPID: number | undefined = undefined) {
+    if (!graalVMHome) {
+        vscode.window.showErrorMessage('Troubleshoot Language Server: No active GraalVM installation found');
+        return;
+    }
+    if (featureSet < 2) {
+        vscode.window.showErrorMessage('Troubleshoot Language Server: Active GraalVM version not supported');
+        return;
+    }
+    const executable = utils.findExecutable('jvisualvm', graalVMHome);
+    if (!executable) {
+        vscode.window.showErrorMessage("Troubleshoot Language Server: VisualVM not found in active GraalVM installation.");
+        return;
+    }
+    if (!nblsPID) {
+        nblsPID = await findProcessByParams([ 'nbcode', 'asf.apache-netbeans-java', `-Djdk.home=${graalVMHome}` ]);
+        if (!nblsPID) {
+            vscode.window.showErrorMessage('Troubleshoot Language Server: the LS process not found');
+            return;
+        }
+    }
+    
+    let command = executable.indexOf(' ') > -1 ? `"${executable}"` : executable; // VisualVM launcher
+    command += ' -J-XX:PerfMaxStringConstLength=6144'; // Increase commandline length for jvmstat
+    command += ' -J-Dvisualvm.search.process.timeout=10000'; // Increase default timeout searching for the defined PID
+    if (parameters) {
+        command += parameters(nblsPID);
+    }
+    // console.log(`$$$ Executing troubleshooting command |${command}|`);
+    exec(command);
 }
 
 function encode(text: string | undefined): string {
