@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.5.14
+* Thread dump / Heap dump / CPU sampler commands for the NBLS process to enable quick troubleshooting
+* SDKMan support fixes
+* README.MD improvements
+
 ## Version 0.5.13
 * Read GraalVM CE releases using GitHub API
 
