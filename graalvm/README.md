@@ -608,6 +608,10 @@ The GraalVM Extension for VS Code recommends the following extensions:
 * [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
 * [File a bug](https://github.com/graalvm/vscode-extensions/issues/new?labels=bug)
 
+In the case of performance problems with GraalVM Extension Pack for Java, it is possible to take Thread dump, Heap dump or CPU sample the underlying Language Server (NetBeans Language Server). Commands: `Troubleshoot Language Server: Thread Dump | Heap Dump | CPU Sampler` open VisualVM bundled with GraalVM and automatically perform selected action on underlying Language Server. Resulting file should be then attached to bug report.
+This can help to identify the root cause of your problem. Please use it when filling a bug report for GraalVM Extension Pack for Java in case of slowness, high memory consumption or high CPU utilization.
+
+![Troubleshoot using VisualVM](images/visualvm_troubleshooting.png)
 ### Privacy Policy
 
 Read the [Oracle Privacy Policy](https://www.oracle.com/legal/privacy/privacy-policy.html) to learn more.
