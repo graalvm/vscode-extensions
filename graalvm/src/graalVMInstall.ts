@@ -577,10 +577,12 @@ async function dowloadGraalVMRelease(releaseURL: string, storagePath: string | u
                             if (error) {
                                 reject(error);
                                 res.resume();
+                                file.end();
                             } else {
                                 token.onCancellationRequested(() => {
                                     reject();
                                     res.destroy();
+                                    file.end();
                                     fs.unlinkSync(filePath);
                                 });
                                 res.pipe(file);
@@ -599,11 +601,13 @@ async function dowloadGraalVMRelease(releaseURL: string, storagePath: string | u
                                 }
                                 res.on('end', () => {
                                     resolve(filePath);
+                                    // file.end(); // NOTE: called by 'res.pipe(file);'
                                 });
                             }
                         }
                     }).on('error', e => {
                         reject(e);
+                        file.end();
                     });
                 };
                 request(releaseURL);
