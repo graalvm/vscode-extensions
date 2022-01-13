@@ -590,8 +590,8 @@ This extension contributes the following settings:
 * __graalvm.home__ - the path to the GraalVM installation
 * __graalvm.installations__ - all registered GraalVM installations
 * __graalvm.systemDetect__ - detect GraalVM's installation from the system environment variables
-* __graalvm.languageServer.currentWorkDir__ - an absolute path to the working directory of GraalVM's Language Server Protocol
-* __graalvm.languageServer.inProcessServer__ - start GraalVM's Language Server Protocol within processes being run or debugged
+* __graalvm.languageServer.start__ - start the GraalVM's Language Server
+* __graalvm.languageServer.currentWorkDir__ - an absolute path to the working directory of GraalVM's Language Server
 * __graalvm.languageServer.delegateServers__ - a comma-separated list of `language@[host:]port` where other language servers run
 * __graalvm.languageServer.startRLanguageServer__ - start the R Language Server
 * __graalvm.languageServer.startRubyLanguageServer__ - start the Ruby Language Server
