@@ -28,8 +28,8 @@ export function startLanguageServer(graalVMHome?: string) {
 	if (!graalVMHome) {
 		return;
 	}
-	const inProcessServer = getGVMConfig().get('languageServer.inProcessServer') as boolean;
-	if (!inProcessServer || delegateLanguageServers.size > 0) {
+	const languageServerStart = getGVMConfig().get('languageServer.start') as 'none' | 'single' | 'inProcess';
+	if (languageServerStart === 'single' || delegateLanguageServers.size > 0) {
 		const re = utils.findExecutable(POLYGLOT, graalVMHome);
 		if (re) {
 			let serverWorkDir: string | undefined = getGVMConfig().get('languageServer.currentWorkDir') as string;
@@ -87,7 +87,7 @@ export function connectToLanguageServer(connection: (() => Thenable<StreamInfo>)
 	};
 
 	languageClient = new Promise<LanguageClient>((resolve) => {
-		let client = new LanguageClient('GraalVM Language Client', connection, clientOptions);
+		let client = new LanguageClient('GraalVMLanguageServer', 'GraalVM Language Client', connection, clientOptions);
 		let prepareStatus = vscode.window.setStatusBarMessage("Graal Language Client: Connecting to GraalLS");
 		client.onReady().then(() => {
 			prepareStatus.dispose();

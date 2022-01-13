@@ -53,15 +53,25 @@
 					"default": [],
 					"description": "Paths to GraalVM installations."
 				},
+				"graalvm.languageServer.start": {
+					"type": "string",
+					"default": "none",
+					"enum": [
+						"none",
+						"single",
+						"inProcess"
+					],
+					"enumDescriptions": [
+						"Do not start GraalVM Language Server.",
+						"Start single GraalVM Language Server per IDE run.",
+						"Start separate GraalVM Language Server within every processes being run or debugged."
+					],
+					"description": "Start GraalVM Language Server."
+				},
 				"graalvm.languageServer.currentWorkDir": {
 					"type": "string",
 					"default": "",
 					"description": "Absolute path to the working directory of the GraalVM Language Server."
-				},
-				"graalvm.languageServer.inProcessServer": {
-					"type": "boolean",
-					"default": false,
-					"description": "Start a new GraalVM Language Server with every processes being run or debugged. By default, a single GraalVM Language Server is started per IDE run."
 				},
 				"graalvm.languageServer.delegateServers": {
 					"type": "string",

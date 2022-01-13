@@ -27,10 +27,10 @@ let rTermArgs: string[] | undefined;
 export class GraalVMDebugAdapterTracker implements vscode.DebugAdapterTrackerFactory {
 
 	createDebugAdapterTracker(session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
-		const inProcessServer = getGVMConfig().get('languageServer.inProcessServer') as boolean;
+		const languageServerStart = getGVMConfig().get('languageServer.start') as 'none' | 'single' | 'inProcess';
 		return {
 			onDidSendMessage(message: any) {
-				if (message.type === 'event' && !hasLSClient() && session.configuration.request === 'launch' && inProcessServer) {
+				if (message.type === 'event' && !hasLSClient() && session.configuration.request === 'launch' && languageServerStart === 'inProcess') {
 					if (message.event === 'output' && message.body.category === 'telemetry' && message.body.output === 'childProcessID') {
 						setLSPID(message.body.data.pid);
 					}
@@ -108,7 +108,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 				}, 1000);
 			} else {
 				const gvmc = getGVMConfig();
-				const inProcessServer = gvmc.get('languageServer.inProcessServer') as boolean;
+				const languageServerStart = gvmc.get('languageServer.start') as 'none' | 'single' | 'inProcess';
 				const graalVMHome = getGVMHome(gvmc);
 				if (graalVMHome) {
 					config.graalVMHome = graalVMHome;
@@ -118,7 +118,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 					} else {
 						config.env = { 'PATH': graalVMBin };
 					}
-					if (config.request === 'launch' && inProcessServer) {
+					if (config.request === 'launch' && languageServerStart === 'inProcess') {
 						stopLanguageServer().then(() => {
 							lspArgs().then(args => {
 								const lspArg = args.find(arg => arg.startsWith('--lsp='));
@@ -162,7 +162,8 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
         return getLaunchInfo(config, getGVMHome()).then(launchInfo => {
 			config.graalVMLaunchInfo = launchInfo;
 			if (config.program) {
-				if (!getGVMConfig().get('languageServer.inProcessServer') as boolean) {
+				const languageServerStart = getGVMConfig().get('languageServer.start') as 'none' | 'single' | 'inProcess';
+				if (languageServerStart === 'single') {
 					vscode.commands.getCommands().then((commands: string[]) => {
 						if (commands.includes('dry_run')) {
 							vscode.commands.executeCommand('dry_run', pathToFileURL(config.program));

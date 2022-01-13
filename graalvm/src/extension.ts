@@ -181,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 			stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
 		} else if (e.affectsConfiguration('graalvm.installations') || e.affectsConfiguration('graalvm.systemDetect')) {
 			vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
-		} else if (e.affectsConfiguration('graalvm.languageServer.currentWorkDir') || e.affectsConfiguration('graalvm.languageServer.inProcessServer')) {
+		} else if (e.affectsConfiguration('graalvm.languageServer.currentWorkDir') || e.affectsConfiguration('graalvm.languageServer.start')) {
 			stopLanguageServer().then(() => startLanguageServer(getGVMHome()));
 		}
 	}));
