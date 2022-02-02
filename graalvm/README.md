@@ -188,6 +188,13 @@ With GraalVM Tools for Java extension you can turn your Java application into a 
 The extension provides support for ahead-of-time compilation with [GraalVM Native Image](../../../reference-manual/native-image/README.md).
 Only the code that is required by the application at run time will be compiled and linked into the final native executable.
 
+### Tracing Agent <!-- MAYBE this tracing agent part can be omitted in this intro page? -->
+GraalVM Tools for Java extension also provides experimental support for the Java [Tracing agent](../../../reference-manual/native-image/Agent.md) to automate the process of tracking and registering dynamic feature calls, making it even easier to build native images in VS Code.
+
+A special launch configuration - **Launch Native Image Agent & Java 8+ Application** - is provided by the GraalVM Tools for Java extension to start a Java project with the Tracing agent.
+
+Check the extension documentation to learn [how to build a native image and apply the Tracing agent from within VS Code](README.md#build-a-native-image).
+
 ### Configuration with Tracing Agent
 
 During a native image build, the representation of a whole program is created to figure out which classes and methods will be used at run time.
