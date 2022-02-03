@@ -8,26 +8,23 @@ permalink: /tools/vscode/graalvm-extension/
 # GraalVM Tools for Java Extension
 
 * [Extension Installation](#extension-installation)
-* [GraalVM Installation](#graalvm-installation)
+* [GraalVM Installation Wizard](#graalvm-installation-wizard)
 * [Java Development and Debugging](#java-development-and-debugging)
 * [Integration with VisualVM](#integration-with-visualvm)
+* [Micronaut Support](#micronaut-support)
 * [Native Image Building and Debugging](#native-image-building-and-debugging)
-* [Popular Languages Support](#popular-languages-support)
+* [Languages Support](#popular-languages-support)
 * [Language Server Protocol Implementation](#language-server-protocol-implementation)
 * [Debug Adapter Protocol Implementation](#debug-adapter-protocol-implementation)
-* [Running and Debugging Polyglot Applications](#running-and-debugging-oolyglot-applications)
 * [Extension Settings](#extension-settings)
 
-[GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) extension provides a full-fledged support for the Java language and, additionally, enables a polyglot environment in VS Code, making it a comfortable and convenient integrated development environment to work with.
-Users can edit and debug applications written in the GraalVM supported languages (Java, JS, Ruby, R, and Python) in VS Code.
+[GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) extension provides a full-fledged support for the Java language and includes the GraalVM runtime with both just-in-time and ahead-of-time compilers, making it a comfortable and convenient integrated development environment to work with.
+Besides Java, this extension enables a polyglot environment in VS Code and provides full editing and debugging capabilities for JavaScript and Node.js, Python, R, and Ruby languages.
+The extension provides the wizard to install GraalVM and to simplify configuring the development environment.
 
-GraalVM Tools for Java Extension brings support for Java projects development and debugging in VS Code.
-Besides Java, this extension provides editing and debugging capabilities for JavaScript and Node.js, Python, R, and Ruby languages.
-The extension also provides the wizard to install GraalVM to simplify configuring the development environment.
+The GraalVM Tools for Java extension in combination with the [GraalVM Tools for Micronaut extension](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), brings native support for the Micronaut framework in VS Code and many more possibilities for Java developers.
 
-The GraalVM Tools for Java extension is a prerequisite for the [Micronaut support in VS Code](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), which brings many more possibilities for Java developers.
-
-Note: The extension is Technology Preview, and the development team is actively working on further improvements to provide high usability to developers.
+Note: The extension is Technology Preview, and the development team is actively working on further improvements to provide better usability for developers.
 
 ## Extension Installation
 
@@ -40,23 +37,30 @@ To install the GraalVM Tools for Java extension in VS Code, do the following:
 
 Once installed, notice the "Gr" icon in the Activity Bar on the left.
 
-![GraalVM Install Dialog](images/graalvm_install_actions.png)
-
 ## GraalVM Installation Wizard
 
-With the extension installed, you already enable all necessary features for Java applications development and debugging.
-However, to make use of all-inclusive capabilities that the extension provides, including support for ahead-of-time compilation, you need to install [GraalVM](https://www.graalvm.org/).
-Any application that runs on a Java Virtual Machine (JVM) can run on GraalVM.
-GraalVM includes a JDK based on the Java HotSpot VM, and integrates an optimizing, just-in-time (JIT) compiler, written in Java: the [Graal compiler](../../../reference-manual/java/compiler.md).
-At run time, an application is loaded and executed normally by the JVM.
-
-The GraalVM Tools for Java extension provides the wizard to install GraalVM.
-Click the ""Gr" icon in the Activity Bar on the left.
-A dialogue opens with the following choices:
-  * **Download & Install GraalVM** will download and install any available GraalVM distribution.
-  * **Add Existing GraalVM** lets you select an existing GraalVM installation from your local disk.
+After installing the extension, you can install GraalVM by using the built-in installation wizard (click the "Gr" icon in the left side Activity Bar).
+You can either add existing GraalVM (if you have GraalVM already), or download it immediately from within VS Code. A dialogue window suggests these options:
+  * **Download & Install GraalVM**
+  * **Add Existing GraalVM**
 
 ![GraalVM Install Dialog](images/graalvm_install_actions.png)
+
+GraalVM includes a JDK based on the Java HotSpot VM, integrates an optimizing, just-in-time (JIT) compiler, written in Java: the [Graal compiler](../../../reference-manual/java/compiler.md), and enables ahead-of-time compilation support with Native Image.
+Any application that runs on a Java Virtual Machine (JVM) can run on GraalVM.
+
+The **Download & Install GraalVM** action is preferable, as it eliminates the fuss around setting up environment variables and prepares the GraalVM runtime in VS Code for you.
+Choose either the Community (free for all purposes) or Enterprise distribution (free for evaluation and development).
+You can also choose to install additional plugins (JavaScript and Node.js support, LLVM, etc.).
+
+Each registered GraalVM instance displays its installation location and all its available plugins.
+Plugins are either installed or available for download - the context actions to install (the plus icon) or remove (the bucket icon) are displayed when hovering over plugin's name.
+All registered GraalVM instances will be listed in the configuration file under **File** > **Preferences** > **Settings** (**Code** > **Preferences** > **Settings** on macOS).
+
+The advantages of this installation model are:
+- It permits multiple GraalVM and components installations at the same time.
+- It allows an easy switch from one runtime version to another.
+- It enables a quick removal of unnecessary GraalVM installations from VS Code global storage or even from your local disk.
 
 ### Download and Install GraalVM
 
@@ -70,29 +74,28 @@ If you prefer GraalVM Community Edition, the installation wizard will download t
 
 If you select GraalVM Enterprise Editon, you will be prompted to accept the Oracle Technology Network License Agreement and requested to enter your email address.
 Providing your email address is mandatory.
+
 ![Accept Oracle License Agreement](images/otn_license_accept.png)
 
 The installation wizard will download the package from [Oracle Software Downloads](https://www.oracle.com/downloads/graalvm-downloads.html) in the background and display the progress.
 If you are behind a proxy, setup your proxy configuration by the "Setup Proxy" command or by overriding the `http_proxy` and `https_proxy` environment variables.
 
-At the same time, the "Install Optional GraalVM Components" window will pop up suggesting to install additional plugins to GraalVM:
+At the same time, the "Install Optional GraalVM Components" window will pop up suggesting to install additional plugins (JavaScript and Node.js support, LLVM, etc.) to GraalVM:
 ![Install Optional GraalVM Components](images/install_optional_components_popup.png)
 
 Once you confirm, you are taken to the selection list:
 ![Select Components to Install](images/install_components_view.png)
 
-Note: You can download and install multiple GraalVM distributions and components at the same time.
-
 ### Add Existing GraalVM
 
 The **Add Existing GraalVM** action allows you to select the existing GraalVM installation from your local disk.
-As in the previous installation scenario, you are prompted to set the GraalVM installation as default, and to install optional components, if not already installed.
+As in the previous installation scenario, you are prompted to set the GraalVM installation as default, and to install additional plugins, if not already installed.
 **Add Existing GraalVM** can also be invoked by using an icon on the side of the **GRAALVM: INSTALLATIONS** panel.
 
 ### Set Default Java
 
 Upon installation completion, the "Set Default Java" action is invoked.
-To set a newly added GraalVM active. Click the “home” icon by the side of the installation:
+To set a newly added GraalVM active, click the “home” icon by the side of the installation:
 
 ![Activate GraalVM](images/activate_graalvm.png)
 
@@ -100,45 +103,30 @@ Select both **Set as JAVA for Terminal** options in the **Configure active Graal
 
 ![Set as JAVA for Terminal](images/set_as_java_for_terminal.png)
 
-Alternatively, you can invoke the same actions from **View**, then **Command Palette** (Command Palette can be also opened by pressing F1, or the _Ctrl+Shift+P_  hot keys combination for Linux, and _Command+Shift+P_ for macOS):
-  * GraalVM: Download & Install GraalVM
-  * GraalVM: Install GraalVM Component
-  * GraalVM: Set Active GraalVM Installation
+Alternatively, you can invoke the same action from **View**, then **Command Palette** (or use the _Ctrl+Shift+P_  hot keys combination for Linux, and _Command+Shift+P_ for macOS), then search for "GraalVM".
+You will see **GraalVM: Set Active GraalVM Installation** among other actions.
 
 ![Command Palette](images/command-palette.png)
 
-The **Download & Install GraalVM** action is a preferable way, because it eliminates the fuss around setting up environment variables and prepares the GraalVM runtime in VS Code for you.
-
-Each registered GraalVM instance displays its installation location and all its available components.
-The active one is placed on top.
-Components are either installed or available for download - the context actions to install (the plus icon) or remove (the bucket icon) are displayed when hovering over the component name.
-
-All registered GraalVM instances will be listed in the configuration file under **File** > **Preferences** > **Settings** (**Code** > **Preferences** > **Settings** on macOS).
-
-The advantages of this installation model are:
-- It permits multiple GraalVM and components installations at the same time.
-- It allows an easy switch from one runtime version to another.
-- It enables a quick removal of unnecessary GraalVM installations from VS Code global storage or even from your local disk.
-
-<!-- 3. Get started with Java development and debugging -->
-
 ## Java Development and Debugging
 
-GraalVM Tools for Java extension brings a complete support for the Java language development and debugging in VS Code.
+The GraalVM Tools for Java extension brings complete support for Java language development and debugging in VS Code.
 Besides the regular features like auto completion, code navigation, refactoring, etc., this extension provides support for ahead-of-time compilation with GraalVM Native Image, integrates with VisualVM, and supports polyglot programming, which will be described later.
 
 To start developing, compile, run and debug your Java applications, GraalVM should be the default Java runtime in VS Code.
-You can install GraalVM as described in the [GraalVM Installation](README.md#graalvm-installation) section (the recommended way).
-You can also specify the path to GraalVM manually, by editting the `java.home` setting in VS Code.
+You can set GraalVM active as described in the [GraalVM Installation](graalvm-installation-wizard) section or specify the path to GraalVM manually, by editting the `java.home` setting in VS Code.
 If not specified, it is searched on the current system path.
-If the path is not pointing to the GraalVM folder, go to the User Settings window and use the `netbeans.jdkhome` value in the _settings.json_ file.
+
+Note: If the path is not pointing to the GraalVM folder, go to the User Settings window and use the `netbeans.jdkhome` value in the _settings.json_ file.
 This configuration is then used to launch the Java Language Server.
 
-The project you create from scratch or a Java project you open in VS Code will then run on GraalVM.
+The application you create from scratch or a Java project you open in VS Code will then run on GraalVM.
+Any application that runs on a JVM can run on GraalVM unmodified.
 
-To debug a Java application running on GraalVM, create a launch configuration, which is absolutely straightforward.
+To debug a Java application running on GraalVM, create a launch configuration.
 Open the file to be debugged or run, switch to the Debug view by clicking on the "bug" icon in the left-hand side panel.
-The newly opened window will suggest you create a _launch.json_ file. Select the "Java 8+" environment:
+The newly opened window will suggest you create a _launch.json_ file.
+Select the "Java 8+" environment:
 
 ![Create Launch Configuration for Java](images/create_java_launch_configuration.png)
 
@@ -146,42 +134,48 @@ To start debugging, press F5 or navigate to **Run > Start Debugging**.
 
 ### Available Launch Configurations
 
-There are several launch configurations available by default.
+There are several launch configurations available by default, or you can add more.
 
 1. The CodeLens feature in the source code uses the **Java 8+...** launch configuration (Debugger or Run) when **Run main | Debug main** CodeLens is selected in the code.
-2. When **Java 8+...** is selected in the **Run and Debug** activity panel then following options are available:
+2. When **Java 8+...** is selected in the **Run and Debug** activity panel, the following options are available:
 
 ![Debug configurations](images/java_debuggers.png)
 
-* **Launch Java 8+ App** - Debug or Run a current Java project
-* **Attach to Port** and **Attach to Process** - Attach debugger actions. Available when **Java 8+ ...** at the bottom of drop down list is selected.
-    * Select this configuration, then click [Run](images/run.png)
-    * Select either from the available processes or enter the port to connect to a JVM running with JDWP.
+* **Launch Java 8+ App** to debug or run a current Java project.
+* **Attach to Port** and **Attach to Process** to attach the debugger. Available when **Java 8+ ...** at the bottom of drop down list is selected.
+    * Select this configuration, then click **Run**
+    * Select either from the available processes or enter the port to connect to a JVM running with JDWP
     * **Attach to Shared Memory** is available on Windows in addtion to above-mentioned _Attach..._
 
-To add more launch configurations, go to **Run > Add Configuration** or open the _.vscode/launch.json_ file and press the **Add Configuration** button in the right-hand corner.
+To add more launch configurations, go to **Run**, then **Add Configuration**, or open the _.vscode/launch.json_ file, and press the **Add Configuration** button in the right-hand corner.
 Suggestions for launch configuration options are available using code completion in `launch.json`.
 
 ![Add Launch Configuration for Java](images/add_java_launch_configuration.png)
 
-<!-- 4.  VisualVM Integration -->
-
 ## Integration with VisualVM
 
 GraalVM Tools for Java extension provides integration with [VisualVM](https://visualvm.github.io), which is the all-in-one Java (and polyglot) monitoring and troubleshooting tool.
-This brings the visual Java tooling to VS Code.
-A special launch configuration **Launch VisualVM & Java 8+ Application** is provided by the GraalVM Tools for Java extension to start VisualVM along with the project.
+This brings powerful yet easy-to-use visual Java tooling to VS Code.
 
-![VisualVM and VS Code Integration](images/vscode_visualvm.png)
-
-The prerequisite is the latest stable GraalVM installed in VS Code (see the [GraalVM Installation section](#graalvm-installation)).
-Once a GraalVM installation is set as **active**, the Command Palette contains the following commands related to VisualVM:
+It you go to **View**, then **Command Palette**, and search for "VisualVM", the following actions related to VisualVM are available:
 
 ![VisualVM Commands available from Command Palette](images/visualvm_command_palette.png)
 
+A special launch configuration - **Launch VisualVM & Java 8+ Application** - is provided by the GraalVM Tools for Java extension to start VisualVM along with the project.
+
+![VisualVM and VS Code Integration](images/vscode_visualvm.png)
+
 Check the [dedicated guide](visualvm-integration.md) how to start VisualVM from within the VS Code and learn about available launch configurations.
 
-<!-- 5.  Ahead-of-time compilation with GraalVM Native Image -->
+## Micronaut Support
+
+The GraalVM Tools for Java extension in combination with the [GraalVM Tools for Micronaut extension](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut) allows you to create Micronaut projects, run and debug them with different debugging protocols.
+This native support for the Micronaut framework allows to build native images of Micronaut applications right from VS Code.
+
+Moreover, you can build Docker images with the application artifacts, or even build Docker images with GraalVM Native Images inside and deploy them to containers.
+
+See the [GraalVM Tools for Micronaut extension documentation](../micronaut/README.md) to learn more.
+
 ## Native Image Building and Debugging
 
 With GraalVM Tools for Java extension you can turn your Java application into a self-contained native executable.

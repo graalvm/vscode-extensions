@@ -71,7 +71,7 @@ Check the [dedicated guide](visualvm-integration.md) about VisualVM and VS Code 
 ## Support for the Micronaut Framework
 
 In combination with the GraalVM Tools for Micronaut extension, you can create Micronaut projects, run and debug them directly from VS Code with different debugging protocols.
-This Native support for the Micronaut framework allows to build native images of Micronaut projects right from VS Code.
+This native support for the Micronaut framework allows to build native images of Micronaut projects right from VS Code.
 
 Moreover, you can build Docker images with the application artifacts, or even build Docker images with GraalVM Native Images inside and deploy them to containers.
 
