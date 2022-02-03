@@ -86,7 +86,7 @@ The advantages are many, especially for microservices.
 Your application will:
 * Be compiled into small executable files, using a fraction of customary resources - so they run lightning fast.
 * Achieve super fast startup, achieving peak performance with no warmup time
-* Ensure improved security by greatly reducing attack surfaces and thwarting reverse engineering
+* Have improved security by greatly reducing attack surfaces and thwarting reverse engineering
 
 With GraalVM Tools for Java extension you can turn your Java projects into native executables directly in VS Code.
 Learn how you can do that from the [extension documentation](README.md#build-a-native-image).
@@ -107,7 +107,7 @@ The GraalVM Tools for Java extension enables a polyglot environment in VS Code, 
 The extension allows for polyglot programming in a bidirectional way: you can embed JavaScript, Ruby, R, and Python in Java, or call Java from those languages.
 A host language and a guest language can directly interoperate with each other and pass data back and forth in the same memory space.
 
-<!-- insert image of these languages' logos -->
+![Supported Languages](images/supported_languages.png)
 
 Owing to GraalVM's [built-in implementation of the Language Server Protocol](https://www.graalvm.org/22.0/tools/lsp/), smart editing features are provided for those languages like code-completion, find usages, go to declaration, and documentation on hover, etc.
 The extension also includes full debugging capabilities for JavaScript and Node.js, Python, Ruby, and R applications.

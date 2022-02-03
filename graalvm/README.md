@@ -14,8 +14,7 @@ permalink: /tools/vscode/graalvm-extension/
 * [Micronaut Support](#micronaut-support)
 * [Native Image Building and Debugging](#native-image-building-and-debugging)
 * [Languages Support](#popular-languages-support)
-* [Language Server Protocol Implementation](#language-server-protocol-implementation)
-* [Debug Adapter Protocol Implementation](#debug-adapter-protocol-implementation)
+* [Built-in Debug Adapter Protocol](#built-in-debug-adapter-protocol)
 * [Extension Settings](#extension-settings)
 
 [GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) extension provides a full-fledged support for the Java language and includes the GraalVM runtime with both just-in-time and ahead-of-time compilers, making it a comfortable and convenient integrated development environment to work with.
@@ -178,30 +177,31 @@ See the [GraalVM Tools for Micronaut extension documentation](../micronaut/READM
 
 ## Native Image Building and Debugging
 
-With GraalVM Tools for Java extension you can turn your Java application into a self-contained native executable.
-The extension provides support for ahead-of-time compilation with [GraalVM Native Image](../../../reference-manual/native-image/README.md).
+The GraalVM download includes [GraalVM Native Image](https://www.graalvm.org/22.0/reference-manual/native-image/), which allows you to ahead-of-time compile your Java code to a standalone native executable - directly in VS Code.
 Only the code that is required by the application at run time will be compiled and linked into the final native executable.
+The advantages are many.
+Your application will:
+  * Be compiled into small executable files, using a fraction of customary resources - so they run lightning fast.
+  * Achieve super fast startup, achieving peak performance with no warmup time
+  * Have improved security by greatly reducing attack surfaces and thwarting reverse engineering
 
-### Tracing Agent <!-- MAYBE this tracing agent part can be omitted in this intro page? -->
-GraalVM Tools for Java extension also provides experimental support for the Java [Tracing agent](../../../reference-manual/native-image/Agent.md) to automate the process of tracking and registering dynamic feature calls, making it even easier to build native images in VS Code.
+### Tracing Agent
 
-A special launch configuration - **Launch Native Image Agent & Java 8+ Application** - is provided by the GraalVM Tools for Java extension to start a Java project with the Tracing agent.
-
-Check the extension documentation to learn [how to build a native image and apply the Tracing agent from within VS Code](README.md#build-a-native-image).
+GraalVM Tools for Java extension also provides experimental support for the [Java Tracing agent](../../../reference-manual/native-image/Agent.md) to automate the process of tracking and registering dynamic feature calls, making it even easier to build native images in VS Code.
 
 ### Configuration with Tracing Agent
 
 During a native image build, the representation of a whole program is created to figure out which classes and methods will be used at run time.
 So the build relies on the static analysis.
 However, this analysis cannot always completely predict all dynamic features like Java Reflection calls, Dynamic Proxy objects, etc.
-Undetected usages of some dynamic features need to be pre-configured, otherwise they will not be included in the native image.
+Undetected usages of some dynamic features need to be pre-configured, otherwise they will not be included in the native executable.
 
-Native Image supports a wide range of options to configure a native image build process.
-The most convenient is to apply the Java [Tracing agent](../../../reference-manual/native-image/Agent.md).
+Native Image supports ways options to configure a native image build process.
+The most convenient is to apply the [Tracing agent](.https://www.graalvm.org/22.0/reference-manual/native-image/Agent/).
 The agent tracks dynamic feature calls whilst your application is running on a JVM, and records those calls into JSON configuration files.
-GraalVM Tools for Java extension provides the experimental support for the Tracing agent.
 
-A special launch configuration **Launch Native Image Agent & Java 8+ Application** is provided by the GraalVM Tools for Java extension to start a Java project with the Tracing agent:
+GraalVM Tools for Java extension provides experimental support for the Tracing agent to automate the process of tracking and registering dynamic feature calls, making it even easier to build native images in VS Code.
+A special launch configuration - **Launch Native Image Agent & Java 8+ Application** - is provided by the extension to start a Java project with the Tracing agent.
 
 ![Special Launch Native Image Agent & Java 8+ configuration](images/nia_launch-config.png)
 
@@ -209,25 +209,25 @@ In the next section you will learn how to build a native image of your Java appl
 
 ### Native Image Building
 
-To get started, install the most recent GraalVM release, activate it, and add the Native Image component, as described in the [GraalVM Installation](#graalvm-installation) section.
-
 To build a native image version of your Java application in VS Code, do the following:
 
 1. Create the _launch.json_ file. If not already created, create a new file from the **Run and Debug** activity panel using the _create a launch.json file_ link. Select the **Java 8+ environment** when asked.
 2. Create the **Launch Native Image Agent & Java 8+ Application** launch configuration. Open the _launch.json_ file and click  **Add Configuration...** in the bottom right corner of the editor. Select the **GraalVM: Launch Java 8+ Application with Native Image Agent** configuration. Make sure to save the _launch.json_ file after editing.
 3. Select the **Launch Native Image Agent & Java 8+ Application** configuration in the **Run and Debug** activity panel. Click *Run Without Debugging** to start the current project.
+
 > Note: Do not click the **Start Debugging** action to start a project. The Tracing agent is not compatible with the debugger agent and running such a configuration will fail.
-4. Specify the output directory for configuration files to be generated. During execution, the agent interfaces with a JVM to intercept all calls that look up classes, methods, fields, resources, or request proxy accesses. The agent generates configuration files in JSON format which contain all intercepted dynamic accesses and will store them the output directory you specify. When starting the project, VS Code asks to select the desired location. The following choices are available:
+
+4. Specify the output directory for configuration files to be generated. During the execution, the agent interfaces with a JVM to intercept all calls that look up classes, methods, fields, resources, or request proxy accesses. The agent generates configuration files containing all intercepted dynamic accesses and will store them the output directory you specify. When starting the project, VS Code asks to select the desired location. The following choices are available:
   * `META-INF/native-image` - the default location in project sources to store the configuration files
   * `/tmp` - the configuration files will be stored to the `/tmp/native-image` directory
   * Custom directory - the configuration files will be stored to the provided custom directory
 5. Generate load to the running process to invoke more code and generate the best configuration.
 6. Once all possible execution paths have been executed, terminate the process. At this point the Tracing agent dumps the collected configuration to the selected output directory.
-7. Go to **Terminal**, and open **New Terminal**. To build a native image from a Java class file in the current working directory, use the following command:
+7. Go to **Terminal**, and open **New Terminal**. To build a native executable from a Java class file in the current working directory, use the following command:
     ```shell
     native-image [options] class [imagename] [options]
     ```
-    However, if you project is Maven or Gradle based, there are dedicated Maven or Gradle plugins to add support for building and testing native applications written in Java. Please refer to the following pages for build tool specific documentation:
+    However, if you project is Maven or Gradle based, there are dedicated Maven or Gradle plugins to add support for building and testing native applications written in Java. Please refer to the following pages for the build tool specific documentation:
     * [Gradle plugin](https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html)
     * [Maven plugin](https://graalvm.github.io/native-build-tools/latest/maven-plugin.html)
     If you use the Micronaut framework to create your Java project, you can build native images of Micronaut applications using the VS Code quick actions. Go [here](../micronaut/README.md#generate-native-images-of-micronaut-projects) to learn how.
@@ -236,33 +236,43 @@ Read more about GraalVM Native Image [here](../../../reference-manual/native-ima
 
 ### Native Image Debugging
 
-You can debug a native executable generated by [GraalVM Native Image](../../../reference-manual/native-image/README.md) the same way as debugging a regular Java application.
-It is possible in VS Code by means of the GraalVM Tools for Java extension.
-The extension serves many purposes including Java like debugging of native image processes.
-
-You can attach the debugger to a native image process, set breakpoints, step over the application source code, create watches, etc.
+The GraalVM Tools for Java extension provides Java-like debugging of native executables in a running state directly from within VS Code.
+You can set breakpoints, inspect the state of your application, even attach the debugger to a native image process in VS Code and step over the application source code, etc.
 
 ![Native Image Debugging in VS Code](images/debugging_ni_vscode.png)
 
-Proceed to [this guide](native-image-debugging.md) to learn how to debug a Java application compiled into a native executable from VS Code.
+Read more about this and find a demo application in the [Native Image Debugging guide](native-image-debugging.md).
 
-## Popular Languages Support
-
-<!-- Besides enabling a complete development environment for Java, GraalVM Tools for Java extension also provides full support for a number of popular languages such as
-JavaScript, Ruby, R, Python. -->
+## Languages Support
 
 GraalVM Tools for Java extension enables a polyglot environment in VS Code, providing necessary editing and debugging features for a number of popular languages such as Python, Ruby, R, JavaScript and Node.JS.
 The extension allows for polyglot programming in a bidirectional way: you can embed JavaScript, Ruby, R, Python in Java, or call Java from those languages.
 A host JVM-based language and a guest language can directly interoperate with each other and pass data back and forth in the same memory space.
 
-A language server is started as a part of every process being executed or debugged in VS Code.
-GraalVM Tools for Java extension checks for the language server, an implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) for a particular language, and provides an option to automatically install it.
+![Supported Languages](images/supported_languages.png)
 
-Using [GraalVM](#graalvm-installation), the extension allows for developing, running, and debugging applications written in JavaScript and Node.js, Python, Ruby, and R lnguages.  Proceed to a [dedicated guide on polyglot programming, running and debugging JavaScript, Node.js, Python, Ruby, and R applications on GraalVM in VS Code](polyglot-runtime.md).
+A language server is started as a part of every process being executed or debugged in VS Code. <-- is it valid? -->
+GraalVM Tools for Java extension checks for the language server, an implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) for a particular language, and provides an option to automatically install it.
+The extension provides smart editing features as code-completion, find usages, go to declaration, and documentation on hover, etc.
+It also includes full debugging capabilities for those languages.
+
+Check the dedicated guide how to run and debug JavaScript and Node.js, Python, Ruby, and R applications in VS Code:
+* [JavaScript and Node.js](polyglot-runtime.md#javascript-and-nodejs-support)
+* [Python](polyglot-runtime.md#python-support)
+* [Ruby](polyglot-runtime.md#ruby-support)
+* [R](polyglot-runtime.md#r-support)
+
+## Built-in Debug Adapter Protocol
+
+Thanks to the built-in implementation of the [Debug Adapter Protocol (DAP)](https://www.graalvm.org/22.0/tools/dap/), a user can choose a debugging protocol in VS Code by setting to either `chromeDevTools` or `debugAdapter`.
+
+The advantage of using the Debug Adapter Protocol over Chrome Dev Tools is that (1) it is "native" to VS Code, meaning it does not require any intermediate translatation, and (2) it supports multithreading, which can be particually useful to debug, e.g., a Ruby application.
+
+Check the documentation for more information on [Polyglot Programming and Debugging in VS Code](polyglot-runtime.md).
 
 ## Extension Settings
 
-This extension contributes the following settings:
+The GraalVM Tools for Java extension contributes the following settings in VS Code:
 
 * __graalvm.home__ - the path to the GraalVM installation
 * __graalvm.installations__ - all registered GraalVM installations
