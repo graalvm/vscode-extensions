@@ -16,7 +16,9 @@ permalink: /tools/vscode/graalvm-extension/polyglot-runtime/
 * [Running and Debugging Polyglot Applications](#running-and-debugging-polyglot-applications)
 * [Additional Editor Features](#additional-editor-features)
 
-GraalVM Tools for Java extension enables a polyglot environment in VS Code, providing necessary editing and debugging features for a number of popular languages such as Python, Ruby, R, JavaScript and Node.JS
+The GraalVM Tools for Java extension enables a polyglot environment in VS Code, providing necessary editing and debugging features for a number of popular languages such as Python, Ruby, R, JavaScript, and Node.JS.
+The extension allows for polyglot programming in a bidirectional way: you can embed JavaScript, Ruby, R, and Python in Java, or call Java from those languages.
+A host language and a guest language can directly interoperate with each other and pass data back and forth in the same memory space.
 
 A language server is started as a part of every process being executed or debugged in VS Code.
 GraalVM Tools for Java extension checks for the language server, an implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) for a particular language, and provides an option to automatically install it.
