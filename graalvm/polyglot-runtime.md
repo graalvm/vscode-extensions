@@ -27,7 +27,7 @@ You can jump to the necessary section directly:
 
 ## Debug Adapter Protocol Implementation
 
-Besides native debugging capabilities, the extension is shipped with a built-in implementation of the [Debug Adapter Protocol (DAP)](https://www.graalvm.org/dev/tools/dap/).
+Besides native debugging capabilities, the extension is shipped with a built-in implementation of the [Debug Adapter Protocol (DAP)](../../dap.md).
 When creating the **Run/Debug Configuration** in VS Code, Chrome DevTools Protocol is provisioned by default.
 With the GraalVM Tools for Java extension, a user can choose a protocol to use by setting the protocol attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 
@@ -88,7 +88,7 @@ The GraalVM extension provides the following debug configurations that can be us
 * __Attach__ attaches a debugger to a locally running GraalVM runtime.
 * __Attach to Remote__ attaches a debugger to the debug port of a remote GraalVM runtime.
 
-You also can choose which debugging protocol to use ([Debug Adapter Protocol](https://www.graalvm.org/dev/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/dev/tools/chrome-debugger/) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
+You also can choose which debugging protocol to use ([Debug Adapter Protocol](../../dap.md) or [Chrome Dev Tools protocol](../../chrome-debugger.md)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the open Debug Adapter Protocol port, the content of the _launch.json_ should be:
 ```json
 {
@@ -132,7 +132,7 @@ To start a debug session, do next:
 
    ![Select Python Debug Configuration](images/select-python-debug-config.png)
 
-You also can choose which debugging protocol to use ([Debug Adapter Protocol](https://www.graalvm.org/dev/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/dev/tools/chrome-debugger/) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
+You also can choose which debugging protocol to use ([Debug Adapter Protocol](../../dap.md) or [Chrome Dev Tools protocol](../../chrome-debugger.md)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the Chrome Dev Tools protocol port, the content of the _launch.json_ should be:
 ```json
 {
@@ -174,7 +174,7 @@ To start a debug session, do next:
 
    ![Ruby Debug Configuration](images/select-ruby-debug-config.png)
 
-You also can choose which debugging protocol to use ([Debug Adapter Protocol](https://www.graalvm.org/dev/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/dev/tools/chrome-debugger/) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
+You also can choose which debugging protocol to use ([Debug Adapter Protocol](../../dap.md) or [Chrome Dev Tools protocol](../../chrome-debugger.md)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the Chrome Dev Tools protocol port, the content of the _launch.json_ should be:
 ```json
 {
@@ -218,7 +218,7 @@ To start a debug session, do next:
 * __Launch R Script__  launches an R script using GraalVM in a debug mode.
 * __Launch R Terminal__ launches an integrated R terminal running on GraalVM in a debug mode.
 
-You also can choose which debugging protocol to use ([Debug Adapter Protocol](https://www.graalvm.org/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/tools/chrome-debugger/)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
+You also can choose which debugging protocol to use ([Debug Adapter Protocol](../../dap.md) or [Chrome Dev Tools protocol](../../chrome-debugger.md)) by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the Chrome Dev Tools protocol port, the content of the _launch.json_ should be:
 ```json
 {
@@ -299,7 +299,7 @@ Once the `languageserver` package is installed, the R Language Server is automat
 [GraalVM Polyglot API](https://www.graalvm.org/sdk/javadoc/org/graalvm/polyglot/package-summary.html) allows to combine multiple languages (supported by GraalVM) in one program.
 The combination can be bidirectional: you can embed JavaScript, Ruby, R, and Python in Java, or call Java from those languages.
 A host language and a guest language can directly interoperate with each other and pass data back and forth in the same memory space.
-For more information, see the [Polyglot Programming guide](https://www.graalvm.org/dev/reference-manual/polyglot-programming/).
+For more information, see the [Polyglot Programming guide](../../../reference-manual/polyglot-programming.md).
 
 The GraalVM Tools for Java extension allows for polyglot programming in VS Code.
 To run such a polyglot application on GraalVM, you have to either pass the `--polyglot` option to any of the existing application lauchers (e.g., `js --polyglot` or `node --polyglot`), or use an experimental launcher called `polyglot` that runs code for JavaScript, Python, Ruby, and R without requiring the selection of a primary language.
@@ -319,7 +319,7 @@ To debug a polyglot application on GraalVM in VS Code, you create a launch confi
 
   ![Polyglot Application Launch Configurations](images/debug-config-polyglot.png)
 
-You can choose which debuggin protocol, ([Debug Adapter Protocol](https://www.graalvm.org/tools/dap/) or [Chrome Dev Tools protocol](https://www.graalvm.org/tools/chrome-debugger/)), to use to debug a polyglot application by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
+You can choose which debuggin protocol, ([Debug Adapter Protocol](../../dap.md) or [Chrome Dev Tools protocol](../../chrome-debugger.md), to use to debug a polyglot application by setting the `protocol` attribute in the corresponding debug configuration to either `chromeDevTools` or `debugAdapter`.
 For example, to connect to the Chrome Dev Tools protocol port, the content of the _launch.json_ can be:
 ```json
 {
@@ -340,7 +340,7 @@ Alternatively, to pass the `--polyglot` option to any of the existing applicatio
 
 ### Additional Editor Features
 
-Since the easy writing of [polyglot](https://www.graalvm.org/docs/reference-manual/polyglot) applications is one of the defining features of GraalVM, the code completion invoked inside JavaScript sources provides items for `Polyglot.eval(...)`, `Polyglot.evalFile(...)`, and `Java.type(...)` calls.
+Since the easy writing of [polyglot](../../../reference-manual/polyglot-programming.md) applications is one of the defining features of GraalVM, the code completion invoked inside JavaScript sources provides items for `Polyglot.eval(...)`, `Polyglot.evalFile(...)`, and `Java.type(...)` calls.
 
 ![Image Code Completion](images/code-completion-js.png)
 

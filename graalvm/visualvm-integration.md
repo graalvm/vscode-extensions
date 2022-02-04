@@ -15,7 +15,7 @@ This brings the visual Java tooling to VS Code.
 A special launch configuration, **Launch VisualVM & Java 8+ Application**, is provided by the GraalVM Tools for Java extension to start VisualVM along with the project.
 To get started, do the following:
 
-1. Click **Gr** in the activity panel, install the latest GraalVM release, and activate it, as described [here](README.md#graalvm-installation-wizard).
+1. Click **Gr** in the activity panel, install the latest GraalVM release, and activate it, as described [here](index.md#graalvm-installation-wizard).
 2. Create the _launch.json_ file. If not already created, create a new _launch.json_ file from the **Run and Debug** activity using the create a launch.json file link. Select the Java 8+ environment when asked.
 3. Open _launch.json_ and click the **Add Configuration…** button in the bottom right corner of the editor. Select the **GraalVM: Launch Java 8+ Application with VisualVM** configuration. Make sure to save the _launch.json_ file after editing.
 4. Select the action to perform when project starts. In the VisualVM pane of the **Gr** activity view, click the **Configure** action to define the action to perform when the project is started.
