@@ -251,7 +251,6 @@ A host JVM-based language and a guest language can directly interoperate with ea
 
 ![Supported Languages](images/supported_languages.png)
 
-A language server is started as a part of every process being executed or debugged in VS Code. <-- is it valid? -->
 GraalVM Tools for Java extension checks for the language server, an implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) for a particular language, and provides an option to automatically install it.
 The extension provides smart editing features as code-completion, find usages, go to declaration, and documentation on hover, etc.
 It also includes full debugging capabilities for those languages.

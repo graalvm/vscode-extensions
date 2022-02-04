@@ -20,44 +20,7 @@ The GraalVM Tools for Java extension enables a polyglot environment in VS Code, 
 The extension allows for polyglot programming in a bidirectional way: you can embed JavaScript, Ruby, R, and Python in Java, or call Java from those languages.
 A host language and a guest language can directly interoperate with each other and pass data back and forth in the same memory space.
 
-A language server is started as a part of every process being executed or debugged in VS Code.
 GraalVM Tools for Java extension checks for the language server, an implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) for a particular language, and provides an option to automatically install it.
-
-## Language Server Protocol Implementation
-
-GraalVM provides a built-in implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol).
-This allows you to attach compatible development tools such as VS Code to GraalVM and to get features like auto complete, go to declaration, or documentation on hover.
-
-Currently, [GraalVM's Language Server Protocol](https://www.graalvm.org/tools/lsp/) implementation supports the following services:
-* [Text Document Synchronization](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_synchronization)
-* [Hover Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover)
-* [Completion Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_completion)
-* [Signature Help Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_signatureHelp)
-* [Document Highlight Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_documentHighlight)
-* [Code Action Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeAction)
-* [Code Lens Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeLens)
-* [Execute Command Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_executeCommand)
-
-> Note: The Language Server Protocol is offered as a technology preview and requires to pass the `--experimental-options` option for its activation.
-
-To start the Language Server Protocol, pass the `--lsp` option to the command-line launcher as in the following example with a Node.js application:
-  ```shell
-  node --experimental-options --lsp app.js
-  [Graal LSP] Starting server and listening on localhost/127.0.0.1:8123
-  Example app listening on port 3000!
-  ```
-
-> Important: GraalVM's Language Server Protocol itself does not provide the static data usually gathered by parsing the application sources (as these data are sometimes fuzzy in the case of dynamic languages). Instead, it was designed to provide the accurate dynamic data gathered from the application runtime.
-
-![Image Language Server Completion](images/lsp-dynamic-completion.png)
-
-However, GraalVM's Language Server Protocol implementation could delegate to the existing language servers written specially for the particular languages (using the `--lsp.Delegates` launcher option) and merge the static data returned from these servers with its own dynamic data to a single result.
-
-This extension works as a client to the Language Server Protocol.
-By default, a language server is started as a part of every process being executed or debugged via the VS Code user interface.
-The other possibility (available on option) is a language server started as a separated process that gets informed about every application being executed or debugged.
-It tries to "dry-run" the same code as the original application and serve the run-time data afterwards.
-Currently, both approaches start the language server, providing the smart editing features for the following GraalVM-supported languages - JavaScript, Python, R, Ruby, and [SimpleLanguage](https://github.com/graalvm/simplelanguage).
 
 ## Debug Adapter Protocol Implementation
 
@@ -90,7 +53,7 @@ To connect to the open DAP port, the content of _launch.json_ for a Node.js appl
 
 The advantage of using the Debug Adapter Protocol over Chrome Dev Tools is that (1) it is "native" to Visual Studio Code (VS Code), meaning it does not require any intermediate translatation, and (2) it supports multithreading, which can be particually useful to debug, e.g., a Ruby application.
 
-## JavaScript and Node.js Support
+## JavaScript and Node.js debugging
 
 To debug a JavaScript or Node.js application running on GraalVM, create a launch configuration for the application.
 To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel.
@@ -181,18 +144,7 @@ In order to start a debug session, first select the proper configuration using t
 Once you have your launch configuration set, start your debug session with F5.
 Alternatively, you can run your configuration through View > Command Palette (Command Palette can be also opened by pressing F1, or _Ctrl+Shift+P_  hot keys combination for Linux and _Command+Shift+P_ for macOS), by filtering on Debug: Select and Start Debugging or typing "debug", and selecting the configuration you want to debug.
 
-## Ruby Support
-
-### Ruby Language Server
-
-This extension provides an option to automatically install and run the [solargraph](https://github.com/castwide/solargraph) which is an implementation of the Language Server Protocol for the Ruby language.
-Enabling this option, the GraalVM Ruby installation is checked for the presence of the `solargraph` gem and the user is provided with the option of an automatic installation of the missing gem.
-
-![Image No Ruby Language Server](images/no-ruby-ls.png)
-
-Once the `solargraph` gem is installed, the Ruby Language Server is automatically started and passed to the Language Server Protocol as delegate when necessary.
-
-### Ruby Debugging
+## Ruby Debugging
 
 To debug a Ruby application running on GraalVM, create a launch configuration for the application.
 To do so, open the application project folder in VS Code (File > Open Folder), then switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
@@ -356,3 +308,50 @@ For JavaScript, Python, R, and Ruby sources opened in the editor, all the `Polyg
 For example, having an R code snippet called via the Polyglot API from inside a JavaScript source, the R language code is embedded inside the corresponding JavaScript String and all VS Code's editing features (syntax highlighting, bracket matching, auto closing pairs, code completion, etc.) treat the content of the String as the R source code.
 
 ![Image Language Embedding](images/language-embedding-js.png)
+
+## Language Server Protocol Implementation
+
+GraalVM provides a built-in implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol).
+This allows you to attach compatible development tools such as VS Code to GraalVM and to get features like auto complete, go to declaration, or documentation on hover.
+
+Currently, [GraalVM's Language Server Protocol](https://www.graalvm.org/tools/lsp/) implementation supports the following services:
+* [Text Document Synchronization](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_synchronization)
+* [Hover Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover)
+* [Completion Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_completion)
+* [Signature Help Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_signatureHelp)
+* [Document Highlight Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_documentHighlight)
+* [Code Action Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeAction)
+* [Code Lens Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeLens)
+* [Execute Command Provider](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_executeCommand)
+
+> Note: The Language Server Protocol is offered as a technology preview and requires to pass the `--experimental-options` option for its activation.
+
+To start the Language Server Protocol, pass the `--lsp` option to the command-line launcher as in the following example with a Node.js application:
+  ```shell
+  node --experimental-options --lsp app.js
+  [Graal LSP] Starting server and listening on localhost/127.0.0.1:8123
+  Example app listening on port 3000!
+  ```
+
+> Important: GraalVM's Language Server Protocol itself does not provide the static data usually gathered by parsing the application sources (as these data are sometimes fuzzy in the case of dynamic languages). Instead, it was designed to provide the accurate dynamic data gathered from the application runtime.
+
+![Image Language Server Completion](images/lsp-dynamic-completion.png)
+
+However, GraalVM's Language Server Protocol implementation could delegate to the existing language servers written specially for the particular languages (using the `--lsp.Delegates` launcher option) and merge the static data returned from these servers with its own dynamic data to a single result.
+
+This extension works as a client to the Language Server Protocol.
+By default, a language server is started as a part of every process being executed or debugged via the VS Code user interface.
+The other possibility (available on option) is a language server started as a separated process that gets informed about every application being executed or debugged.
+It tries to "dry-run" the same code as the original application and serve the run-time data afterwards.
+Currently, both approaches start the language server, providing the smart editing features for the following GraalVM-supported languages - JavaScript, Python, R, Ruby, and [SimpleLanguage](https://github.com/graalvm/simplelanguage).
+
+### Ruby Language Server
+
+This extension provides an option to automatically install and run the [solargraph](https://github.com/castwide/solargraph) which is an implementation of the Language Server Protocol for the Ruby language.
+Enabling this option, the GraalVM Ruby installation is checked for the presence of the `solargraph` gem and the user is provided with the option of an automatic installation of the missing gem.
+
+![Image No Ruby Language Server](images/no-ruby-ls.png)
+
+Once the `solargraph` gem is installed, the Ruby Language Server is automatically started and passed to the Language Server Protocol as delegate when necessary.
+
+### R Language Server

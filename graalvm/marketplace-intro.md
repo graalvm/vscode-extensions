@@ -7,7 +7,6 @@ The GraalVM Tools for Java extension provides full-fledged support for the Java 
 debugging capabilities, polyglot support, and lightning fast just-in-time as well as ahead-of-time compilers - all without ever leaving the comfort of VS Code.
 
 <!-- insert some thrilling image from VS Code -->
-<!-- ![GraalVM Extension](images/image.png) -->
 
 The GraalVM Tools for Java extension does the work of several extensions in one. Key features include:
 * Full-grown Java development support and debugging
@@ -45,17 +44,17 @@ Choose either the Community (free for all purposes) or Enterprise distribution (
 
 ![GraalVM Install Dialog](images/graalvm_install_actions.png)
 
-For more information about GraalVM installation and setup, check the [extension documentation](README.md#graalvm-installation).
+For more information about GraalVM installation and setup, check the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#graalvm-installation-wizard).
 
 ## Java Development and Debugging
 
 The GraalVM Tools for Java extension brings complete support for Java language development and debugging in VS Code, including popular features like auto completion, code navigation, and refactoring, etc.
 
 Any application that runs on a JVM can run on GraalVM unmodified.
-GraalVM includes a JDK based on the Java HotSpot VM, and integrates an optimizing, just-in-time (JIT) compiler, written in Java: the [Graal compiler](https://www.graalvm.org/22.0/reference-manual/compiler/).
+GraalVM includes a JDK based on the Java HotSpot VM, and integrates an optimizing, just-in-time (JIT) compiler, written in Java: the [Graal compiler](https://www.graalvm.org/dev/reference-manual/compiler/).
 
 There are several launch configurations available by default, or you can add more.
-Check the [extension documentation](README.md#java-development-and-debugging) to learn more.
+Check the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#java-development-and-debugging) to learn more.
 
 ## Integration with VisualVM
 
@@ -66,7 +65,7 @@ A special launch configuration - **Launch VisualVM & Java 8+ Application** - is 
 
 ![VisualVM and VS Code Integration](images/vscode_visualvm.png)
 
-Check the [dedicated guide](visualvm-integration.md) about VisualVM and VS Code integration using the extension.
+Check the [dedicated guide](https://www.graalvm.org/dev/tools/vscode/graalvm/visualvm-integration/) about VisualVM and VS Code integration using the extension.
 
 ## Support for the Micronaut Framework
 
@@ -75,7 +74,7 @@ This native support for the Micronaut framework allows to build native images of
 
 Moreover, you can build Docker images with the application artifacts, or even build Docker images with GraalVM Native Images inside and deploy them to containers.
 
-See the [GraalVM Tools for Micronaut extension documentation](../micronaut/README.md) to learn more.
+See the [GraalVM Tools for Micronaut extension documentation](https://www.graalvm.org/dev/tools/vscode/micronaut-extension/) to learn more.
 
 ## Native Image
 
@@ -89,8 +88,8 @@ Your application will:
 * Have improved security by greatly reducing attack surfaces and thwarting reverse engineering
 
 With GraalVM Tools for Java extension you can turn your Java projects into native executables directly in VS Code.
-Learn how you can do that from the [extension documentation](README.md#build-a-native-image).
-Read more about GraalVM Native Image [here](https://www.graalvm.org/22.0/reference-manual/native-image/).
+Learn how you can do that from the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#native-image-building-and-debugging).
+Read more about GraalVM Native Image [here](https://www.graalvm.org/dev/reference-manual/native-image/).
 
 ## Native Image Debugging
 
@@ -101,7 +100,7 @@ Read more about this and find a demo application in the [Native Image Debugging 
 
 ![Native Image Debugging in VS Code](images/debugging_ni_vscode.png)
 
-## Polyglot Languages Support
+## Polyglot Runtime and Languages Support
 
 The GraalVM Tools for Java extension enables a polyglot environment in VS Code, providing necessary editing and debugging features for a number of popular languages such as Python, Ruby, R, JavaScript, and Node.JS.
 The extension allows for polyglot programming in a bidirectional way: you can embed JavaScript, Ruby, R, and Python in Java, or call Java from those languages.
@@ -109,14 +108,14 @@ A host language and a guest language can directly interoperate with each other a
 
 ![Supported Languages](images/supported_languages.png)
 
-Owing to GraalVM's [built-in implementation of the Language Server Protocol](https://www.graalvm.org/22.0/tools/lsp/), smart editing features are provided for those languages like code-completion, find usages, go to declaration, and documentation on hover, etc.
+Owing to GraalVM's [built-in implementation of the Language Server Protocol](https://www.graalvm.org/dev/tools/lsp/), smart editing features are provided for those languages like code-completion, find usages, go to declaration, and documentation on hover, etc.
 The extension also includes full debugging capabilities for JavaScript and Node.js, Python, Ruby, and R applications.
 
 Check the dedicated guide how to run and debug JavaScript and Node.js, Python, Ruby, and R applications in VS Code:
-* [JavaScript and Node.js](polyglot-runtime.md#javascript-and-nodejs-support)
-* [Python](polyglot-runtime.md#python-support)
-* [Ruby](polyglot-runtime.md#ruby-support)
-* [R](polyglot-runtime.md#r-support)
+* [JavaScript and Node.js](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/polyglot-runtime/)
+* [Python](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/polyglot-runtime/)
+* [Ruby](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/polyglot-runtime/)
+* [R](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/polyglot-runtime/)
 
 ## Built-in Implementation of Debug Adapter Protocol (DAP)
 
@@ -124,7 +123,7 @@ Thanks to the built-in implementation of the [Debug Adapter Protocol (DAP)](http
 
 The advantage of using the Debug Adapter Protocol over Chrome Dev Tools is that (1) it is "native" to VS Code, meaning it does not require any intermediate translatation, and (2) it supports multithreading, which can be particually useful to debug, e.g., a Ruby application.
 
-Check the documentation for more information on [Polyglot Programming and Debugging in VS Code](polyglot-runtime.md).
+Check the documentation for more information on [Polyglot Programming and Debugging in VS Code](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/polyglot-runtime/).
 
 ## Provide Feedback or Seek Help
 
