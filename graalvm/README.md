@@ -31,7 +31,7 @@ To install the GraalVM Tools for Java extension in VS Code:
 
 1. Navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
 2. Search for "GraalVM" in the search field.
-3. Once found, press **Install**.
+3. Once found, click **Install**.
 4. Reload when required.
 
 ## GraalVM Installation Wizard
