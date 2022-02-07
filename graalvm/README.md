@@ -38,7 +38,7 @@ To install the GraalVM Tools for Java extension in VS Code:
 
 After installing the extension, you can install GraalVM by using the built-in installation wizard (click the "Gr" icon in the left side Activity Bar).
 
-You can either add existing GraalVM (if you have GraalVM already), or download it immediately from within VS Code.
+You can either add an existing GraalVM installation (if you have GraalVM already), or download it immediately from within VS Code.
 The **Download & Install GraalVM** action is preferable, as it eliminates the fuss around setting up environment variables and prepares the GraalVM runtime in VS Code for you.
 Choose either the Community (free for all purposes) or Enterprise distribution (free for evaluation and development). You can also choose to install additional plugins (JavaScript and Node.js support, LLVM, etc.).
 
