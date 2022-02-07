@@ -18,7 +18,7 @@ The GraalVM Tools for Java extension does the work of several extensions in one.
 * Native support for the Micronaut framework
 * Polyglot programming and debugging for polyglot applications, with support for JavaScript, Node.js, Python, R, and Ruby
 * Built-in implementation of Debug Adapter Protocol (DAP)
-* Smart editing features like auto complete, go to declaration, documentation on hover, etc.
+* Smart editing features such as auto complete, go to declaration, and documentation on hover.
 
 The power of VS Code just got boosted.
 
