@@ -18,10 +18,10 @@ The **debugging features** are provided for all supported languages with no exce
 In this guide you will learn how to start debugging JavaScript and Node.JS, Python, Ruby, R applications one by one, read about the Language Server Protocol implementation and editing features.
 You can jump to the necessary section directly:
 * [Debug Adapter Protocol Implementation](#debug-adapter-protocol-implementation)
-* [JavaScript and Node.js Debugging](polyglot-runtime.md#javascript-and-nodejs-support)
-* [Python Debugging](polyglot-runtime.md#python-support)
-* [Ruby Debugging](polyglot-runtime.md#ruby-support)
-* [R Debugging](polyglot-runtime.md#r-support)
+* [Debugging JavaScript and Node.js](#debugging-javascript-and-nodejs)
+* [Debugging Python](#debugging-python)
+* [Debugging Ruby](#debugging-ruby)
+* [Debugging R](#debugging-r)
 * [Language Server Protocol Implementation](#language-server-protocol-implementation)
 * [Running and Debugging Polyglot Applications](#running-and-debugging-polyglot-applications)
 
@@ -57,7 +57,7 @@ To connect to the open DAP port, the content of _launch.json_ for, for example, 
 
 The advantage of using the Debug Adapter Protocol over Chrome Dev Tools is that (1) it is "native" to Visual Studio Code (VS Code), meaning it does not require any intermediate translatation, and (2) it supports multithreading, which can be particually useful to debug, e.g., a Ruby application.
 
-## JavaScript and Node.js Debugging
+## Debugging JavaScript and Node.js
 
 To debug a JavaScript or Node.js application running on GraalVM, create a launch configuration for the application:
 
@@ -81,7 +81,7 @@ To start a debug session, do next:
 
 The GraalVM extension provides the following debug configurations that can be used to run and debug JavaScript and Node.js applications running on GraalVM:
 
-![JavaScript and Node.js Debugging Configurations](images/debug-config.png)
+![Debugging JavaScript and Node.js Configurations](images/debug-config.png)
 
 * __Launch Node.js Application__ launches a Node.js application with GraalVM in a debug mode.
 * __Launch JavaScript__ launches a JavaScript application with GraalVM in a debug mode.
@@ -106,7 +106,7 @@ For example, to connect to the open Debug Adapter Protocol port, the content of 
 }
 ```
 
-## Python Debugging
+## Debugging Python
 
 To debug a Python application running on GraalVM, create a launch configuration for the application:
 1. Go to **File**, then **Open Folder** to open the application project folder in VS Code.
@@ -150,7 +150,7 @@ For example, to connect to the Chrome Dev Tools protocol port, the content of th
 }
 ```
 
-## Ruby Debugging
+## Debugging Ruby
 
 To debug a Ruby application running on GraalVM, create a launch configuration for the application:
 

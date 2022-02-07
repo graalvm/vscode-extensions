@@ -17,13 +17,13 @@ permalink: /tools/vscode/graalvm-extension/
 * [Built-in Debug Adapter Protocol](#built-in-debug-adapter-protocol)
 * [Extension Settings](#extension-settings)
 
-[GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) extension provides a full-fledged support for the Java language and includes the GraalVM runtime with both just-in-time and ahead-of-time compilers, making it a comfortable and convenient integrated development environment to work with.
+[GraalVM Tools for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm) extension provides full-fledged support for the Java language and includes the GraalVM runtime with both just-in-time and ahead-of-time compilers, making it a comfortable and convenient integrated development environment.
 Besides Java, this extension enables a polyglot environment in VS Code and provides full editing and debugging capabilities for JavaScript and Node.js, Python, R, and Ruby languages.
 The extension provides the wizard to install GraalVM and to simplify configuring the development environment.
 
 The GraalVM Tools for Java extension in combination with the [GraalVM Tools for Micronaut extension](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut), brings native support for the Micronaut framework in VS Code and many more possibilities for Java developers.
 
-Note: The extension is Technology Preview, and the development team is actively working on further improvements to provide better usability for developers.
+Note: The extension is a Technology Preview, and the development team is actively working on further improvements to provide better usability for developers.
 
 ## Extension Installation
 
@@ -31,7 +31,7 @@ To install the GraalVM Tools for Java extension in VS Code, do the following:
 
 1. Navigate to Extensions in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ hot keys combination).
 2. Search for "GraalVM" in the search field.
-3. Once found, press Install. That action will install the GraalVM Tools for Java extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
+3. Once found, click **Install**. That action will install the GraalVM Tools for Java extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm).
 4. Reload when required.
 
 Once installed, notice the "Gr" icon in the Activity Bar on the left.
@@ -39,7 +39,7 @@ Once installed, notice the "Gr" icon in the Activity Bar on the left.
 ## GraalVM Installation Wizard
 
 After installing the extension, you can install GraalVM by using the built-in installation wizard (click the "Gr" icon in the left side Activity Bar).
-You can either add existing GraalVM (if you have GraalVM already), or download it immediately from within VS Code. A dialogue window suggests these options:
+You can either add an existing GraalVM installation (if you have GraalVM already), or download it immediately from within VS Code. A dialogue window suggests these options:
   * **Download & Install GraalVM**
   * **Add Existing GraalVM**
 
@@ -48,13 +48,13 @@ You can either add existing GraalVM (if you have GraalVM already), or download i
 GraalVM includes a JDK based on the Java HotSpot VM, integrates an optimizing, just-in-time (JIT) compiler, written in Java: the [Graal compiler](../../../reference-manual/java/compiler.md), and enables ahead-of-time compilation support with Native Image.
 Any application that runs on a Java Virtual Machine (JVM) can run on GraalVM.
 
-The **Download & Install GraalVM** action is preferable, as it eliminates the fuss around setting up environment variables and prepares the GraalVM runtime in VS Code for you.
+The **Download & Install GraalVM** action is recommended, as it eliminates the fuss around setting up environment variables and prepares the GraalVM runtime in VS Code for you.
 Choose either the Community (free for all purposes) or Enterprise distribution (free for evaluation and development).
 You can also choose to install additional plugins (JavaScript and Node.js support, LLVM, etc.).
 
-Each registered GraalVM instance displays its installation location and all its available plugins.
+Each registered GraalVM installation displays its location and all its available components.
 Plugins are either installed or available for download - the context actions to install (the plus icon) or remove (the bucket icon) are displayed when hovering over plugin's name.
-All registered GraalVM instances will be listed in the configuration file under **File** > **Preferences** > **Settings** (**Code** > **Preferences** > **Settings** on macOS).
+All registered GraalVM installations will be listed in the configuration file under **File** > **Preferences** > **Settings** (**Code** > **Preferences** > **Settings** on macOS).
 
 The advantages of this installation model are:
 - It permits multiple GraalVM and components installations at the same time.
@@ -70,31 +70,32 @@ If you select **Download & Install GraalVM**, the installation wizard will ask y
   * Select the destination folder
 
 If you prefer GraalVM Community Edition, the installation wizard will download the package from [Github](https://github.com/graalvm/graalvm-ce-builds/releases) in the background and display the progress.
-
-If you select GraalVM Enterprise Editon, you will be prompted to accept the Oracle Technology Network License Agreement and requested to enter your email address.
+If you select GraalVM Enterprise Edition, you will be prompted to accept the Oracle Technology Network License Agreement and requested to enter your email address.
 Providing your email address is mandatory.
 
 ![Accept Oracle License Agreement](images/otn_license_accept.png)
 
 The installation wizard will download the package from [Oracle Software Downloads](https://www.oracle.com/downloads/graalvm-downloads.html) in the background and display the progress.
-If you are behind a proxy, setup your proxy configuration by the "Setup Proxy" command or by overriding the `http_proxy` and `https_proxy` environment variables.
+If you are behind a proxy, setup your proxy configuration using the "Setup Proxy" command or by overriding the `http_proxy` and `https_proxy` environment variables.
 
 At the same time, the "Install Optional GraalVM Components" window will pop up suggesting to install additional plugins (JavaScript and Node.js support, LLVM, etc.) to GraalVM:
+
 ![Install Optional GraalVM Components](images/install_optional_components_popup.png)
 
 Once you confirm, you are taken to the selection list:
+
 ![Select Components to Install](images/install_components_view.png)
 
 ### Add Existing GraalVM
 
-The **Add Existing GraalVM** action allows you to select the existing GraalVM installation from your local disk.
+Use the **Add Existing GraalVM** action to select an existing local GraalVM installation.
 As in the previous installation scenario, you are prompted to set the GraalVM installation as default, and to install additional plugins, if not already installed.
 **Add Existing GraalVM** can also be invoked by using an icon on the side of the **GRAALVM: INSTALLATIONS** panel.
 
 ### Set Default Java
 
 Upon installation completion, the "Set Default Java" action is invoked.
-To set a newly added GraalVM active, click the “home” icon by the side of the installation:
+To set a newly added GraalVM active, click the home icon by the side of the installation:
 
 ![Activate GraalVM](images/activate_graalvm.png)
 
@@ -122,10 +123,10 @@ This configuration is then used to launch the Java Language Server.
 The application you create from scratch or a Java project you open in VS Code will then run on GraalVM.
 Any application that runs on a JVM can run on GraalVM unmodified.
 
-To debug a Java application running on GraalVM, create a launch configuration:
+To debug a Java application running on GraalVM, first create a launch configuration:
 
 1. Open the file to be debugged or run.
-2. Switch to the Debug view by clicking on the "bug" icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
+2. Switch to the Debug view by clicking on the bug icon in the left-hand side panel. The newly opened window will suggest you create a _launch.json_ file.
 3. Select the **Java 8+** environment:
 
   ![Create Launch Configuration for Java](images/create_java_launch_configuration.png)
@@ -165,7 +166,7 @@ A special launch configuration - **Launch VisualVM & Java 8+ Application** - is 
 
 ![VisualVM and VS Code Integration](images/vscode_visualvm.png)
 
-Check the [dedicated guide](visualvm-integration.md) how to start VisualVM from within the VS Code and learn about available launch configurations.
+Check the [dedicated guide](visualvm-integration.md) how to start VisualVM from within VS Code and learn about available launch configurations.
 
 ## Micronaut Support
 
@@ -188,7 +189,7 @@ Your application will:
 
 ### Tracing Agent
 
-GraalVM Tools for Java extension also provides experimental support for the [Java Tracing agent](../../../reference-manual/native-image/Agent.md) to automate the process of tracking and registering dynamic feature calls, making it even easier to build native images in VS Code.
+GraalVM Tools for Java extension also provides experimental support for the [Java Tracing agent](../../../reference-manual/native-image/Agent.md) to automate the process of tracking and registering dynamic feature calls, making it even easier to build native executables from VS Code projects.
 
 ### Configuration with Tracing Agent
 
@@ -208,7 +209,7 @@ A special launch configuration - **Launch Native Image Agent & Java 8+ Applicati
 
 In the next section you will learn how to build a native image of your Java application and apply the Tracing agent in VS code.
 
-### Native Image Building
+### Building Native Executables
 
 To build a native image version of your Java application in VS Code, do the following:
 
@@ -218,10 +219,10 @@ To build a native image version of your Java application in VS Code, do the foll
 
 > Note: Do not click the **Start Debugging** action to start a project. The Tracing agent is not compatible with the debugger agent and running such a configuration will fail.
 
-4. Specify the output directory for configuration files to be generated. During the execution, the agent interfaces with a JVM to intercept all calls that look up classes, methods, fields, resources, or request proxy accesses. The agent generates configuration files containing all intercepted dynamic accesses and will store them the output directory you specify. When starting the project, VS Code asks to select the desired location. The following choices are available:
+4. Specify the output directory for configuration files to be generated. During the execution, the agent interfaces with a JVM to intercept all calls that look up classes, methods, fields, resources, or request proxy accesses. The agent generates configuration files containing all intercepted dynamic accesses and and stores them in the output directory you specify. When you start the project, VS Code asks you to select the desired location. The following choices are available:
   * `META-INF/native-image` - the default location in project sources to store the configuration files
   * `/tmp` - the configuration files will be stored to the `/tmp/native-image` directory
-  * Custom directory - the configuration files will be stored to the provided custom directory
+  * Custom directory - the configuration files will be stored in the custom directory you specify
 5. Generate load to the running process to invoke more code and generate the best configuration.
 6. Once all possible execution paths have been executed, terminate the process. At this point the Tracing agent dumps the collected configuration to the selected output directory.
 7. Go to **Terminal**, and open **New Terminal**. To build a native executable from a Java class file in the current working directory, use the following command:
@@ -235,7 +236,7 @@ To build a native image version of your Java application in VS Code, do the foll
 
 Read more about GraalVM Native Image [here](../../../reference-manual/native-image/README.md).
 
-### Native Image Debugging
+### Debugging Native Executables
 
 The GraalVM Tools for Java extension provides Java-like debugging of native executables in a running state directly from within VS Code.
 You can set breakpoints, inspect the state of your application, even attach the debugger to a native image process in VS Code and step over the application source code, etc.
