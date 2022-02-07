@@ -13,7 +13,7 @@ The GraalVM Tools for Java extension does the work of several extensions in one.
 * The GraalVM runtime, enabling you to run Java applications unmodified
 * The just-in-time Graal compiler, ensuring your code runs fast
 * The ahead-of-time compilation with GraalVM Native Image, to turn your Java application into tiny executables, perfect for storing in the cloud and microservices deployments
-* The debugging of native Java proceses at run time
+* Debugging of native Java proceses at run time
 * Integration with VisualVM - for even easier and more powerful debugging
 * Native support for the Micronaut framework
 * Polyglot programming and debugging for polyglot applications, with support for JavaScript, Node.js, Python, R, and Ruby
