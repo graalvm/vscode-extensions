@@ -3,7 +3,7 @@
 You want the power of Java and the ease of VS Code?
 Level up your developer abilities by leveraging GraalVM in VS Code.
 
-The GraalVM Tools for Java extension provides full-fledged support for the Java language, but it also includes the power of GraalVM, full
+The GraalVM Tools for Java extension provides full-fledged support for the Java language, and it also includes the power of GraalVM, full
 debugging capabilities, polyglot support, and lightning fast just-in-time as well as ahead-of-time compilers - all without ever leaving the comfort of VS Code.
 
 <!-- insert some thrilling image from VS Code -->
