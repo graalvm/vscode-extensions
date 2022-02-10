@@ -4,11 +4,10 @@ You want the power of Java and the simplicity of VS Code?
 Improve your developer productivity by leveraging GraalVM in VS Code.
 
 The GraalVM Tools for Java extension provides full-fledged support for the Java language. It also includes the power of GraalVM, full
-debugging capabilities, polyglot support, and lightning-fast just-in-time compilers as well as ahead-of-time compilers--all without ever leaving the comfort of VS Code.
+debugging capabilities, polyglot support, and lightning-fast just-in-time compilers as well as ahead-of-time compilers - all without ever leaving the comfort of VS Code.
 
-<!-- insert some thrilling image from VS Code -->
-
-The GraalVM Tools for Java extension performs the work of several extensions in one. Key features include:
+The GraalVM Tools for Java extension performs the work of several extensions in one.
+Key features include:
 * Full Java development support and debugging
 * The GraalVM runtime, enabling you to run Java applications unmodified
 * The just-in-time Graal compiler, ensuring your code runs fast
@@ -19,8 +18,6 @@ The GraalVM Tools for Java extension performs the work of several extensions in 
 * Polyglot programming and debugging for polyglot applications, with support for JavaScript, Node.js, Python, R, and Ruby
 * Built-in implementation of Debug Adapter Protocol (DAP)
 * Smart editing features such as auto complete, go to declaration, and documentation on hover
-
-The power of VS Code just got boosted.
 
 This extension makes VS Code a comfortable and convenient integrated development environment for GraalVM developers.
 Let's get started!

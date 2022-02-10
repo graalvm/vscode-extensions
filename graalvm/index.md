@@ -238,8 +238,8 @@ Read more about GraalVM Native Image [here](../../../reference-manual/native-ima
 
 ### Debugging Native Executables
 
-he GraalVM Tools for Java extension provides Java-like debugging of a native executable in a running state directly from within VS Code.
-You can set breakpoints, inspect the state of your application, even attach the debugger to a native executable process in VS Code and step over the Java application source code.
+The GraalVM Tools for Java extension provides Java-like debugging of a native executable in a running state directly from within VS Code.
+You can set breakpoints, inspect the state of your application, even attach the debugger to a native image process in VS Code and step over the Java application source code.
 
 ![Native Image Debugging in VS Code](images/debugging_ni_vscode.png)
 
