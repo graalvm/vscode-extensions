@@ -93,7 +93,7 @@ Read more about GraalVM Native Image [here](https://www.graalvm.org/dev/referenc
 The GraalVM Tools for Java extension provides Java-like debugging of a native executable in a running state directly from within VS Code.
 You can set breakpoints, inspect the state of your application, even attach the debugger to a native executable process in VS Code and step over the Java application source code!
 
-Read more about this and find a demo application in the [Native Image Debugging guide](native-image-debugging.md).
+Read more about this and find a demo application in the [Native Image Debugging guide](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/debugging-native-image/).
 
 ![Native Image Debugging in VS Code](images/debugging_ni_vscode.png)
 
@@ -110,7 +110,7 @@ Thanks to GraalVM's [built-in implementation of the Language Server Protocol](ht
 
 The debugging features are provided for all supported languages by default.
 
-Proceed to the [dedicated guide](polyglot-runtime.md) to read about debugging JavaScript and Node.JS, Python, Ruby, R applications in VS Code, the Language Server Protocol implementation and editing features.
+Proceed to the [dedicated guide](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/polyglot-runtime/) to read about debugging JavaScript and Node.JS, Python, Ruby, R applications in VS Code, the Language Server Protocol implementation and editing features.
 
 ## Built-in Implementation of Debug Adapter Protocol (DAP)
 
