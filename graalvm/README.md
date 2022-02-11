@@ -103,7 +103,7 @@ The GraalVM Tools for Java extension enables a polyglot environment in VS Code, 
 The extension supports polyglot programming in a bidirectional way: you can embed JavaScript, Ruby, R, and Python in Java, or call Java from those languages.
 A host language and a guest language can directly interoperate with each other and pass data back and forth in the same memory space.
 
-![Supported Languages](images/supported_languages.png)
+![Supported Languages](images/langs_vscode.png)
 
 The GraalVM Tools for Java extension comes with full editing capabilities for JavaScript, Node.js, and Python by default. For editing Ruby and R in VS Code you will need to additionally install language servers.
 Thanks to GraalVM's [built-in implementation of the Language Server Protocol](https://www.graalvm.org/dev/tools/lsp/), smart editing features are added on top for those languages such as code-completion, find usages, go to declaration, CodeLens, documentation on hover.
