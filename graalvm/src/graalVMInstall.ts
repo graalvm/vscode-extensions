@@ -35,8 +35,8 @@ const NO_GU_FOUND: string = 'Cannot find runtime \'gu\' within your GraalVM inst
 
 const lockedComponentIds: string[] = [];
 
-export function setupGraalVM(warning: boolean = false) {
-	findGraalVMs().then(vms => {
+export function setupGraalVM(context: vscode.ExtensionContext, warning: boolean = false) {
+	findGraalVMs(context).then(vms => {
 		const items: string[] = vms.length > 0 ? [SELECT_ACTIVE_GRAALVM, INSTALL_GRAALVM] : [SELECT_EXISTING_GRAALVM, INSTALL_GRAALVM];
         const message: (message: string, ...items: string[]) => Thenable<string | undefined> = warning ? vscode.window.showWarningMessage : vscode.window.showInformationMessage;
 		message('No active GraalVM installation found.', ...items).then(value => {
@@ -84,7 +84,7 @@ export async function installGraalVM(context: vscode.ExtensionContext): Promise<
                     if (process.platform === 'darwin') {
                         graalVMHome = join(graalVMHome, 'Contents', 'Home');
                     }
-                    updateGraalVMLocations(graalVMHome);
+                    updateGraalVMLocations(context, graalVMHome);
                     checkForMissingComponents(graalVMHome);
                 } else {
                     const msg = 'Failed to extract the downloaded archive. Please extract it manually and use the Add Existing GraalVM action to register the GraalVM.';
@@ -104,16 +104,16 @@ export async function installGraalVM(context: vscode.ExtensionContext): Promise<
     }
 }
 
-export async function removeGraalVMInstallation(homeFolder?: string) {
+export async function removeGraalVMInstallation(context: vscode.ExtensionContext, homeFolder?: string) {
     if (!homeFolder) {
-        homeFolder = await _selectInstalledGraalVM(true);
+        homeFolder = await _selectInstalledGraalVM(context, true);
     }
     const graalFolder = homeFolder;
     if (!graalFolder) {
         return -1;
     }
-    await removeGraalVMconfiguration(graalFolder);
-    if (isImplicitGraalVM(graalFolder)) {
+    await removeGraalVMconfiguration(context, graalFolder);
+    if (isImplicitGraalVM(context, graalFolder)) {
         vscode.window.showWarningMessage('This GraalVM installation was detected automatically from system environment and cannot be removed. Unselect Settings / Detect system GraalVM installations to disable automatic GraalVM detection.');
         return -1;
     }
@@ -128,12 +128,12 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
     }
 }
 
-export async function installGraalVMComponent(component: string | Component | undefined, homeFolder?: string, context?: vscode.ExtensionContext): Promise<void> {
+export async function installGraalVMComponent(context: vscode.ExtensionContext, component: string | Component | undefined, homeFolder?: string): Promise<void> {
     _callIdGVMHome(component, homeFolder, context, _installGraalVMComponent);
 }
 
-export async function uninstallGraalVMComponent(component: string | Component | undefined, homeFolder?: string): Promise<void> {
-    _callIdGVMHome(component, homeFolder, undefined, _uninstallGraalVMComponent);
+export async function uninstallGraalVMComponent(context: vscode.ExtensionContext, component: string | Component | undefined, homeFolder?: string): Promise<void> {
+    _callIdGVMHome(component, homeFolder, context, _uninstallGraalVMComponent);
 }
 
 const MACOS_JDK_SUBDIR: string = join('Contents', 'Home');
@@ -166,7 +166,7 @@ export async function addExistingGraalVM(context: vscode.ExtensionContext, homeF
         let graalVMHome = uri[0].fsPath;
         if (graalVMHome) {
             graalVMHome = process.platform === 'darwin' && !fs.existsSync(join(graalVMHome, "bin", "java")) && !graalVMHome.endsWith(MACOS_JDK_SUBDIR) ? join(graalVMHome, MACOS_JDK_SUBDIR) : graalVMHome;
-            updateGraalVMLocations(graalVMHome);
+            updateGraalVMLocations(context, graalVMHome);
             if (!homeFolder) {
                 const newGraalVMParentDir = vscode.Uri.file(dirname(uri[0].fsPath)).toString();
                 await context.globalState.update(LAST_GRAALVM_PARENTDIR, newGraalVMParentDir);
@@ -180,23 +180,23 @@ export async function addExistingGraalVM(context: vscode.ExtensionContext, homeF
     }
 }
 
-export async function selectActiveGraalVM(graalVMHome?: string, nonInteractive?: boolean): Promise<void> {
-    graalVMHome = graalVMHome || await _selectInstalledGraalVM(true);
+export async function selectActiveGraalVM(context: vscode.ExtensionContext, graalVMHome?: string, nonInteractive?: boolean): Promise<void> {
+    graalVMHome = graalVMHome || await _selectInstalledGraalVM(context, true);
     if (graalVMHome) {
         const graalVMVersion = await getGraalVMVersion(graalVMHome);
         if (graalVMVersion) {
-            await configureGraalVMHome(graalVMHome, nonInteractive);
+            await configureGraalVMHome(context, graalVMHome, nonInteractive);
         }
     }
 }
 
-export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
+export async function findGraalVMs(context: vscode.ExtensionContext): Promise<{name: string, path: string}[]> {
     const paths: string[] = [];
     const comparator = utils.isSamePath();
-    addPathToJava(normalize(getGVMHome()), paths, comparator);
+    addPathToJava(context, normalize(getGVMHome()), paths, comparator);
     const installations = getGVMInsts().map(inst => normalize(inst));
-    installations.forEach(installation => addPathToJava(installation, paths, comparator, true));
-    findImplicitGraalVMs(paths, comparator);
+    installations.forEach(installation => addPathToJava(context, installation, paths, comparator, true));
+    findImplicitGraalVMs(context, paths, comparator);
     const vms: {name: string, path: string}[] = [];
     for (let i = 0; i < paths.length; i++) {
         const version = await getGraalVMVersion(paths[i]);
@@ -207,28 +207,28 @@ export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
     return vms;
 }
 
-function findImplicitGraalVMs(paths: string[], comparator = utils.isSamePath()) {
+function findImplicitGraalVMs(context: vscode.ExtensionContext, paths: string[], comparator = utils.isSamePath()) {
     if (getConf('graalvm').get('systemDetect')) {
-        addPathsToJavaIn('/opt', paths, comparator);
+        addPathsToJavaIn(context, '/opt', paths, comparator);
         if (process.env.GRAALVM_HOME) {
-            addPathToJava(normalize(process.env.GRAALVM_HOME), paths, comparator);
+            addPathToJava(context, normalize(process.env.GRAALVM_HOME), paths, comparator);
         }
         if (process.env.JAVA_HOME) {
-            addPathToJava(normalize(process.env.JAVA_HOME), paths, comparator);
+            addPathToJava(context, normalize(process.env.JAVA_HOME), paths, comparator);
         }
         if (process.env.PATH) {
             process.env.PATH.split(delimiter)
                 .filter(p => basename(p) === 'bin')
-                .forEach(p => addPathToJava(dirname(p), paths, comparator));
+                .forEach(p => addPathToJava(context, dirname(p), paths, comparator));
         }
         obtainSDKmanGVMInstallations()
-            .forEach(p => addPathToJava(normalize(p[0]), paths, comparator));
+            .forEach(p => addPathToJava(context, normalize(p[0]), paths, comparator));
     }
 }
 
-function isImplicitGraalVM(path: string): boolean {
+function isImplicitGraalVM(context: vscode.ExtensionContext, path: string): boolean {
     const paths: string[] = [];
-    findImplicitGraalVMs(paths);
+    findImplicitGraalVMs(context, paths);
     return paths.includes(path);
 }
 
@@ -276,7 +276,7 @@ export async function getGraalVMVersion(homeFolder: string): Promise<string | un
     });
 }
 
-export function getInstallConfigurations(): ConfigurationPickItem[] {
+export function getInstallConfigurations(context: vscode.ExtensionContext): ConfigurationPickItem[] {
     const ret: ConfigurationPickItem[] = [];
 
     ret.push(new ConfigurationPickItem(
@@ -297,12 +297,12 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
         async graalVMHome => {
             const env: any = getTerminalEnv();
             env.JAVA_HOME = graalVMHome;
-            return setTerminalEnv(env);
+            return setTerminalEnv(context, env);
         },
         async _graalVMHome => {
             const env: any = getTerminalEnv();
             env.JAVA_HOME = undefined;
-            return setTerminalEnv(env);
+            return setTerminalEnv(context, env);
         }
     ));
     
@@ -332,7 +332,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
             } else {
                 env.PATH = `${graalVMPath}${delimiter}${process.env.PATH}`;
             }
-            return setTerminalEnv(env);
+            return setTerminalEnv(context, env);
         },
         async graalVMHome => {
             const env: any = getTerminalEnv();
@@ -346,7 +346,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
                     env.PATH = paths.join(delimiter);
                 }
             }
-            return setTerminalEnv(env);
+            return setTerminalEnv(context, env);
         }
     ));
 
@@ -405,8 +405,8 @@ export async function checkForMissingComponents(homeFolder: string): Promise<voi
     }
 }
 
-async function _selectInstalledGraalVM(explicit: boolean): Promise<string | undefined>{
-    const vms: {label: string, detail: string}[] = (await findGraalVMs()).map(item => {
+async function _selectInstalledGraalVM(context: vscode.ExtensionContext, explicit: boolean): Promise<string | undefined>{
+    const vms: {label: string, detail: string}[] = (await findGraalVMs(context)).map(item => {
         return {label: item.name, detail: item.path};
     });
     if (vms.length === 0) {
@@ -630,34 +630,34 @@ async function extractGraalVM(downloadedFile: string, targetDir: string): Promis
     });
 }
 
-async function _callIdGVMHome(component: string | Component | undefined, homeFolder: string | undefined, context: vscode.ExtensionContext | undefined, fnc: (id: string | undefined, graalVMHome: string, context: vscode.ExtensionContext | undefined) => Promise<void>): Promise<void>{
+async function _callIdGVMHome(component: string | Component | undefined, homeFolder: string | undefined, context: vscode.ExtensionContext, fnc: (id: string | undefined, graalVMHome: string, context: vscode.ExtensionContext) => Promise<void>): Promise<void>{
     if (component instanceof Component) {
         return fnc(component.componentId, component.installation.home, context);
     } else {
-        homeFolder = homeFolder || await _selectInstalledGraalVM(false);
+        homeFolder = homeFolder || await _selectInstalledGraalVM(context, false);
         if (homeFolder) {
             return fnc(component, homeFolder, context);
         }
     }
 }
 
-async function _installGraalVMComponent(componentId: string | undefined, graalVMHome: string, context?: vscode.ExtensionContext): Promise<void> {
+async function _installGraalVMComponent(componentId: string | undefined, graalVMHome: string, context: vscode.ExtensionContext): Promise<void> {
     if (utils.checkFolderWritePermissions(graalVMHome)) {
         const componentIds: string[] = componentId ? [componentId] : await selectAvailableComponents(graalVMHome).catch((error) => {
             vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
             return [];
         });
-        changeGraalVMComponent(graalVMHome, componentIds, 'install', context);
+        changeGraalVMComponent(graalVMHome, componentIds, 'install', context, true);
     }
 }
 
-async function _uninstallGraalVMComponent(componentId: string | undefined, graalVMHome: string): Promise<void> {
+async function _uninstallGraalVMComponent(componentId: string | undefined, graalVMHome: string, context: vscode.ExtensionContext): Promise<void> {
     if (utils.checkFolderWritePermissions(graalVMHome)) {
         const componentIds: string[] = componentId ? [componentId] : await selectInstalledComponents(graalVMHome).catch((error) => {
             vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
             return [];
         });
-        changeGraalVMComponent(graalVMHome, componentIds.reverse(), 'remove');
+        changeGraalVMComponent(graalVMHome, componentIds.reverse(), 'remove', context, false);
     }
 }
 
@@ -681,7 +681,7 @@ function unlockComponents(graalVMHome: string, componentIds: string[]): void {
     });
 }
 
-async function changeGraalVMComponent(graalVMHome: string, componentIds: string[], action: string, context?: vscode.ExtensionContext): Promise<void> {
+async function changeGraalVMComponent(graalVMHome: string, componentIds: string[], action: string, context: vscode.ExtensionContext, checkLicense? : boolean): Promise<void> {
     componentIds = lockComponents(graalVMHome, componentIds);
     if (componentIds.length === 0) {
         return;
@@ -689,7 +689,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
     const executablePath = await getGU(graalVMHome);
     let email: string | undefined;
     const eeInfo: any = action === 'install' ? await getEEReleaseInfo(graalVMHome) : undefined;
-    if (eeInfo && context) {
+    if (eeInfo && checkLicense) {
         const license = await get(eeInfo.license, /^text\/plain/);
         if (license) {
             email = await LicenseCheckPanel.show(context, eeInfo.licenseLabel, license.split('\n').join('<br>'));
@@ -718,7 +718,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             }
             try {
                 await execCancellable(`${executablePath} ${action} ${args}${id}`, token, { cwd: join(graalVMHome, 'bin') });
-                await checkGraalVMconfiguration(graalVMHome);
+                await checkGraalVMconfiguration(context, graalVMHome);
             } catch (error) {
                 vscode.window.showWarningMessage(error?.message);
             }
@@ -944,7 +944,7 @@ function deleteFolder(folder: string) {
     }
 }
 
-function updateGraalVMLocations(homeFolder: string) {
+function updateGraalVMLocations(context: vscode.ExtensionContext, homeFolder: string) {
     homeFolder = normalize(homeFolder);
     const gr = getGVMConfig();
     const installations = getGVMInsts(gr);
@@ -955,10 +955,10 @@ function updateGraalVMLocations(homeFolder: string) {
                 setGVMInsts(gr, installations);
                 const graalVMHome = getGVMHome(gr);
                 if (!graalVMHome) {
-                    configureGraalVMHome(homeFolder);
+                    configureGraalVMHome(context, homeFolder);
 
                 } else if (graalVMHome !== homeFolder) {
-                    utils.askYesNo(`Set ${version} as active GraalVM?`, () => configureGraalVMHome(homeFolder));
+                    utils.askYesNo(`Set ${version} as active GraalVM?`, () => configureGraalVMHome(context, homeFolder));
                 }
             } else {
                 vscode.window.showErrorMessage('Failed to add the selected GraalVM installation');
@@ -967,7 +967,7 @@ function updateGraalVMLocations(homeFolder: string) {
     }
 }
 
-function addPathsToJavaIn(folder: string, paths: string[], comparator = utils.isSamePath()) {
+function addPathsToJavaIn(context: vscode.ExtensionContext, folder: string, paths: string[], comparator = utils.isSamePath()) {
     if (folder && fs.existsSync(folder) && fs.statSync(folder).isDirectory) {
         fs.readdirSync(folder).map(f => join(folder, f)).map(p => {
             if (process.platform === 'darwin') {
@@ -975,15 +975,15 @@ function addPathsToJavaIn(folder: string, paths: string[], comparator = utils.is
                 return fs.existsSync(homePath) ? homePath : p;
             }
             return p;
-        }).filter(p => fs.statSync(p).isDirectory()).forEach(p => addPathToJava(p, paths, comparator));
+        }).filter(p => fs.statSync(p).isDirectory()).forEach(p => addPathToJava(context, p, paths, comparator));
     }
 }
 
-function addPathToJava(folder: string, paths: string[], comparator = utils.isSamePath(), removeOnEmpty: boolean = false): void {
+function addPathToJava(context: vscode.ExtensionContext, folder: string, paths: string[], comparator = utils.isSamePath(), removeOnEmpty: boolean = false): void {
     const executable: string | undefined = utils.findExecutable('java', folder);
     if (!executable) {
         if (removeOnEmpty) {
-            removeGraalVMconfiguration(folder);
+            removeGraalVMconfiguration(context, folder);
         }
         return;
     }
@@ -1135,6 +1135,9 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null> = new vscode.EventEmitter<vscode.TreeItem | undefined | null>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null> = this._onDidChangeTreeData.event;
 
+        constructor(public readonly context: vscode.ExtensionContext) {
+        }
+
 	refresh(): void {
 		this._onDidChangeTreeData.fire(undefined);
 	}
@@ -1169,7 +1172,7 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
 		} else {
             const graalVMHome = getGVMHome();
             const writable = utils.checkFolderWritePermissions(graalVMHome, true);
-            return findGraalVMs().then(vms => {
+            return findGraalVMs(this.context).then(vms => {
                 return vms.map(item => new Installation(item.name, vscode.TreeItemCollapsibleState.Collapsed, item.path, item.path === graalVMHome, writable));
             });
 		}
