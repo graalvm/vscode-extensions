@@ -3,10 +3,32 @@
 'use strict';
 
 const path = require('path');
+const maven = require('maven');
+const CopyPlugin = require("copy-webpack-plugin");
+        
 
 /**@type {import('webpack').Configuration}*/
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
+
+    plugins: [
+        {
+            apply: (compiler) => {
+                compiler.hooks.beforeCompile.tapPromise('MavenPlugin', (compilation) => {
+                    const mvn = maven.create({ cwd: '../nbcode-graalvm' });
+                    return mvn.execute(['clean', 'install'], {'skipTests': true});}
+                );
+            }
+        },
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: "../nbcode-graalvm/nbcode-graalvm-ojdbc/target/nbm/netbeans/nbcodegraalvm/",
+                    to: "../nbcode/graalvmextra/"
+                }
+            ],
+        }),
+    ],
 
     entry: {
         extension: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
