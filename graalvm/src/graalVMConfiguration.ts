@@ -14,7 +14,6 @@ import { checkForMissingComponents, getInstallConfigurations } from './graalVMIn
 import { getPythonConfigurations } from './graalVMPython';
 import { getRConfigurations } from './graalVMR';
 import { getRubyConfigurations } from './graalVMRuby';
-import { removeSDKmanUnclassifiedInstallation, setupSDKmanGVMInstallation } from './sdkmanSupport';
 
 let configurations: ConfigurationPickItem[];
 
@@ -56,8 +55,18 @@ export function getTerminalEnv(): any {
     return getConf(TERMINAL_INTEGRATED).get(`env.${utils.platform()}`) as any | {};
 }
 
-export async function setTerminalEnv(env: any): Promise<any> {
-    return getConf(TERMINAL_INTEGRATED).update(`env.${utils.platform()}`, env, true);
+export async function setTerminalEnv(context: vscode.ExtensionContext, env: any): Promise<any> {
+    return getConf(TERMINAL_INTEGRATED).update(`env.${utils.platform()}`, env, true).then(() => {
+        let collection = context.environmentVariableCollection;
+        if (env.GRAALVM_HOME) {
+            const separator = process.platform === 'win32' ? ';' : ':';
+            collection.prepend('PATH', env.GRAALVM_HOME + path.sep + 'bin' + separator);
+            collection.replace('JAVA_HOME', env.GRAALVM_HOME);
+        } else {
+            collection.prepend('PATH', '');
+            collection.delete('JAVA_HOME');
+        }
+    });
 }
 
 export async function setupProxy() {
@@ -95,8 +104,8 @@ export async function setupProxy() {
     });
 }
 
-export async function checkGraalVMconfiguration(graalVMHome: string) {
-    gatherConfigurations();
+export async function checkGraalVMconfiguration(context: vscode.ExtensionContext, graalVMHome: string) {
+    gatherConfigurations(context);
     for (const conf of configurations) {
         if (!conf.show(graalVMHome) && conf.setted(graalVMHome)) {
             try {
@@ -106,21 +115,21 @@ export async function checkGraalVMconfiguration(graalVMHome: string) {
     }
 }
 
-export async function configureGraalVMHome(graalVMHome: string, nonInteractive?: boolean) {
+export async function configureGraalVMHome(context: vscode.ExtensionContext, graalVMHome: string, nonInteractive?: boolean) {
     const gr = getGVMConfig();
     const oldGVM = getGVMHome(gr);
     if (graalVMHome !== oldGVM) {
-        await removeConfigurations(oldGVM);
+        await removeConfigurations(context, oldGVM);
     }
-    await defaultConfig(graalVMHome, gr);
+    await defaultConfig(context, graalVMHome, gr);
     if (!nonInteractive) {
-        await configureInteractive(graalVMHome);
+        await configureInteractive(context, graalVMHome);
     }
 }
 
-export async function removeGraalVMconfiguration(graalVMHome: string) {
-    await removeDefaultConfigurations(graalVMHome);
-    await removeConfigurations(graalVMHome);
+export async function removeGraalVMconfiguration(context: vscode.ExtensionContext, graalVMHome: string) {
+    await removeDefaultConfigurations(context, graalVMHome);
+    await removeConfigurations(context, graalVMHome);
 }
 
 function validateProxySettings(proxy: string) {
@@ -273,7 +282,7 @@ function wrappedMavenProxy(proxy: string): MavenSettings {
     };
 }
 
-async function removeDefaultConfigurations(graalVMHome: string) {
+async function removeDefaultConfigurations(context: vscode.ExtensionContext, graalVMHome: string) {
     const gr = getGVMConfig();
     const installations = getGVMInsts(gr);
     const index = installations.indexOf(graalVMHome);
@@ -290,7 +299,7 @@ async function removeDefaultConfigurations(graalVMHome: string) {
         if (env.GRAALVM_HOME === graalVMHome) {
             env.GRAALVM_HOME = undefined;
         }
-        await setTerminalEnv(env);
+        await setTerminalEnv(context, env);
     }
     try {
         const nbConf = getConf('netbeans');
@@ -301,8 +310,8 @@ async function removeDefaultConfigurations(graalVMHome: string) {
     } catch(_err) {}
 }
 
-async function removeConfigurations(graalVMHome: string) {
-    gatherConfigurations();
+async function removeConfigurations(context: vscode.ExtensionContext, graalVMHome: string) {
+    gatherConfigurations(context);
     for (const conf of configurations) {
         if (conf.setted(graalVMHome)) {
             try {
@@ -310,12 +319,11 @@ async function removeConfigurations(graalVMHome: string) {
             } catch (_err) {}
         }
     }
-    await removeSDKmanUnclassifiedInstallation(graalVMHome);
 }
 
-async function configureInteractive(graalVMHome: string) {
+async function configureInteractive(context: vscode.ExtensionContext, graalVMHome: string) {
     checkForMissingComponents(graalVMHome);
-    gatherConfigurations();
+    gatherConfigurations(context);
     const toShow: ConfigurationPickItem[] = configurations.filter(conf => {
         const show = conf.show(graalVMHome);
         if (show) {
@@ -345,17 +353,17 @@ async function configureInteractive(graalVMHome: string) {
     }
 }
 
-function gatherConfigurations() {
+function gatherConfigurations(context: vscode.ExtensionContext) {
     if (configurations) {
         return;
     }
-    configurations = getInstallConfigurations().concat(
+    configurations = getInstallConfigurations(context).concat(
         getPythonConfigurations(), 
         getRubyConfigurations(),
         getRConfigurations());
 }
 
-async function defaultConfig(graalVMHome: string, gr: vscode.WorkspaceConfiguration) {
+async function defaultConfig(context: vscode.ExtensionContext, graalVMHome: string, gr: vscode.WorkspaceConfiguration) {
     await setGVMHome(graalVMHome, gr);
     const insts = getGVMInsts(gr);
     if (!insts.includes(graalVMHome)) {
@@ -369,8 +377,7 @@ async function defaultConfig(graalVMHome: string, gr: vscode.WorkspaceConfigurat
 
     let env: any = getTerminalEnv();
     env.GRAALVM_HOME = graalVMHome;
-    await setTerminalEnv(env);
-    await setupSDKmanGVMInstallation(graalVMHome);
+    await setTerminalEnv(context, env);
 }
 
 export class ConfigurationPickItem implements vscode.QuickPickItem {
