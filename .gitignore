@@ -9,3 +9,5 @@ package-lock.json
 /.project
 .DS_Store
 .gitignore
+/nbcode-graalvm/nbcode-graalvm-ojdbc/target/
+/graalvm/nbcode/
