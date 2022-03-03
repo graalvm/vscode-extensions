@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.5.15
+* Oracle DB JDBC driver installed
+* Setting GraalVM as JAVA_HOME improved for terminal,...
+* Documentation improvements 
+* Option `graalvm.languageServer.start` for switching off the GraalVM Language Server added
+* Fixed download of GraalVM binaries
 ## Version 0.5.14
 * Thread dump / Heap dump / CPU sampler commands for the NBLS process to enable quick troubleshooting
 * SDKMan support fixes
