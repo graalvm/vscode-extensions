@@ -1,10 +1,3 @@
----
-layout: docs
-toc_group: vscode
-link_title: GraalVM Extension Pack for Java
-permalink: /tools/vscode/graalvm-extension-pack/
----
-
 # GraalVM Extension Pack for Java
 
 [GraalVM Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.graalvm-pack) is a collection of extensions that helps you write, debug and test Java, JavaScript, Python, Ruby, R and polyglot applications running on GraalVM, either standalone or using the Micronaut framework.
