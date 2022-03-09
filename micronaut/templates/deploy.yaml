@@ -12,16 +12,16 @@ spec:
       labels:
         app: "{{name}}"
     spec:
+      {{#dockerSecret}}
+      imagePullSecrets: 
+        - name: {{dockerSecret}}
+      {{/dockerSecret}}
       containers:
         - name: "{{name}}"
           image: "{{{image}}}"
           env:
           - name: MICRONAUT_SERVER_PORT
             value: "8080"
-          {{#dockerSecret}}
-          imagePullSecrets: 
-          - name: {{dockerSecret}}
-          {{/dockerSecret}}
           resources:
             limits:
               cpu: "1"
