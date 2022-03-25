@@ -320,6 +320,11 @@
 				"command": "extension.graalvm.debugKubernetes",
 				"title": "Debug (Attach using Java 8+)",
 				"category": "GraalVM"
+			},
+			{
+				"command": "extension.graalvm.heapReplay",
+				"title": "Replay Heap Recording",
+				"category": "GraalVM"
 			}
 		],
 		"viewsContainers": {
@@ -460,6 +465,13 @@
 				{
 					"command": "extension.graalvm.toggleCodeCoverage",
 					"group": "4_coverage"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "extension.graalvm.heapReplay",
+					"when": "resourceExtname == .hprof",
+					"group": "navigation"
 				}
 			],
 			"view/title": [

@@ -201,7 +201,9 @@ export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapter
 					const spawnOpts: cp.SpawnOptions = {cwd: session.configuration.graalVMLaunchInfo.cwd, env: process.env, detached: true};
 					const childProcess = cp.spawn(session.configuration.graalVMLaunchInfo.exec, session.configuration.graalVMLaunchInfo.args, spawnOpts);
 					return new Promise<vscode.DebugAdapterServer>((resolve, reject) => {
+						let pending: boolean = true;
 						childProcess.on('error', (error) => {
+							pending = false;
 							reject(new Error(`Cannot launch debug target (${error.toString()}).`));
 						});
 						const captureStdOutput: boolean = session.configuration.outputCapture === 'std';
@@ -222,6 +224,7 @@ export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapter
 									let regExp = /^\s*\[Graal DAP\] Starting server and listening on \S*\s*$/m;
 									if (msg.match(regExp)) {
 										lastEarlyNodeMsgSeen = true;
+										pending = false;
 										resolve(new vscode.DebugAdapterServer(session.configuration.graalVMLaunchInfo.port));
 									}
 								}
@@ -230,6 +233,12 @@ export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapter
 								}
 							});
 						}
+						childProcess.on('close', (code: number) => {
+							if (pending) {
+								// We did not see the listening message
+								reject(new Error(`Could not attach to debug target, finished with exit code ${code}.`));
+							}
+						});
 					});
 				} else {
 					throw new Error(`Unknown console type '${session.configuration.console}'.`);
@@ -308,6 +317,61 @@ export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string
 		}
 	}
 	return;
+}
+
+export async function heapReplay(heapUri: vscode.Uri) {
+    const replayExecutable = "polyglot";
+    if (!heapUri) {
+        let uris: vscode.Uri[] | undefined = undefined;
+        uris = await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            openLabel: 'Open heap file',
+            title: 'Select Heap File to Replay',
+            filters: {
+                'Heap': [ 'hprof' ]
+            }
+        });
+        if (uris && uris.length > 0) {
+            heapUri = uris[0];
+        }
+    }
+    if (!heapUri) {
+	return;
+    }
+    if (!checkCanReplay(replayExecutable)) {
+        return;
+    }
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(heapUri);
+    const debugConfig : vscode.DebugConfiguration = {
+        type: "graalvm",
+        name: "Launch Heap Replay",
+        request: "launch",
+        runtimeExecutable: replayExecutable,
+        protocol: "debugAdapter",
+        args: ["--hprof.replay", heapUri.fsPath],
+        outputCapture: "std"
+    };
+    await vscode.debug.startDebugging(workspaceFolder, debugConfig);
+}
+
+function checkCanReplay(replayExecutable: string): boolean {
+    const re = utils.findExecutable(replayExecutable, getGVMHome());
+    if (!re) {
+        vscode.window.showInformationMessage(`Cannot find runtime '${replayExecutable}' within your GraalVM installation. Make sure to have GraalVM '${replayExecutable}' installed.`);
+        return false;
+    }
+    let testHprofArgs = ['--language', 'hprof', '--eval', 'js:"OK"'];
+    try {
+        let out = cp.execFileSync(re, testHprofArgs);
+        let text = out.toString();
+        if (text.includes("OK")) {
+            return true;
+        }
+    } catch (err) {
+        // hprof can not be executed
+    }
+    vscode.window.showInformationMessage(`Cannot replay heap with '${re}'. Please install GraalVM EE 22.1 or newer.`);
+    return false;
 }
 
 async function forwardAndPrintAppUrl(kubectl: kubernetes.KubectlV1, podName: string, podNamespace?: string): Promise<void> {
@@ -475,10 +539,6 @@ async function getLaunchInfo(config: vscode.DebugConfiguration | ILaunchRequestA
 				launchArgs.push(`--inspect=${port}`);
 			}
 		} else if (config.protocol === 'debugAdapter') {
-			let idx = runtimeArgs.indexOf('--jvm');
-			if (idx < 0) {
-				launchArgs.push('--jvm');
-			}
 			launchArgs.push(`--dap=${port}`);
 		}
 	}
