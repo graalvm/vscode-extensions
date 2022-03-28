@@ -152,6 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
 		visualvm.troubleshootNBLSCpuSampler();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', debug.attachToKubernetes));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.heapReplay', debug.heapReplay));
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
