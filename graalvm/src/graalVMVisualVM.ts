@@ -18,6 +18,7 @@ import { setupGraalVM, getGraalVMVersion } from './graalVMInstall';
 const DISPLAY_NAME_PREFIX: string = '-Dvisualvm.display.name=';
 const DISPLAY_NAME_SUFFIX: string = '%PID';
 
+const PERSISTENT_HANDLE_PROJECT_PROCESS: string = 'visualvm.persistent.handleProjectProcess';
 const PERSISTENT_PRESELECT: string = 'visualvm.persistent.preselect';
 const PERSISTENT_WINDOW_TO_FRONT: string = 'visualvm.persistent.windowToFront';
 const PERSISTENT_SOURCES_INTEGRATION: string = 'visualvm.persistent.sourcesIntegration';
@@ -39,6 +40,7 @@ let featureSet: number = 0;
 // Current active GraalVM installation
 let graalVMHome: string | undefined = undefined;
 
+let handleProjectProcess: boolean = true;
 let preselect: string = '2';
 let windowToFront: boolean = true;
 let sourcesIntegration: boolean = true;
@@ -62,6 +64,7 @@ let extContext: vscode.ExtensionContext;
 export function initialize(context: vscode.ExtensionContext) {
     extContext = context;
     initializeProject();
+    initializeHandleProjectProcess(context);
     initializePreselectView(context);
     initializeWindowToFront(context);
     initializeSourcesIntegration(context);
@@ -70,6 +73,7 @@ export function initialize(context: vscode.ExtensionContext) {
     initializeMemorySamplingRate(context);
     initializeJfrSettings(context);
     initializeGraalVM(context, getGVMHome());
+    initializeProcessHandler();    
 }
 
 // invoked when active GraalVM changes
@@ -126,6 +130,24 @@ export async function startVisualVM() {
             exec(command);
         }
     }
+}
+
+function initializeHandleProjectProcess(context: vscode.ExtensionContext) {
+    const persistentHandleProjectProcess: string | undefined = context.globalState.get(PERSISTENT_HANDLE_PROJECT_PROCESS);
+    setHandleProjectProcess(undefined, persistentHandleProjectProcess === undefined ? handleProjectProcess : Boolean(persistentHandleProjectProcess === 'true'));
+}
+
+export function toggleHandleProjectProcess(context: vscode.ExtensionContext) {
+    setHandleProjectProcess(context, !handleProjectProcess);
+}
+
+async function setHandleProjectProcess(context: vscode.ExtensionContext | undefined, handleProcess: boolean) {
+    handleProjectProcess = handleProcess;
+    await vscode.commands.executeCommand('setContext', 'visualvm.handleProjectProcess', handleProjectProcess);
+    if (context) {
+        await context.globalState.update(PERSISTENT_HANDLE_PROJECT_PROCESS, String(handleProjectProcess));
+    }
+    processNode.updateFeatures();
 }
 
 function initializePreselectView(context: vscode.ExtensionContext) {
@@ -573,15 +595,27 @@ function clearMonitoredProcess() {
     processNode.updateProcName();
 }
 
-function checkProcessIsRunning(pid: number): boolean {
+function checkProcessIsRunning(pid: number, showWarning: boolean = true): boolean {
     try {
         process.kill(pid, 0);
         return true;
     } catch (e) {
-        vscode.window.showWarningMessage(`Process ${processNode.description} already terminated.`);
+        if (showWarning) {
+            vscode.window.showWarningMessage(`Process ${processNode.description} already terminated.`);
+        }
         clearMonitoredProcess();
         return false;
     }
+}
+
+function initializeProcessHandler() {
+    vscode.debug.onDidTerminateDebugSession(() => {
+        setTimeout(() => {
+            if (PID) {
+                checkProcessIsRunning(PID, false);
+            }
+        }, 500);
+    });
 }
 
 async function checkPID(): Promise<boolean> {
@@ -1369,13 +1403,20 @@ class ProcessNode extends VisualVMNode {
     }
 
     updateFeatures() {
-        if (featureSet === 0) {
-            this.children = [];
-        } else if (featureSet === 1) {
-            this.children = [ whenStartedNode ];
-        } else {
-            this.children = [ whenStartedNode, threadDumpNode, heapDumpNode, cpuSamplerNode, memorySamplerNode, jfrNode ];
+        const children: vscode.TreeItem[] = [];
+        if (featureSet > 0) {
+            if (handleProjectProcess) {
+                children.push(whenStartedNode);
+            }
         }
+        if (featureSet > 1) {
+            children.push(threadDumpNode);
+            children.push(heapDumpNode);
+            children.push(cpuSamplerNode);
+            children.push(memorySamplerNode);
+            children.push(jfrNode);
+        }
+        this.children = children;
         refreshUI();
     }
 
@@ -1410,3 +1451,45 @@ export class VisualVMNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 }
 export const nodeProvider = new VisualVMNodeProvider();
+
+export async function initializeConfiguration(): Promise<boolean> {
+	const java = await vscode.workspace.findFiles('**/*.java', '**/node_modules/**', 1);
+	if (java?.length > 0) {
+		const maven = await vscode.workspace.findFiles('pom.xml', '**/node_modules/**', 1);
+		if (maven?.length > 0) {
+			return true;
+		}
+		const gradle = await vscode.workspace.findFiles('build.gradle', '**/node_modules/**', 1);
+		if (gradle?.length > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+class VisualVMConfigurationProvider implements vscode.DebugConfigurationProvider {
+
+    resolveDebugConfiguration(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+		return new Promise<vscode.DebugConfiguration>(resolve => {
+			resolve(config);
+		});
+	}
+
+	resolveDebugConfigurationWithSubstitutedVariables?(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        return new Promise<vscode.DebugConfiguration>(resolve => {
+            if (handleProjectProcess) {
+                const displayName: string = defineDisplayName();
+                const attach: string = attachVisualVM();
+                const vmArgs = `${displayName} ${attach}`;
+                if (!config.vmArgs) {
+                    config.vmArgs = vmArgs;
+                } else {
+                    config.vmArgs = `${config.vmArgs} ${vmArgs}`;
+                }
+            }
+			resolve(config);
+		});
+	}
+
+}
+export const configurationProvider = new VisualVMConfigurationProvider();

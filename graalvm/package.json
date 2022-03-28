@@ -176,6 +176,16 @@
 				"category": "VisualVM"
 			},
 			{
+				"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
+				"title": "⠀   Auto detect project process",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.toggleHandleProjectProcessVisualVM_",
+				"title": "✓  Auto detect project process",
+				"category": "VisualVM"
+			},
+			{
 				"command": "extension.graalvm.preselectOverviewVisualVM",
 				"title": "○ Preselect Overview view",
 				"category": "VisualVM"
@@ -365,6 +375,14 @@
 		"menus": {
 			"commandPalette": [
 				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM_",
+					"when": "false"
+				},
+				{
 					"command": "extension.graalvm.preselectOverviewVisualVM",
 					"when": "false"
 				},
@@ -494,6 +512,16 @@
 					"command": "extension.graalvm.startVisualVM",
 					"when": "view == visualvm-control-panel && visualvm.featureSet >= 1",
 					"group": "navigation@1"
+				},
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
+					"when": "view == visualvm-control-panel && !visualvm.handleProjectProcess && visualvm.featureSet >= 1",
+					"group": "vcp_group_0@1"
+				},
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.handleProjectProcess && visualvm.featureSet >= 1",
+					"group": "vcp_group_0@1"
 				},
 				{
 					"command": "extension.graalvm.preselectOverviewVisualVM",
@@ -1033,17 +1061,6 @@
 							"name": "Launch Native Image Agent & Java 8+ Application",
 							"mainClass": "^\"${1:\\${file\\}}\"",
 							"vmArgs": "^\"\\${command:extension.graalvm.attachNativeImageAgent\\}\""
-						}
-					},
-					{
-						"label": "GraalVM: Launch Java 8+ Application With VisualVM",
-						"description": "Launch a Java 8+ application and enable monitoring with VisualVM",
-						"body": {
-							"type": "java8+",
-							"request": "launch",
-							"name": "Launch VisualVM & Java 8+ Application",
-							"mainClass": "^\"${1:\\${file\\}}\"",
-							"vmArgs": "^\"\\${command:extension.graalvm.defineDisplayName\\} \\${command:extension.graalvm.attachVisualVM\\}\""
 						}
 					}
 				]
