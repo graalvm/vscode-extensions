@@ -306,7 +306,7 @@ function handleInvalidToken(token: Token): boolean {
 
 async function requestDownloadToken(licenseId?: string): Promise<Token | undefined> {
     let input = await vscode.window.showInputBox({
-        placeHolder: 'Enter existing download token or provide email address to generate a new download token',
+        placeHolder: 'Provide email address to generate download token or enter existing download token',
         validateInput: async (val) => val.indexOf('@') > -1 ? validateEmail(val) : validateToken(val),
         ignoreFocusOut: true
     });
