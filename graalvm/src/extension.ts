@@ -70,6 +70,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startVisualVM', () => {
 		visualvm.startVisualVM();
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleHandleProjectProcessVisualVM', () => {
+		visualvm.toggleHandleProjectProcess(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleHandleProjectProcessVisualVM_', () => {
+		visualvm.toggleHandleProjectProcess(context);
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectOverviewVisualVM', () => {
 		visualvm.preselectView(context, '1');
 	}));
@@ -151,6 +157,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSCpuSampler', () => {
 		visualvm.troubleshootNBLSCpuSampler();
 	}));
+	visualvm.initializeConfiguration().then(initialized => {
+		if (initialized) {
+			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java8+', visualvm.configurationProvider));
+		}
+	});
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.showDocsNativeImage', (...params: any[]) => {
 		nativeImage.showDocumentation(params);
 	}));
