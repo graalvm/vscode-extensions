@@ -16,6 +16,7 @@ import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
 import { addNativeImageToPOM, attachNativeImageAgent } from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
 import * as visualvm from './graalVMVisualVM';
+import * as gds from './gdsUtils';
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectGraalVMHome', async (installation?: string | Installation, nonInteractive?: boolean) => {
@@ -66,6 +67,9 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.removeInstallation', (path?: string | Installation) => {
 		removeGraalVMInstallation(context, path instanceof Installation ? path.home : path);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.gds.showConfiguration', () => {
+		gds.showConfiguration();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startVisualVM', () => {
 		visualvm.startVisualVM();
