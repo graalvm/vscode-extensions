@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
@@ -11,6 +11,7 @@ import * as http from "http";
 import * as https from "https";
 import * as url from "url";
 import * as sax from "sax";
+import * as fs from 'fs';
 import { getGVMHome } from "./graalVMConfiguration";
 import { getGraalVMVersion } from './graalVMInstall';
 import { findExecutable } from './utils';
@@ -246,7 +247,7 @@ function getBuild(baseIndent: string, indent: string, eol: string, version: stri
 }
 
 
-export async function attachNativeImageAgent(): Promise<string> {
+export async function attachNativeImageAgent(outputDir: string | undefined = undefined): Promise<string> {
     const graalVMHome = getGVMHome();
     if (!graalVMHome) {
         vscode.window.showWarningMessage('No active GraalVM installation found, launching without native-image agent.');
@@ -257,10 +258,14 @@ export async function attachNativeImageAgent(): Promise<string> {
         vscode.window.showWarningMessage('Native Image component not installed in active GraalVM installation, launching without native-image agent.');
         return '';
     }
-
-    const outputDir = await selectOutputDir();
+    const preconfigured: boolean = outputDir !== undefined;
+    if (!preconfigured) {
+        outputDir = await selectOutputDir();
+    }
     if (outputDir) {
-        vscode.window.showInformationMessage(`Configuration will be stored in ${outputDir}`);
+        if (!preconfigured) {
+            vscode.window.showInformationMessage(`Configuration will be stored in ${outputDir}`);
+        }
         const agent = 'native-image-agent';
         const parameter = 'config-output-dir';
         return `-agentlib:${agent}=${parameter}=${outputDir}`;
@@ -316,8 +321,10 @@ function getTmpConfigDir(): Promise<string | undefined> {
     });
 }
 
-async function getCustomConfigDir(): Promise<string | undefined> {
+async function getCustomConfigDir(preselect: string | undefined = undefined): Promise<string | undefined> {
+    const preselectUri = preselect ? vscode.Uri.file(preselect) : undefined;
     const location: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+        defaultUri: preselectUri,
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false,
@@ -337,3 +344,455 @@ class QuickPickTargetDir implements vscode.QuickPickItem{
         public readonly getTarget: () => Promise<string | undefined>
     ){}
 }
+
+// NOTE: do not persiste the enabled state for now, should always be disabled on VS Code startup
+// const PERSISTENT_AGENT_ENABLED: string = 'nativeimage.persistent.agentEnabled';
+const PERSISTENT_OUTPUT_DIR: string = 'nativeimage.persistent.outputDir';
+const PERSISTENT_CUSTOM_OUTPUT: string = 'nativeimage.persistent.customOutput';
+const PERSISTENT_LAST_EXECUTED: string = 'nativeimage.persistent.lastExecuted';
+
+const CONFIGURATION_FILES: string[] = [
+    'jni-config.json',
+    'predefined-classes-config.json',
+    'proxy-config.json',
+    'reflect-config.json',
+    'resource-config.json',
+    'serialization-config.json'
+];
+
+let featureSet: number = 0;
+
+let graalVMHome: string | undefined = undefined;
+
+let agentEnabled: number = 0;
+let outputDir: number = 0;
+let customOutput: string | undefined = undefined;
+let lastExecuted: string | undefined = undefined;
+
+let extContext: vscode.ExtensionContext;
+
+// invoked on extension startup
+export function initialize(context: vscode.ExtensionContext) {
+    extContext = context;
+    initializeAgentEnabled(context);
+    initializeOutput(context);
+    initializeLastExecuted(context);
+    initializeGraalVM(getGVMHome());
+}
+
+// invoked when active GraalVM changes
+export function initializeGraalVM(gvmHome: string) {
+    graalVMHome = gvmHome;
+
+    setFeatureSet(0);
+    initializeGraalVMAsync();
+}
+
+async function initializeGraalVMAsync() {
+    const graalVMVersion: string[] | undefined = graalVMHome ? (await getGraalVMVersion(graalVMHome))?.split(' ') : undefined;
+    if (graalVMVersion) {
+        let version = graalVMVersion[2].slice(0, graalVMVersion[2].length - 1);
+        const dev = version.endsWith('-dev');
+        if (dev) {
+            version = version.slice(0, version.length - '-dev'.length);
+        }
+        const numbers: string[] = version.split('.');
+        const features = resolveFeatureSet(parseInt(numbers[0]), parseInt(numbers[1]), parseInt(numbers[2]), dev);
+        setFeatureSet(features);
+    } else {
+        setFeatureSet(0);
+    }
+}
+
+function resolveFeatureSet(_major: number, _minor: number, _update: number, _dev: boolean): number {
+    return 1;
+}
+
+async function setFeatureSet(features: number) {
+    featureSet = features;
+    await vscode.commands.executeCommand('setContext', 'nativeimage.featureSet', featureSet);
+    agentNode.updateFeatures();
+}
+
+function initializeAgentEnabled(_context: vscode.ExtensionContext) {
+    // NOTE: do not persiste the enabled state for now, should always be disabled on VS Code startup
+    // const persistentAgentEnabled: string | undefined = context.workspaceState.get(PERSISTENT_AGENT_ENABLED);
+    // agentEnabled = persistentAgentEnabled === undefined ? agentEnabled : parseInt(persistentAgentEnabled);
+    setAgentEnabled(undefined, agentEnabled);
+}
+
+async function setAgentEnabled(_context: vscode.ExtensionContext | undefined, code: number) {
+    agentEnabled = code;
+    agentEnabledNode.updateSettings();
+    // NOTE: do not persiste the enabled state for now, should always be disabled on VS Code startup
+    // if (context) {
+    //     await context.workspaceState.update(PERSISTENT_AGENT_ENABLED, String(agentEnabled));
+    // }
+}
+
+function configureAgentEnabled(context: vscode.ExtensionContext) {
+    let choices: QuickPickString[] = getAgentEnabledChoices();
+    vscode.window.showQuickPick(choices, {
+        placeHolder: 'Select agent state'
+    }).then(selection => { if (selection) setAgentEnabled(context, selection.code); });
+}
+
+function initializeOutput(context: vscode.ExtensionContext) {
+    const persistentOutputDir: string | undefined = context.workspaceState.get(PERSISTENT_OUTPUT_DIR);
+    outputDir = persistentOutputDir === undefined ? outputDir : parseInt(persistentOutputDir);
+    customOutput = context.workspaceState.get(PERSISTENT_CUSTOM_OUTPUT);
+    setOutput(undefined, outputDir, customOutput);
+}
+
+async function setOutput(context: vscode.ExtensionContext | undefined, code: number, custom: string | undefined) {
+    outputDir = code;
+    customOutput = custom;
+    configOutputNode.updateSettings();
+    if (context) {
+        await context.workspaceState.update(PERSISTENT_OUTPUT_DIR, String(outputDir));
+        await context.workspaceState.update(PERSISTENT_CUSTOM_OUTPUT, customOutput);
+    }
+}
+
+function configureOutput(context: vscode.ExtensionContext) {
+    let choices: QuickPickString[] = getOutputChoices();
+    vscode.window.showQuickPick(choices, {
+        placeHolder: 'Select native-image configuration output directory'
+    }).then(async selection => {
+        if (selection) {
+            const code = selection.code;
+            if (code === 2) {
+                const output = await getCustomConfigDir(customOutput);
+                if (output) {
+                    setOutput(context, selection.code, output);
+                }
+            } else {
+                setOutput(context, selection.code, customOutput);
+            }
+        }
+    });
+}
+
+function initializeLastExecuted(context: vscode.ExtensionContext) {
+    lastExecuted = context.workspaceState.get(PERSISTENT_LAST_EXECUTED);
+    setLastExecuted(undefined, lastExecuted);
+}
+
+async function setLastExecuted(context: vscode.ExtensionContext | undefined, executed: string | undefined) {
+    lastExecuted = executed;
+    lastExecutedNode.updateSettings();
+    if (context) {
+        await context.workspaceState.update(PERSISTENT_LAST_EXECUTED, lastExecuted);
+    }
+}
+
+export function showDocumentation(...params: any[]) {
+    if (params[0][0]) {
+        (params[0][0] as Documented).showDocumentation();
+    }
+}
+
+export function configureSetting(context: vscode.ExtensionContext, ...params: any[]) {
+    if (params[0][0]) {
+        (params[0][0] as Configurable).configure(context);
+    }
+}
+
+export function openConfiguration() {
+    getConfigurationDestination().then(output => {
+        if (output) {
+            let found: boolean = false;
+            for (var file of CONFIGURATION_FILES) {
+                found = openFile(path.join(output, file)) || found;
+            }
+            if (!found) {
+                vscode.window.showWarningMessage(`No native-image configuration available in ${output}.`);
+            }
+        } else {
+            vscode.window.showErrorMessage('Unknown output directory.');
+        }
+    }).catch(err => {
+        vscode.window.showErrorMessage(err.message);
+    });
+}
+
+function openFile(file: string): boolean {
+    if (fs.existsSync(file)) {
+        vscode.workspace.openTextDocument(file).then(doc => {
+            vscode.window.showTextDocument(doc, { preview: false });
+        });
+        return true;
+    }
+    return false;
+}
+
+async function getConfigurationDestination(): Promise<string | undefined> {
+    switch (outputDir) {
+        case 0: {
+            const supportsResources = await supportsResourcesRoot();
+            const projectDir = supportsResources ? await getProjectConfigDir() : undefined;
+            if (!projectDir) {
+                throw new Error('Unable to resolve project resources location.');
+            }
+            return projectDir;
+        }
+        case 1: {
+            const tmpDir = await getTmpConfigDir();
+            return tmpDir;
+        }
+        case 2: {
+            return customOutput;
+        }
+        default: {
+            return undefined;
+        }
+    }
+}
+
+function getAgentEnabledChoices(): QuickPickString[] {
+    return [
+        new QuickPickString('disabled', 'Native Image agent is disabled', 'disabled', 0),
+        new QuickPickString('enabled', 'Native Image agent is started with the project process', 'enabled', 1)
+    ];
+}
+
+function getOutputChoices(): QuickPickString[] {
+    return [
+        new QuickPickString('Project resources', `Store configuration to project ${getProjectResourcesDestination()}`, 'project resources', 0),
+        new QuickPickString('Temporary directory', 'Store configuration to temporary directory', 'temporary directory', 1),
+        new QuickPickString('Custom directory...', 'Store configuration to custom directory', '', 2)
+    ];
+}
+
+function getProjectResourcesDestination() {
+    return path.join('resources', 'META-INF', 'native-image');
+}
+
+class QuickPickString implements vscode.QuickPickItem {
+    constructor(
+        public readonly label: string,
+        public readonly detail: string | undefined,
+        public readonly value: string,
+        public readonly code: number
+    ) {}
+}
+
+class NativeImageNode extends vscode.TreeItem {
+
+    children: vscode.TreeItem[] | undefined;
+
+    constructor(label: string, description: string | undefined, contextValue: string | undefined, children: vscode.TreeItem[] | undefined, expanded: boolean | undefined) {
+        super(label);
+        this.description = description;
+        this.contextValue = contextValue;
+        this.children = children;
+        if (!children || expanded === undefined) {
+            this.collapsibleState = vscode.TreeItemCollapsibleState.None;
+        } if (expanded === true) {
+            this.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+        } else if (expanded === false) {
+            this.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        }
+    }
+
+    public getChildren(): vscode.TreeItem[] | undefined {
+        return this.children;
+    }
+
+}
+
+interface Documented {
+
+    showDocumentation(): void;
+
+}
+
+interface Configurable {
+
+    configure(context: vscode.ExtensionContext): void;
+
+}
+
+class AgentEnabledNode extends NativeImageNode implements Configurable {
+
+    constructor() {
+        super('State:', undefined, 'nativeimage.configure',  undefined, undefined);
+        this.updateSettings();
+    }
+
+    configure(context: vscode.ExtensionContext) {
+        configureAgentEnabled(context);
+    }
+
+    updateSettings() {
+        this.description = getAgentEnabledChoices()[agentEnabled].label;
+        this.tooltip = `${this.label} ${this.description}`;
+        refreshUI()
+    }
+
+}
+const agentEnabledNode = new AgentEnabledNode();
+
+class ConfigOutputNode extends NativeImageNode implements Configurable {
+
+    constructor() {
+        super('Output directory:', undefined, 'nativeimage.outputDir',  undefined, undefined);
+        this.updateSettings();
+    }
+
+    configure(context: vscode.ExtensionContext) {
+        configureOutput(context);
+    }
+
+    async updateSettings() {
+        if (outputDir === 2) {
+            this.description = customOutput;
+        } else {
+            this.description = getOutputChoices()[outputDir].value;
+        }
+        let destination: string | undefined = undefined;
+        try {
+            destination = await getConfigurationDestination();
+        } catch (err) {
+            if (outputDir === 0) {
+                // project resources may not be ready when the extension starts
+                destination = `project ${getProjectResourcesDestination()}`;
+            }
+        }
+        if (!destination) {
+            destination = 'unable to resolve';
+        }
+        this.tooltip = `${this.label} ${destination}`;
+        refreshUI()
+    }
+
+}
+const configOutputNode = new ConfigOutputNode();
+
+class LastExecutedNode extends NativeImageNode implements Configurable {
+
+    constructor() {
+        super('Last executed:', undefined, 'nativeimage.lastConfig',  undefined, undefined);
+        this.updateSettings();
+    }
+
+    configure(context: vscode.ExtensionContext) {
+        configureOutput(context);
+    }
+
+    async updateSettings() {
+        this.description = lastExecuted ? lastExecuted : 'not executed yet';
+        this.tooltip = `${this.label} ${this.description}`;
+        refreshUI()
+    }
+
+}
+const lastExecutedNode = new LastExecutedNode();
+
+class AgentNode extends NativeImageNode implements Documented {
+
+    constructor() {
+        super('Agent', undefined, 'nativeimage.agent', undefined, true);
+        this.updateFeatures();
+    }
+
+    showDocumentation() {
+        vscode.env.openExternal(vscode.Uri.parse('https://www.graalvm.org/reference-manual/native-image/Agent/'));
+    }
+
+    updateFeatures() {
+        if (featureSet === 0) {
+            this.children = [];
+        } else {
+            this.children = [ agentEnabledNode, configOutputNode, lastExecutedNode ];
+        }
+        refreshUI();
+    }
+
+}
+const agentNode = new AgentNode();
+
+export class NativeImageNodeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+
+	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null> = new vscode.EventEmitter<vscode.TreeItem | undefined | null>();
+	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null> = this._onDidChangeTreeData.event;
+
+	refresh(): void {
+		this._onDidChangeTreeData.fire(undefined);
+	}
+
+	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
+		return element;
+	}
+
+	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
+        if (!element) {
+            if (featureSet === 0) {
+                return [];
+            } else {
+                return [ agentNode ];
+            }
+        } else {
+            return (element as NativeImageNode).getChildren();
+        }
+	}
+}
+export const nodeProvider = new NativeImageNodeProvider();
+
+function refreshUI() {
+    if (nodeProvider) {
+        nodeProvider.refresh();
+    }
+}
+
+export async function initializeConfiguration(): Promise<boolean> {
+	const java = await vscode.workspace.findFiles('**/*.java', '**/node_modules/**', 1);
+	if (java?.length > 0) {
+		const maven = await vscode.workspace.findFiles('pom.xml', '**/node_modules/**', 1);
+		if (maven?.length > 0) {
+			return true;
+		}
+		const gradle = await vscode.workspace.findFiles('build.gradle', '**/node_modules/**', 1);
+		if (gradle?.length > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+class NativeImageConfigurationProvider implements vscode.DebugConfigurationProvider {
+
+    resolveDebugConfiguration(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+		return new Promise<vscode.DebugConfiguration>(resolve => {
+			resolve(config);
+		});
+	}
+
+	resolveDebugConfigurationWithSubstitutedVariables?(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        return new Promise<vscode.DebugConfiguration>(async resolve => {
+            if (agentEnabled) {
+                if (config.noDebug) {
+                    try {
+                        let target = await getConfigurationDestination();
+                        const vmArgs = await attachNativeImageAgent(target ? target : '');
+                        if (vmArgs) {
+                            if (!config.vmArgs) {
+                                config.vmArgs = vmArgs;
+                            } else {
+                                config.vmArgs = `${config.vmArgs} ${vmArgs}`;
+                            }
+                            setLastExecuted(extContext, new Date().toLocaleString());
+                        }
+                    } catch (err) {
+                        vscode.window.showErrorMessage(`${err.message} Launching without native-image agent.`);
+                    }
+                } else {
+                    vscode.window.showWarningMessage('Running native-image agent is not supported for Debug session, launching without native-image agent.');
+                }
+            }
+			resolve(config);
+		});
+	}
+
+}
+export const configurationProvider = new NativeImageConfigurationProvider();
