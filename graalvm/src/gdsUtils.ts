@@ -65,12 +65,12 @@ export function showConfiguration() {
                 }
                 case TokenOrigin.File: {
                     const tokenfile = getTokenFile();
-                    origin = `default configuration ${tokenfile}`;
+                    origin = `default configuration file: ${tokenfile}`;
                     break;
                 }
                 case TokenOrigin.CustomFile: {
                     const customTokenfile = getCustomTokenFile();
-                    origin = `custom configuration ${customTokenfile}`;
+                    origin = `custom configuration file: ${customTokenfile}`;
                     break;
                 }
                 default: {
@@ -79,7 +79,7 @@ export function showConfiguration() {
             }
             if (origin) {
                 const action = 'Copy Token to Clipboard';
-                const msg = `Download token is currently defined in ${origin}.`;
+                const msg = `The download token is in the ${origin}.`;
                 vscode.window.showInformationMessage(msg, action).then(value => {
                     if (value === action) {
                         vscode.env.clipboard.writeText(token.value);
@@ -213,19 +213,19 @@ export async function handleGUError(token: Token, guErrorType: string): Promise<
 
 async function proceedAfterLicenseConfirmation(): Promise<boolean> {
     const proceed = 'Continue Download';
-    const message = `License for this download has been sent to the email address which generated the download token. Follow the steps in the email and then click ${proceed} to proceed with the download, or invoke the download action again.`;
+    const message = `The license for this download has been sent to the email address that generated the download token. Follow the steps in the email and then click ${proceed} to proceed. Alternatively, restart the download.`;
     return await delayedProceed(proceed, message);
 }
 
 async function proceedAfterTokenVerification(): Promise<boolean> {
     const proceed = 'Continue Download';
-    const message = `The download token has not been verified yet. Follow the steps sent to the email address which generated the download token and then click ${proceed} to proceed with the download, or invoke the download action again.`;
+    const message = `The download token has not yet been verified. Follow the steps in the email sent to the email address that generated the download token. Then click ${proceed} to proceed. Alternatively, restart the download.`;
     return await delayedProceed(proceed, message, true);
 }
 
 async function proceedAfterLicenceAcceptance(): Promise<boolean> {
     const proceed = 'Continue Download';
-    const message = `The license for this download has not been accepted yet. Follow the steps sent to the email address which generated the download token and then click ${proceed} to proceed with the download, or invoke the download action again.`;
+    const message = `The license for this download has not yet been accepted. Follow the steps in the email sent to the email address that generated the download token. Then click ${proceed} to proceed. Alternatively, restart the download.`;
     return await delayedProceed(proceed, message, true);
 }
 
@@ -306,7 +306,7 @@ function handleInvalidToken(token: Token): boolean {
 
 async function requestDownloadToken(licenseId?: string): Promise<Token | undefined> {
     let input = await vscode.window.showInputBox({
-        placeHolder: 'Provide email address to generate download token or enter existing download token',
+        placeHolder: 'Provide your email address to generate a download token or enter your existing download token',
         validateInput: async (val) => val.indexOf('@') > -1 ? validateEmail(val) : validateToken(val),
         ignoreFocusOut: true
     });
@@ -332,7 +332,7 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
             const token = await requestTokenAcceptLicense(address, licenseId);
             if (token) {
                 const action = 'Copy to Clipboard';
-                const msg = `New download token for email address ${address} has been generated.`;
+                const msg = `A new download token has been generated for the email address ${address}.`;
                 vscode.window.showInformationMessage(msg, action).then(value => {
                     if (value === action) {
                         const clipboard = `Download token for email address ${address} is ${token}`;
@@ -356,7 +356,7 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
             const message = `Download token has been sent to ${address}. Follow the steps in the email and enter the download token.`;
             vscode.window.showInformationMessage(message);
             let token = await vscode.window.showInputBox({
-                placeHolder: 'Enter the generated download token',
+                placeHolder: 'Enter the download token',
                 validateInput: async (val) => validateToken(val),
                 ignoreFocusOut: true
             });
