@@ -187,6 +187,16 @@
 				"category": "VisualVM"
 			},
 			{
+				"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
+				"title": "⠀   Auto detect project process",
+				"category": "VisualVM"
+			},
+			{
+				"command": "extension.graalvm.toggleHandleProjectProcessVisualVM_",
+				"title": "✓  Auto detect project process",
+				"category": "VisualVM"
+			},
+			{
 				"command": "extension.graalvm.preselectOverviewVisualVM",
 				"title": "○ Preselect Overview view",
 				"category": "VisualVM"
@@ -313,6 +323,24 @@
 				"category": "VisualVM"
 			},
 			{
+				"command": "extension.graalvm.showDocsNativeImage",
+				"title": "Documentation",
+				"icon": "$(question)",
+				"category": "NativeImage"
+			},
+			{
+				"command": "extension.graalvm.configureSettingNativeImage",
+				"title": "Configure",
+				"icon": "$(edit)",
+				"category": "NativeImage"
+			},
+			{
+				"command": "extension.graalvm.openConfigNativeImage",
+				"title": "Open Configuration Files",
+				"icon": "$(go-to-file)",
+				"category": "NativeImage"
+			},
+			{
 				"command": "extension.graalvm.troubleshootNBLSThreadDump",
 				"title": "Thread Dump",
 				"category": "Troubleshoot Language Server"
@@ -353,6 +381,10 @@
 				"contents": "No GraalVM installation found.\n[Download & Install GraalVM](command:extension.graalvm.installGraalVM)\n[Add Existing GraalVM](command:extension.graalvm.addExistingGraalVM)"
 			},
 			{
+				"view": "ni-control-panel",
+				"contents": "Set active GraalVM installation to use Native Image."
+			},
+			{
 				"view": "visualvm-control-panel",
 				"contents": "Set active GraalVM installation to use VisualVM."
 			}
@@ -366,6 +398,13 @@
 					"contextualTitle": "GraalVM Installations"
 				},
 				{
+					"id": "ni-control-panel",
+					"name": "Native Image",
+					"icon": "resources/graalvm.svg",
+					"contextualTitle": "Native Image",
+					"when": "nativeImageInitialized"
+				},
+				{
 					"id": "visualvm-control-panel",
 					"name": "VisualVM",
 					"icon": "resources/graalvm.svg",
@@ -375,6 +414,14 @@
 		},
 		"menus": {
 			"commandPalette": [
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM_",
+					"when": "false"
+				},
 				{
 					"command": "extension.graalvm.preselectOverviewVisualVM",
 					"when": "false"
@@ -468,6 +515,18 @@
 					"when": "false"
 				},
 				{
+					"command": "extension.graalvm.showDocsNativeImage",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.configureSettingNativeImage",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.openConfigNativeImage",
+					"when": "false"
+				},
+				{
 					"command": "extension.graalvm.debugKubernetes",
 					"when": "false"
 				}
@@ -505,6 +564,16 @@
 					"command": "extension.graalvm.startVisualVM",
 					"when": "view == visualvm-control-panel && visualvm.featureSet >= 1",
 					"group": "navigation@1"
+				},
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
+					"when": "view == visualvm-control-panel && !visualvm.handleProjectProcess && visualvm.featureSet >= 1",
+					"group": "vcp_group_0@1"
+				},
+				{
+					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM_",
+					"when": "view == visualvm-control-panel && visualvm.handleProjectProcess && visualvm.featureSet >= 1",
+					"group": "vcp_group_0@1"
 				},
 				{
 					"command": "extension.graalvm.preselectOverviewVisualVM",
@@ -647,6 +716,26 @@
 					"command": "extension.graalvm.configureSettingVisualVM",
 					"when": "view == visualvm-control-panel && viewItem == visualvm.configure",
 					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.showDocsNativeImage",
+					"when": "view == ni-control-panel && viewItem == nativeimage.agent",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.openConfigNativeImage",
+					"when": "view == ni-control-panel && viewItem == nativeimage.outputDir",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.configureSettingNativeImage",
+					"when": "view == ni-control-panel && viewItem == nativeimage.configure",
+					"group": "inline@1"
+				},
+				{
+					"command": "extension.graalvm.configureSettingNativeImage",
+					"when": "view == ni-control-panel && viewItem == nativeimage.outputDir",
+					"group": "inline@2"
 				},
 				{
 					"command": "extension.graalvm.debugKubernetes",
@@ -1033,28 +1122,6 @@
 							"port": 9229,
 							"localRoot": "${workspaceFolder}",
 							"remoteRoot": "${2:Absolute path to the remote directory containing the program}"
-						}
-					},
-					{
-						"label": "GraalVM: Launch Java 8+ Application With Native Image Agent",
-						"description": "Launch a Java 8+ application with the native-image agent",
-						"body": {
-							"type": "java8+",
-							"request": "launch",
-							"name": "Launch Native Image Agent & Java 8+ Application",
-							"mainClass": "^\"${1:\\${file\\}}\"",
-							"vmArgs": "^\"\\${command:extension.graalvm.attachNativeImageAgent\\}\""
-						}
-					},
-					{
-						"label": "GraalVM: Launch Java 8+ Application With VisualVM",
-						"description": "Launch a Java 8+ application and enable monitoring with VisualVM",
-						"body": {
-							"type": "java8+",
-							"request": "launch",
-							"name": "Launch VisualVM & Java 8+ Application",
-							"mainClass": "^\"${1:\\${file\\}}\"",
-							"vmArgs": "^\"\\${command:extension.graalvm.defineDisplayName\\} \\${command:extension.graalvm.attachVisualVM\\}\""
 						}
 					}
 				]

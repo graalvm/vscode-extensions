@@ -13,7 +13,7 @@ import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMCompone
 import { onClientNotification, startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
-import { addNativeImageToPOM, attachNativeImageAgent } from './graalVMNativeImage';
+import * as nativeImage from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
 import * as visualvm from './graalVMVisualVM';
 import * as gds from './gdsUtils';
@@ -39,10 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
 		uninstallGraalVMComponent(context, component, homeFolder);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.addNativeImageToPOM', () => {
-		addNativeImageToPOM();
+		nativeImage.addNativeImageToPOM();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.attachNativeImageAgent', async (): Promise<string> => {
-		return await attachNativeImageAgent();
+		return await nativeImage.attachNativeImageAgent();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleCodeCoverage', () => {
 		toggleCodeCoverage(context);
@@ -73,6 +73,12 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startVisualVM', () => {
 		visualvm.startVisualVM();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleHandleProjectProcessVisualVM', () => {
+		visualvm.toggleHandleProjectProcess(context);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleHandleProjectProcessVisualVM_', () => {
+		visualvm.toggleHandleProjectProcess(context);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectOverviewVisualVM', () => {
 		visualvm.preselectView(context, '1');
@@ -155,9 +161,30 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSCpuSampler', () => {
 		visualvm.troubleshootNBLSCpuSampler();
 	}));
+	visualvm.initializeConfiguration().then(initialized => {
+		if (initialized) {
+			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java8+', visualvm.configurationProvider));
+		}
+	});
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.showDocsNativeImage', (...params: any[]) => {
+		nativeImage.showDocumentation(params);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.configureSettingNativeImage', (...params: any[]) => {
+		nativeImage.configureSetting(context, params);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.openConfigNativeImage', () => {
+		nativeImage.openConfiguration();
+	}));
+	nativeImage.initializeConfiguration().then(initialized => {
+		if (initialized) {
+			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java8+', nativeImage.configurationProvider));
+			vscode.commands.executeCommand('setContext', 'nativeImageInitialized', true);
+		}
+	});
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', debug.attachToKubernetes));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.heapReplay', debug.heapReplay));
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
+	context.subscriptions.push(vscode.window.registerTreeDataProvider('ni-control-panel', nativeImage.nodeProvider));
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			'extension.graalvm.debugPod', 
@@ -179,6 +206,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
 			const graalVMHome = getGVMHome();
 			visualvm.initializeGraalVM(context, graalVMHome);
+			nativeImage.initializeGraalVM(graalVMHome);
 			if (!graalVMHome) {
 				setupGraalVM(context);
 			}
@@ -202,6 +230,7 @@ export function activate(context: vscode.ExtensionContext) {
 		selectActiveGraalVM(context, graalVMHome, true).then(() => startLanguageServer(graalVMHome));
 	}
 	visualvm.initialize(context);
+	nativeImage.initialize(context);
 	vscode.window.setStatusBarMessage('GraalVM extension activated', 3000);
 	
 	// Public API
