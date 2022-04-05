@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.10
+* Register Micronaut for Oracle Developer Tools for VS Code (SQL and PLSQL) Extension to create DB connection
+
 ## Version 0.5.9
 * Micronaut 'Build Native Image' uses nativeCompile command and GraalVM Gradle plugin for Micronaut 3.2.0 and newer
 

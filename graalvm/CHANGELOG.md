@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.5.16
+* Installs Oracle JDBC driver to NetBeans Language Server
+* Native Image Agent control panel added
+* GraalVM Insight Heap replay functionality added
+* Image pull secret fixed for Kubernetes debugging
+
 ## Version 0.5.15
 * Oracle DB JDBC driver installed
 * Setting GraalVM as JAVA_HOME improved for terminal,...
