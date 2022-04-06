@@ -848,11 +848,16 @@ async function getGraalVMCEReleases(): Promise<any> {
         getGraalVMReleaseURLs(GRAALVM_RELEASES_URL),
         getGraalVMReleaseURLs(GRAALVM_DEV_RELEASES_URL)
     ]).catch(err => {
-        throw new Error('Cannot get data from server: ' + err.message);
+        if (err?.code === 'ENOTFOUND') {
+            notifyConnectionProblem();
+            return [];
+        } else {
+            throw new Error('Cannot get data from server: ' + err.message);
+        }
     }).then(urls => {
         const merged: string[] = Array.prototype.concat.apply([], urls);
         if (merged.length === 0) {
-            throw new Error(`No GraalVM installable found for platform ${process.platform}`);
+            throw new Error(`No GraalVM Community installable found for ${process.platform}/${process.arch}`);
         }
         const releases: any = {};
         merged.forEach(releaseUrl => {
@@ -904,7 +909,14 @@ async function getGraalVMEEReleases(): Promise<any> {
             releaseJavaVersion.licenseId = licenseId;
         }
     } catch (err) {
-        throw new Error('Cannot get data from server: ' + err.message);
+        if (err?.code === 'ENOTFOUND') {
+            notifyConnectionProblem();
+        } else {
+            throw new Error('Cannot get data from server: ' + err.message);
+        }
+    }
+    if (Object.keys(releases).length === 0) {
+        throw new Error(`No GraalVM Enterprise installable found for ${process.platform}/${process.arch}`);
     }
     return releases;
 }

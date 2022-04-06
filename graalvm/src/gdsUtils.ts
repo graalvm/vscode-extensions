@@ -14,15 +14,13 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as graalVMConfiguration from './graalVMConfiguration';
 
-// const GDS_BASE = 'https://gds.oracle.com/api'; // production
-const GDS_BASE = 'https://gds-stage.oraclecorp.com/api'; // staging
-const GDS_VERSION = '20220101';
+const GDS_COMPONENT_CATALOG = 'https://gds.oracle.com/api/20220101'; // production GDS address
+const CUSTOM_GDS_COMPONENT_CATALOG_KEY = 'gds.component.catalog'; // key to customize the GDS address (settings.json)
 const ENDPOINT_ARTIFACTS = 'artifacts';
 const ENDPOINT_TOKEN_REQUEST = 'tokenRequests';
 const ENDPOINT_LICENSE_ACCEPTANCE = 'licenseAcceptance';
-// const GRAALVM_PRODUCT_ID = 'D53FAE8052773FFAE0530F15000AA6C6'; // production
-const GRAALVM_PRODUCT_ID = 'D35D04EC5DB2F1F6E0531614000A615C'; // staging
-// const GRAALVM_PRODUCT_ID = 'DAF5A0AA0FD98D55E0531714000A901E'; // staging-devbuilds
+const GRAALVM_PRODUCT_ID = 'D53FAE8052773FFAE0530F15000AA6C6'; // production GraalVM product ID
+const CUSTOM_GRAALVM_PRODUCT_ID_KEY = 'gds.product.id'; // key to customize the GraalVM product ID (settings.json)
 
 const CONFIG_DIR = '.gu';
 const CONFIG_FILE = 'config';
@@ -52,6 +50,20 @@ export interface Token {
     value: string,
     origin: TokenOrigin,
     pendingLicense: boolean
+}
+
+function getGDSAddress(): string {
+    const gvmConfig = graalVMConfiguration.getGVMConfig();
+    const customCatalog: string | undefined = gvmConfig ? gvmConfig.get(CUSTOM_GDS_COMPONENT_CATALOG_KEY) : undefined;
+    const address: string = customCatalog ? customCatalog : GDS_COMPONENT_CATALOG;
+    return address;
+}
+
+function getGraalVMProductID(): string {
+    const gvmConfig = graalVMConfiguration.getGVMConfig();
+    const customProductID: string | undefined = gvmConfig ? gvmConfig.get(CUSTOM_GRAALVM_PRODUCT_ID_KEY) : undefined;
+    const productID: string = customProductID ? customProductID : GRAALVM_PRODUCT_ID;
+    return productID;
 }
 
 export function showConfiguration() {
@@ -403,12 +415,13 @@ export async function getGraalVMEECoreArtifacts() {
     let os: string = process.platform;
     if (os === 'win32') {
         os = 'windows';
+    } else if (os === 'darwin') {
+        os = 'macos';
     }
     const arch = utils.getArch();
     const isBase = 'True';
     const edition = 'ee';
     const supported = 'True';
-    // const supported = 'False';
     const status = 'PUBLISHED';
     const includeMetadata = 'notFilteredOnly';
     const responseFields1 = 'id';
@@ -417,7 +430,7 @@ export async function getGraalVMEECoreArtifacts() {
     const sortOrder = 'DESC';
     const sortBy = 'timeCreated';
     // Throws error for broken gunzip, catched by the caller
-    const response = await getDataRetry(`${ENDPOINT_ARTIFACTS}?metadata=arch%3A${arch}&metadata=os%3A${os}&metadata=isBase%3A${isBase}&metadata=edition%3A${edition}&metadata=supported%3A${supported}&productId=${GRAALVM_PRODUCT_ID}&status=${status}&includeMetadata=${includeMetadata}&responseFields=${responseFields1}&responseFields=${responseFields2}&responseFields=${responseFields3}&limit=${limit}&page=${page}&sortOrder=${sortOrder}&sortBy=${sortBy}`);
+    const response = await getDataRetry(`${ENDPOINT_ARTIFACTS}?metadata=arch%3A${arch}&metadata=os%3A${os}&metadata=isBase%3A${isBase}&metadata=edition%3A${edition}&metadata=supported%3A${supported}&productId=${getGraalVMProductID()}&status=${status}&includeMetadata=${includeMetadata}&responseFields=${responseFields1}&responseFields=${responseFields2}&responseFields=${responseFields3}&limit=${limit}&page=${page}&sortOrder=${sortOrder}&sortBy=${sortBy}`);
     if (response.code === 200) {
         const artifacts = JSON.parse(response.data);
         return artifacts;
@@ -534,9 +547,8 @@ async function getDataRetry(endpoint: string, options: https.RequestOptions = {}
 }
 
 async function getData(endpoint: string, options: https.RequestOptions = {}): Promise<{ code: number | undefined, headers: any, data: any }> {
-    console.log('## GETDATA '  + endpoint);
     return new Promise((resolve, reject) => {
-        const addr = `${GDS_BASE}/${GDS_VERSION}/${endpoint}`;
+        const addr = `${getGDSAddress()}/${endpoint}`;
         if (!options.headers) {
             options.headers = {};
         }
@@ -567,7 +579,7 @@ async function getData(endpoint: string, options: https.RequestOptions = {}): Pr
 
 async function postData(endpoint: string, data: any, options: https.RequestOptions = {}): Promise<{ code: number | undefined, headers: any, data: any }> {
     return new Promise((resolve, reject) => {
-        const addr = `${GDS_BASE}/${GDS_VERSION}/${endpoint}`;
+        const addr = `${getGDSAddress()}/${endpoint}`;
         options.method = 'POST';
         if (!options.headers) {
             options.headers = {};
