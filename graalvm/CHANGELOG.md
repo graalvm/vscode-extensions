@@ -2,7 +2,7 @@
 
 ## Version 0.5.16
 * Installs Oracle JDBC driver to NetBeans Language Server
-* Native Image Agent control panel added
+* Native Image control panel added to the Gr view, providing settings for the Native Image Agent in the first version
 * GraalVM Insight Heap replay functionality added
 * Image pull secret fixed for Kubernetes debugging
 

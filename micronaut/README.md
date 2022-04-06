@@ -293,7 +293,7 @@ Having set some breakpoints in your applciation, do the following to start debug
 ![Attach a remote debugger](images/attach-remote-debugger.png)
 
 ## Database Integration
-If installed in VSCode Oracle Developer Tools for VS Code (SQL and PLSQL) extension can be used to register OCI database for Micronaut project. This allows Micronaut data support to use connected database objects in developing Micronaut applications
+If __Oracle Developer Tools for VS Code (SQL and PLSQL)__ extension is installed it can be used to register OCI database for Micronaut project. This allows Micronaut data support to use connected database objects while developing Micronaut applications. See __Register Database for Micronaut__ action:
 ![Oracle DB and Micronaut extensions integration](images/ora-db-register-micronaut.png)
 
 ### Feedback
