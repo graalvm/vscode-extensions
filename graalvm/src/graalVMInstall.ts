@@ -848,8 +848,8 @@ async function getGraalVMCEReleases(): Promise<any> {
         getGraalVMReleaseURLs(GRAALVM_RELEASES_URL),
         getGraalVMReleaseURLs(GRAALVM_DEV_RELEASES_URL)
     ]).catch(err => {
-        if (err?.code === 'ENOTFOUND') {
-            notifyConnectionProblem();
+        if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {
+            notifyConnectionProblem('GraalVM Community releases');
             return [];
         } else {
             throw new Error('Cannot get data from server: ' + err.message);
@@ -857,7 +857,7 @@ async function getGraalVMCEReleases(): Promise<any> {
     }).then(urls => {
         const merged: string[] = Array.prototype.concat.apply([], urls);
         if (merged.length === 0) {
-            throw new Error(`No GraalVM Community installable found for ${process.platform}/${process.arch}`);
+            throw new Error(`No GraalVM Community release found for ${process.platform}/${process.arch}`);
         }
         const releases: any = {};
         merged.forEach(releaseUrl => {
@@ -909,14 +909,14 @@ async function getGraalVMEEReleases(): Promise<any> {
             releaseJavaVersion.licenseId = licenseId;
         }
     } catch (err) {
-        if (err?.code === 'ENOTFOUND') {
-            notifyConnectionProblem();
+        if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {
+            notifyConnectionProblem('GraalVM Enterprise releases');
         } else {
             throw new Error('Cannot get data from server: ' + err.message);
         }
     }
     if (Object.keys(releases).length === 0) {
-        throw new Error(`No GraalVM Enterprise installable found for ${process.platform}/${process.arch}`);
+        throw new Error(`No GraalVM Enterprise release found for ${process.platform}/${process.arch}`);
     }
     return releases;
 }
@@ -1103,7 +1103,7 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
                     const args = ['available'];
                     cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
                         if (error || _stderr) {
-                            notifyConnectionProblem();
+                            notifyConnectionProblem('GraalVM components');
                             reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
                         } else {
                             const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
@@ -1120,8 +1120,8 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
     });
 }
 
-async function notifyConnectionProblem(){
-    const select = await vscode.window.showWarningMessage("Could not resolve GraalVM components. Check your connection and verify proxy settings.", 'Setup proxy');
+async function notifyConnectionProblem(subject: string){
+    const select = await vscode.window.showWarningMessage(`Could not resolve ${subject}. Check your connection and verify proxy settings.`, 'Setup proxy');
     if (select === 'Setup proxy') {
         setupProxy();
     }
