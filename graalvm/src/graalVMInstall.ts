@@ -1048,14 +1048,14 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
     return new Promise<{label: string, detail: string, installed?: boolean}[]>((resolve, reject) => {
         getGU(graalVMHome).then(executablePath => {
             const binGVM = join(graalVMHome, 'bin');
-            cp.exec(`${executablePath} list`, { cwd: binGVM }, (error, stdout, _stderr) => {
+            cp.exec(`${executablePath} list -v`, { cwd: binGVM }, (error, stdout, _stderr) => {
                 if (error || _stderr) {
                     reject(error ?? new Error(_stderr));
                 } else {
                     const installed: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
                     getEEReleaseInfo(graalVMHome).then(eeInfo => {
                         if (eeInfo) {
-                            const args = ['available', '--custom-catalog', `${eeInfo.catalog}`];
+                            const args = ['available', '--custom-catalog', `${eeInfo.catalog}`, '-v'];
                             cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
                                 if (error || _stderr) {
                                     notifyConnectionProblem();
@@ -1070,7 +1070,7 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
                                 }
                             });
                         } else {
-                            const args = ['available'];
+                            const args = ['available', '-v'];
                             cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
                                 if (error || _stderr) {
                                     notifyConnectionProblem();
@@ -1116,28 +1116,26 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
     return undefined;
 }
 
-const reg: RegExp = /(\S+( \S)?)+/g;
-function processsGUOutput(stdout: string): {label: string, detail: string}[] {
-    const components: {label: string, detail: string}[] = [];
-    let header: boolean = true;
-    let head: string;
-    let maxLength: number = 4;
+const ID_PATTERN: RegExp = /ID\s*:\s*(\S+)/;
+const NAME_PATTERN: RegExp = /Name\s*:\s*(\S+(\s+\S+)*)/;
+function processsGUOutput(stdout: string): { label: string, detail: string }[] {
+    const components: { label: string, detail: string }[] = [];
+    let id: string | undefined = undefined;
+    let name: string | undefined = undefined;
     stdout.split('\n').forEach((line: string) => {
-        if (header) {
-            if (line.startsWith('-----')) {
-                header = false;
-                const headMatch: string[] | null = head.match(reg);
-                if (headMatch) {
-                    maxLength = Math.max(headMatch.length, maxLength);
-                }
-            } else {
-                head = line;
-            }
+        const compId: string[] | null = line.match(ID_PATTERN);
+        if (compId) {
+            id = compId[1];
         } else {
-            const info: string[] | null = line.match(reg);
-            if(info && info.length === maxLength) {
-                components.push({ label: info[0], detail: info[2] });
+            const compName: string[] | null = line.match(NAME_PATTERN);
+            if (compName) {
+                name = compName[1];
             }
+        }
+        if (id && name) {
+            components.push({ label: id, detail: name });
+            id = undefined;
+            name = undefined;
         }
     });
     return components;
