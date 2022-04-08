@@ -22,9 +22,11 @@ const GITHUB_URL: string = 'https://api.github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-builds/releases';
 const GRAALVM_DEV_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-dev-builds/releases';
 const GDS_URL: string = 'https://oca.opensource.oracle.com/gds/meta-data.json';
-const LINUX_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-amd64-\S*/gmi;
-const MAC_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-amd64-\S*/gmi;
-const WINDOWS_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-windows-amd64-\S*/gmi;
+const LINUX_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-amd64-\S*.tar.gz$/gmi;
+const LINUX_AARCH64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-aarch64-\S*.tar.gz$/gmi;
+const MAC_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-amd64-\S*.tar.gz$/gmi;
+const MAC_AARCH64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-aarch64-\S*.tar.gz$/gmi;
+const WINDOWS_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-windows-amd64-\S*.zip$/gmi;
 const INSTALL: string = 'Install ';
 const OPTIONAL_COMPONENTS: string = 'Optional GraalVM Components';
 const LAST_GRAALVM_PARENTDIR: string = 'lastGraalVMInstallationParentDir';
@@ -932,24 +934,35 @@ async function getGraalVMReleaseURLs(releasesURL: string): Promise<string[]> {
         if(!rawData) {
             return ret;
         }
-        let regex: RegExp;
+        const arch = utils.getArch();
+        let regex: RegExp | undefined = undefined;
         if (process.platform === 'linux') {
-            regex = LINUX_LINK_REGEXP;
+            if (arch === utils.ARCH_AMD64) {
+                regex = LINUX_AMD64_LINK_REGEXP;
+            } else if (arch === utils.ARCH_AARCH64) {
+                regex = LINUX_AARCH64_LINK_REGEXP;
+            }
         } else if (process.platform === 'darwin') {
-            regex = MAC_LINK_REGEXP;
+            if (arch === utils.ARCH_AMD64) {
+                regex = MAC_AMD64_LINK_REGEXP;
+            } else if (arch === utils.ARCH_AARCH64) {
+                regex = MAC_AARCH64_LINK_REGEXP;
+            }
         } else if (process.platform === 'win32') {
-            regex = WINDOWS_LINK_REGEXP;
-        } else {
-            return ret;
+            if (arch === utils.ARCH_AMD64) {
+                regex = WINDOWS_AMD64_LINK_REGEXP;
+            }
         }
-        const data: { assets?: { browser_download_url?: string }[] }[] = JSON.parse(rawData);
-        data.forEach(release => {
-            release.assets?.forEach(asset => {
-                if (asset.browser_download_url?.match(regex)) {
-                    ret.push(asset.browser_download_url);
-                }
+        if (regex !== undefined) {
+            const data: { assets?: { browser_download_url?: string }[] }[] = JSON.parse(rawData);
+            data.forEach(release => {
+                release.assets?.forEach(asset => {
+                    if (asset.browser_download_url?.match(regex as RegExp)) {
+                        ret.push(asset.browser_download_url);
+                    }
+                });
             });
-        });
+        }
         return ret;
     });
 }
@@ -1095,12 +1108,12 @@ async function getAvailableComponents(graalVMHome: string): Promise<{label: stri
     return new Promise<{label: string, detail: string, installed?: boolean}[]>((resolve, reject) => {
         getGU(graalVMHome).then(executablePath => {
             const binGVM = join(graalVMHome, 'bin');
-            cp.exec(`${executablePath} list`, { cwd: binGVM }, (error, stdout, _stderr) => {
+            cp.exec(`${executablePath} list -v`, { cwd: binGVM }, (error, stdout, _stderr) => {
                 if (error || _stderr) {
                     reject(error ?? new Error(_stderr));
                 } else {
                     const installed: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
-                    const args = ['available'];
+                    const args = ['available', '-v'];
                     cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
                         if (error || _stderr) {
                             notifyConnectionProblem('GraalVM components');
@@ -1152,28 +1165,26 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
     return undefined;
 }
 
-const reg: RegExp = /(\S+( \S)?)+/g;
-function processsGUOutput(stdout: string): {label: string, detail: string}[] {
-    const components: {label: string, detail: string}[] = [];
-    let header: boolean = true;
-    let head: string;
-    let maxLength: number = 4;
+const ID_PATTERN: RegExp = /ID\s*:\s*(\S+)/;
+const NAME_PATTERN: RegExp = /Name\s*:\s*(\S+(\s+\S+)*)/;
+function processsGUOutput(stdout: string): { label: string, detail: string }[] {
+    const components: { label: string, detail: string }[] = [];
+    let id: string | undefined = undefined;
+    let name: string | undefined = undefined;
     stdout.split('\n').forEach((line: string) => {
-        if (header) {
-            if (line.startsWith('-----')) {
-                header = false;
-                const headMatch: string[] | null = head.match(reg);
-                if (headMatch) {
-                    maxLength = Math.max(headMatch.length, maxLength);
-                }
-            } else {
-                head = line;
-            }
+        const compId: string[] | null = line.match(ID_PATTERN);
+        if (compId) {
+            id = compId[1];
         } else {
-            const info: string[] | null = line.match(reg);
-            if(info && info.length === maxLength) {
-                components.push({ label: info[0], detail: info[2] });
+            const compName: string[] | null = line.match(NAME_PATTERN);
+            if (compName) {
+                name = compName[1];
             }
+        }
+        if (id && name) {
+            components.push({ label: id, detail: name });
+            id = undefined;
+            name = undefined;
         }
     });
     return components;
