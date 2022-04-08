@@ -21,9 +21,11 @@ const GITHUB_URL: string = 'https://api.github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-builds/releases';
 const GRAALVM_DEV_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-dev-builds/releases';
 const GDS_URL: string = 'https://oca.opensource.oracle.com/gds/meta-data.json';
-const LINUX_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-amd64-\S*/gmi;
-const MAC_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-amd64-\S*/gmi;
-const WINDOWS_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-windows-amd64-\S*/gmi;
+const LINUX_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-amd64-\S*.tar.gz$/gmi;
+const LINUX_AARCH64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-aarch64-\S*.tar.gz$/gmi;
+const MAC_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-amd64-\S*.tar.gz$/gmi;
+const MAC_AARCH64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-aarch64-\S*.tar.gz$/gmi;
+const WINDOWS_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-windows-amd64-\S*.zip$/gmi;
 const INSTALL: string = 'Install ';
 const OPTIONAL_COMPONENTS: string = 'Optional GraalVM Components';
 const GRAALVM_EE_LICENSE: string = 'GraalVM Enterprise Edition License';
@@ -872,24 +874,35 @@ async function getGraalVMReleaseURLs(releasesURL: string): Promise<string[]> {
         if(!rawData) {
             return ret;
         }
-        let regex: RegExp;
+        const arch = utils.getArch();
+        let regex: RegExp | undefined = undefined;
         if (process.platform === 'linux') {
-            regex = LINUX_LINK_REGEXP;
+            if (arch === utils.ARCH_AMD64) {
+                regex = LINUX_AMD64_LINK_REGEXP;
+            } else if (arch === utils.ARCH_AARCH64) {
+                regex = LINUX_AARCH64_LINK_REGEXP;
+            }
         } else if (process.platform === 'darwin') {
-            regex = MAC_LINK_REGEXP;
+            if (arch === utils.ARCH_AMD64) {
+                regex = MAC_AMD64_LINK_REGEXP;
+            } else if (arch === utils.ARCH_AARCH64) {
+                regex = MAC_AARCH64_LINK_REGEXP;
+            }
         } else if (process.platform === 'win32') {
-            regex = WINDOWS_LINK_REGEXP;
-        } else {
-            return ret;
+            if (arch === utils.ARCH_AMD64) {
+                regex = WINDOWS_AMD64_LINK_REGEXP;
+            }
         }
-        const data: { assets?: { browser_download_url?: string }[] }[] = JSON.parse(rawData);
-        data.forEach(release => {
-            release.assets?.forEach(asset => {
-                if (asset.browser_download_url?.match(regex)) {
-                    ret.push(asset.browser_download_url);
-                }
+        if (regex !== undefined) {
+            const data: { assets?: { browser_download_url?: string }[] }[] = JSON.parse(rawData);
+            data.forEach(release => {
+                release.assets?.forEach(asset => {
+                    if (asset.browser_download_url?.match(regex as RegExp)) {
+                        ret.push(asset.browser_download_url);
+                    }
+                });
             });
-        });
+        }
         return ret;
     });
 }
