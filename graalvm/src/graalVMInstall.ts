@@ -1117,7 +1117,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
 }
 
 const ID_PATTERN: RegExp = /ID\s*:\s*(\S+)/;
-const NAME_PATTERN: RegExp = /Name\s*:\s*(\S+(\s+\S+)*)\s*/;
+const NAME_PATTERN: RegExp = /Name\s*:\s*(\S+(\s+\S+)*)/;
 function processsGUOutput(stdout: string): { label: string, detail: string }[] {
     const components: { label: string, detail: string }[] = [];
     let id: string | undefined = undefined;
