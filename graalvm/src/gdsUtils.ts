@@ -243,14 +243,62 @@ async function proceedAfterLicenceAcceptance(): Promise<boolean> {
 
 async function delayedProceed(proceed: string, message: string, warning: boolean = false): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-        if (warning) {
-            vscode.window.showWarningMessage(message, proceed).then(value => {
+        const showMessage: (message: string, ...items: string[]) => Thenable<string | undefined> = warning ? vscode.window.showWarningMessage : vscode.window.showInformationMessage;
+        if (displayedEmailAddresses) {
+            // Show while an email address that generated a download token is still displayed or minimized
+            showMessage(message, proceed).then(value => {
                 resolve(value === proceed);
             });
         } else {
-            vscode.window.showInformationMessage(message, proceed).then(value => {
+            // Show when no email address that generated a download token is displayed or minimized
+            const forgot = 'Forgot Email Address';
+            showMessage(message, proceed, forgot).then(value => {
+                if (value === forgot) {
+                    processForgottenAddress();
+                }
                 resolve(value === proceed);
             });
+        }
+    });
+}
+
+function processForgottenAddress() {
+    getDownloadToken(false).then(token => {
+        if (token?.value) {
+            let origin: string | undefined;
+            switch (token.origin) {
+                case TokenOrigin.Env: {
+                    origin = `environment variable ${DOWNLOAD_TOKEN_ENV}`;
+                    break;
+                }
+                case TokenOrigin.File: {
+                    const tokenfile = getTokenFile();
+                    origin = `default configuration file: ${tokenfile}`;
+                    break;
+                }
+                case TokenOrigin.CustomFile: {
+                    const customTokenfile = getCustomTokenFile();
+                    origin = `custom configuration file: ${customTokenfile}`;
+                    break;
+                }
+                default: {
+                    origin = undefined;
+                }
+            }
+            if (origin) {
+                const msg = `To generate a new download token using a new email address, clear the current download token defined in ${origin}. Then restart the download.`;
+                if (token.origin === TokenOrigin.File) {
+                    const clear = 'Clear Download Token';
+                    vscode.window.showInformationMessage(msg, clear).then(value => {
+                        if (value === clear) {
+                            saveTokenToFile(''); // clear the saved token
+                            vscode.window.showInformationMessage('Download token has been cleared.');
+                        }
+                    });
+                } else {
+                    vscode.window.showInformationMessage(msg);
+                }
+            }
         }
     });
 }
@@ -338,14 +386,18 @@ async function requestDownloadToken(licenseId?: string): Promise<Token | undefin
     return undefined;
 }
 
+let displayedEmailAddresses: number = 0;
+
 async function generateToken(address: string, licenseId?: string): Promise<string | undefined> {
     if (licenseId) {
         try {
             const token = await requestTokenAcceptLicense(address, licenseId);
             if (token) {
+                displayedEmailAddresses++;
                 const action = 'Copy to Clipboard';
-                const msg = `A new download token has been generated for the email address ${address}.`;
+                const msg = `New download token has been generated for the email address ${address}.`;
                 vscode.window.showInformationMessage(msg, action).then(value => {
+                    displayedEmailAddresses--;
                     if (value === action) {
                         const clipboard = `Download token for email address ${address} is ${token}`;
                         vscode.env.clipboard.writeText(clipboard);
@@ -365,8 +417,11 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
     } else {
         try {
             await requestToken(address);
+            displayedEmailAddresses++;
             const message = `Download token has been sent to ${address}. Follow the steps in the email and enter the download token.`;
-            vscode.window.showInformationMessage(message);
+            vscode.window.showInformationMessage(message).then(() => {
+                displayedEmailAddresses--;
+            });
             let token = await vscode.window.showInputBox({
                 placeHolder: 'Enter the download token',
                 validateInput: async (val) => validateToken(val),
