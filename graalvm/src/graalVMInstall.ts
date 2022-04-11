@@ -747,7 +747,6 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             let guErrorType: string | undefined = undefined;
             const dataListener = dtoken ? function (chunk: any) {
                 const guMessage = chunk.toString();
-                // console.log(`--- GU says: ${guMessage}`);
                 const errorType = gdsUtils.getGUErrorType(guMessage);
                 if (errorType) {
                     guErrorType = errorType;

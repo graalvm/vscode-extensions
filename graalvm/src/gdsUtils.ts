@@ -171,17 +171,23 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string): P
     return undefined;
 }
 
-const INVALID_TOKEN = 'is not valid.';
-const UNVERIFIED_TOKEN = 'has not been validated yet, check your e-mail.';
-const LICENSE_PENDING = 'License has been sent to your Email';
+// The download token "XXXXXXXXXX" is not valid.
+const INVALID_TOKEN_1 = 'The download token';
+const INVALID_TOKEN_2 = 'is not valid.';
+// The download token "XXXXXXXXXX" has not been validated. Please check your email and then press ENTER to continue.
+const UNVERIFIED_TOKEN_1 = 'The download token';
+const UNVERIFIED_TOKEN_2 = 'has not been validated. Please check your email and then press ENTER to continue.';
+// The license has been sent to XXXXX@XXX.XX. Accept it and then press ENTER to continue.
+const LICENSE_PENDING_1 = 'The license has been sent to';
+const LICENSE_PENDING_2 = 'Accept it and then press ENTER to continue.';
 
 export function getGUErrorType(guMessage: string): string | undefined {
-    if (guMessage.includes(INVALID_TOKEN)) {
-        return INVALID_TOKEN;
-    } else if (guMessage.includes(UNVERIFIED_TOKEN)) {
-        return UNVERIFIED_TOKEN;
-    } else if (guMessage.includes(LICENSE_PENDING)) {
-        return LICENSE_PENDING;
+    if (guMessage.startsWith(INVALID_TOKEN_1) && guMessage.includes(INVALID_TOKEN_2)) {
+        return INVALID_TOKEN_1 + INVALID_TOKEN_2;
+    } else if (guMessage.startsWith(UNVERIFIED_TOKEN_1) && guMessage.includes(UNVERIFIED_TOKEN_2)) {
+        return UNVERIFIED_TOKEN_1 + UNVERIFIED_TOKEN_2;
+    } else if (guMessage.startsWith(LICENSE_PENDING_1) && guMessage.includes(LICENSE_PENDING_2)) {
+        return LICENSE_PENDING_1 + LICENSE_PENDING_2;
     }
     return undefined;
 }
@@ -192,21 +198,21 @@ export function isHandledGUError(error: any): boolean {
 
 export async function handleGUError(token: Token, guErrorType: string): Promise<boolean> {
     switch (guErrorType) {
-        case LICENSE_PENDING: {
+        case LICENSE_PENDING_1 + LICENSE_PENDING_2: {
             handleValidToken(token);
             if (await proceedAfterLicenseConfirmation()) {
                 return true;
             }
             break;
         }
-        case UNVERIFIED_TOKEN: {
+        case UNVERIFIED_TOKEN_1 + UNVERIFIED_TOKEN_2: {
             handleValidToken(token);
             if (await proceedAfterTokenVerification()) {
                 return true;
             }
             break;
         }
-        case INVALID_TOKEN: {
+        case INVALID_TOKEN_1 + INVALID_TOKEN_2: {
             const retry = handleInvalidToken(token);
             if (retry) {
                 const newToken = await getDownloadToken(true);
