@@ -92,6 +92,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Detect system GraalVM installations."
+				},
+				"graalvm.gu.config": {
+					"type": "string",
+					"default": "",
+					"description": "Path to the custom GU configuration file."
 				}
 			}
 		},
@@ -130,6 +135,12 @@
 				"command": "extension.graalvm.uninstallGraalVMComponent",
 				"title": "Uninstall GraalVM Component",
 				"icon": "$(trash)",
+				"category": "GraalVM"
+			},
+			{
+				"command": "extension.graalvm.gds.showConfiguration",
+				"title": "Show GU Configuration",
+				"icon": "$(home)",
 				"category": "GraalVM"
 			},
 			{
