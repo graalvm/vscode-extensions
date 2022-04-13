@@ -50,7 +50,7 @@ let processName: string | undefined = undefined;
 let ID: string | undefined = undefined;
 let PID: number | undefined = undefined;
 
-let performWhenStarted: number = 1;
+let performWhenStarted: number = 0;
 
 let cpuSamplingFilter: number = 0;
 let cpuSamplingRate: number = 2;
