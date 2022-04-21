@@ -831,7 +831,7 @@ async function getGU(graalVMHome?: string): Promise<string> {
 }
 
 function makeGUProxy(executable:string, proxy?: string): string {
-    if (!proxy || getConf('http').get('proxySupport') !== 'off') {
+    if (!proxy || getConf('http').get('proxySupport') === 'off') {
         return `"${executable}"`;
     }
     if (process.platform === 'win32') {

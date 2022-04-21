@@ -91,7 +91,7 @@ export async function setupProxy() {
             }
             if (proxy !== out || mavenProxy !== out) {
                 await http.update('proxy', out, true);
-                await http.update('proxySupport', out ? 'off' : 'on', true);
+                await http.update('proxySupport', out ? 'on' : 'off', true);
                 await vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
                 if (isMvn && mavenProxy !== out) {
                     utils.askYesNo(`Change also Maven proxy in "${getMavenSettingsFilePath()}"?`,
