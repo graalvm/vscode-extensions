@@ -41,6 +41,13 @@ Choose either the Community distribution (free for all purposes) or Enterprise d
 
 ![GraalVM Install Dialog](images/graalvm_install_actions.png)
 
+### Proxy Settings
+When working behind firewall it is necessary to set the proxy for GraalVM Installation wizard and components installation so these features work properly. The extension will ask for setting this initially. Set:
+1. __Http: Proxy:__ to server and port required
+2. __Http: Proxy Support: on__ when behind firewall and __OFF__ when working without proxy.
+
+![Proxy Support](images/proxyOn.png)
+
 For more information about GraalVM installation and setup, consult the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#graalvm-installation-wizard).
 
 ## Java Development and Debugging

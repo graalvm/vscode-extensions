@@ -5,6 +5,7 @@
 * Native Image control panel added to the Gr view, providing settings for the Native Image Agent in the first version
 * GraalVM Insight Heap replay functionality added
 * Image pull secret fixed for Kubernetes debugging
+* Proxy settings fixes for GDS service
 
 ## Version 0.5.15
 * Oracle DB JDBC driver installed
