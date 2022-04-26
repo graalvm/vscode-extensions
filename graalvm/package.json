@@ -386,7 +386,13 @@
 			},
 			{
 				"view": "visualvm-control-panel",
-				"contents": "Set active GraalVM installation to use VisualVM."
+				"contents": "Set active GraalVM installation to use VisualVM.",
+				"when": "!extension.graalvm.remoteMode"
+			},
+			{
+				"view": "visualvm-control-panel",
+				"contents": "VisualVM integration not available for remote sessions.",
+				"when": "extension.graalvm.remoteMode"
 			}
 		],
 		"views": {
@@ -414,6 +420,14 @@
 		},
 		"menus": {
 			"commandPalette": [
+				{
+					"command": "extension.graalvm.runVisualVMForPID",
+					"when": "!extension.graalvm.remoteMode"
+				},
+				{
+					"command": "extension.graalvm.startVisualVM",
+					"when": "!extension.graalvm.remoteMode"
+				},
 				{
 					"command": "extension.graalvm.toggleHandleProjectProcessVisualVM",
 					"when": "false"
