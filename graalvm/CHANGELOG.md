@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.5.17
+* Disable VisualVM integration for Remote SSH development sessions
+
 ## Version 0.5.16
 * Installs Oracle JDBC driver to NetBeans Language Server
 * Native Image control panel added to the Gr view, providing settings for the Native Image Agent in the first version
