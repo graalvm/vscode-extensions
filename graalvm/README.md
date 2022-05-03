@@ -46,8 +46,6 @@ When working behind firewall it is necessary to set the proxy for GraalVM Instal
 1. __Http: Proxy:__ to server and port required
 2. __Http: Proxy Support: on__ when behind firewall and __OFF__ when working without proxy.
 
-![Proxy Support](images/proxyOn.png)
-
 For more information about GraalVM installation and setup, consult the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#graalvm-installation-wizard).
 
 ## Java Development and Debugging
@@ -64,8 +62,6 @@ Take a look at the [extension documentation](https://www.graalvm.org/dev/tools/v
 
 GraalVM Tools for Java extension provides integration with [VisualVM](https://visualvm.github.io), the all-in-one Java (and polyglot) monitoring and troubleshooting tool.
 VisualVM brings powerful, yet easy-to-use, visual Java tooling to VS Code.
-
-A special launch configuration - **Launch VisualVM & Java 8+ Application** - is provided by the extension to start VisualVM along with your project.
 
 ![VisualVM and VS Code Integration](images/vscode_visualvm.png)
 
