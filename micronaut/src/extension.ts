@@ -73,19 +73,21 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 	creatorInit();
-	if (micronautProjectExists()) {
-		vscode.commands.executeCommand('setContext', 'micronautProjectExists', true);
-		builderInit();
-		const javaHome = getJavaHome();
-		if (javaHome) {
-			vscode.commands.executeCommand('setContext', 'javaHomeSet', true);
-		}
-		kubernetes.extension.kubectl.v1.then((kubectl => {
-			if (kubectl.available) {
-				vscode.commands.executeCommand('setContext', 'kubectl.available', true);
+	micronautProjectExists().then(exists => {
+		if (exists) {
+			vscode.commands.executeCommand('setContext', 'micronautProjectExists', true);
+			builderInit();
+			const javaHome = getJavaHome();
+			if (javaHome) {
+				vscode.commands.executeCommand('setContext', 'javaHomeSet', true);
 			}
-		}));
-	}
+			kubernetes.extension.kubectl.v1.then((kubectl => {
+				if (kubectl.available) {
+					vscode.commands.executeCommand('setContext', 'kubectl.available', true);
+				}
+			}));
+		}
+	});
 }
 
 export function deactivate() {}
