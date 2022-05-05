@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.11
+* Logo change to comply with trademarks
+
 ## Version 0.5.10
 * Register Micronaut for Oracle Developer Tools for VS Code (SQL and PLSQL) Extension to create DB connection
 
