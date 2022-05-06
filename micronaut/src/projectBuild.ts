@@ -40,7 +40,8 @@ export async function build(goal?: string, group?: string) {
     }
     if (goal) {
         const javaHome = getJavaHome();
-        if (javaHome && (goal === 'nativeImage' || goal === 'dockerBuildNative')) {
+        const isNativeImageGoal = goal === 'nativeImage' || goal === 'nativeCompile' || goal === 'dockerBuildNative';
+        if (javaHome && isNativeImageGoal) {
             const nativeImage = findExecutable(NATIVE_IMAGE, javaHome);
             if (!nativeImage) {
                 const gu = findExecutable('gu', javaHome);
@@ -66,7 +67,18 @@ export async function build(goal?: string, group?: string) {
                 env.JAVA_HOME = javaHome;
                 env.PATH = `${path.join(javaHome, 'bin')}${path.delimiter}${process.env.PATH}`;
             }
-            terminal = vscode.window.createTerminal({ name: MICRONAUT, env });
+            if (isNativeImageGoal && process.platform === 'win32') {
+                const command = 'extension.graalvm.createWindowsNITerminal';
+                const commands: string[] = await vscode.commands.getCommands();
+                if (commands.includes(command)) {
+                    terminal = await vscode.commands.executeCommand(command, { name: MICRONAUT, env });
+                }
+                if (!terminal) {
+                    return;
+                }
+            } else {
+                terminal = vscode.window.createTerminal({ name: MICRONAUT, env });
+            }
             terminal.show();
             terminal.sendText(command);
         } else {
