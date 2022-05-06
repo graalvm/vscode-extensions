@@ -1,6 +1,9 @@
 # Change Log
 
-## 0.5.17
+## Version 0.5.18
+* GraalVM settings like `graalvm.home` are Remote SSH aware
+
+## Version 0.5.17
 * Disable VisualVM integration for Remote SSH development sessions
 
 ## Version 0.5.16
