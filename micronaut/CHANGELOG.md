@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.12
+* Micronaut CLI setting is Remote SSH aware
+
 ## Version 0.5.11
 * Logo change to comply with trademarks
 

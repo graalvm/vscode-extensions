@@ -46,12 +46,15 @@
 				"graalvm.home": {
 					"type": "string",
 					"default": "",
-					"description": "Path to the active GraalVM installation."
+					"description": "Path to the active GraalVM installation.",
+					"scope": "machine"
+
 				},
 				"graalvm.installations": {
 					"type": "array",
 					"default": [],
-					"description": "Paths to GraalVM installations."
+					"description": "Paths to GraalVM installations.",
+					"scope": "machine"
 				},
 				"graalvm.languageServer.start": {
 					"type": "string",
@@ -71,12 +74,14 @@
 				"graalvm.languageServer.currentWorkDir": {
 					"type": "string",
 					"default": "",
-					"description": "Absolute path to the working directory of the GraalVM Language Server."
+					"description": "Absolute path to the working directory of the GraalVM Language Server.",
+					"scope": "machine"
 				},
 				"graalvm.languageServer.delegateServers": {
 					"type": "string",
 					"default": "",
-					"description": "Comma-separated list of language@[host:]port where other language servers run."
+					"description": "Comma-separated list of language@[host:]port where other language servers run.",
+					"scope": "machine"
 				},
 				"graalvm.languageServer.startRLanguageServer": {
 					"type": "boolean",
@@ -96,7 +101,8 @@
 				"graalvm.gu.config": {
 					"type": "string",
 					"default": "",
-					"description": "Path to the custom GU configuration file."
+					"description": "Path to the custom GU configuration file.",
+					"scope": "machine"
 				}
 			}
 		},
@@ -1174,7 +1180,7 @@
 		"webpack": "^5.40.0",
 		"webpack-cli": "^4.7.2"
 	},
-	"extensionDependencies": [
-		"asf.apache-netbeans-java"
-	]
+    "extensionDependencies": [
+      "asf.apache-netbeans-java"
+    ]
 }
