@@ -14,7 +14,7 @@ import * as sax from "sax";
 import * as fs from 'fs';
 import { getGVMHome } from "./graalVMConfiguration";
 import { getGraalVMVersion } from './graalVMInstall';
-import { findExecutable } from './utils';
+import { findExecutable, platform } from './utils';
 
 const URL_SEARCH: string = 'https://search.maven.org/solrsearch/select';
 const GID: string = 'org.graalvm.nativeimage';
@@ -244,6 +244,125 @@ function getBuild(baseIndent: string, indent: string, eol: string, version: stri
         `${indent}</plugins>`,
         `</build>${eol}${baseIndent}`
     ].join(`${eol}${baseIndent}${indent}`);
+}
+
+
+const NATIVE_IMAGE_TERMINAL = 'Native Image';
+
+// Creates terminal using the currently active GraalVM
+export async function openWindowsNITerminal() {
+    const env: any = {};
+    const graalVMHome = getGVMHome();
+    if (!graalVMHome) {
+        vscode.window.showErrorMessage('No active GraalVM installation found');
+        return;
+    }
+    const nativeImage = findExecutable('native-image', graalVMHome);
+    if (!nativeImage) {
+        const gu = findExecutable('gu', graalVMHome);
+        if (gu) {
+            const command = 'Install Native Image';
+            const selected = await vscode.window.showWarningMessage('Native Image component not installed in the active GraalVM installation.', command);
+            if (selected === command) {
+                await vscode.commands.executeCommand('extension.graalvm.installGraalVMComponent', 'native-image', graalVMHome);
+                return;
+            }
+        } else {
+            vscode.window.showErrorMessage('Native Image component not installed in the active GraalVM installation.');
+            return;
+        }
+    }
+    let terminal: vscode.Terminal | undefined = vscode.window.terminals.find(terminal => terminal.name === NATIVE_IMAGE_TERMINAL);
+    if (terminal) {
+        terminal.dispose();
+    }
+    env.JAVA_HOME = graalVMHome;
+    env.PATH = `${path.join(graalVMHome, 'bin')}${path.delimiter}${process.env.PATH}`;
+    terminal = await createWindowsNITerminal({ name: NATIVE_IMAGE_TERMINAL, env });
+    if (terminal) {
+        terminal.show();
+    }
+}
+
+// Creates terminal using the provided env
+export async function createWindowsNITerminal(options: vscode.TerminalOptions): Promise<vscode.Terminal | undefined> {
+    let configureEnvironment: string | undefined = await configureWindowsEnvironment();
+    if (!configureEnvironment) {
+        return;
+    }
+    const terminal = await createTerminal(options, 'Command Prompt');
+    terminal.sendText(configureEnvironment);
+    return terminal;
+}
+
+async function createTerminal(options: vscode.TerminalOptions, profile?: string): Promise<vscode.Terminal> {
+    const profileKey = `integrated.defaultProfile.${platform()}`;
+    const currentProfile = profile ? vscode.workspace.getConfiguration('terminal').get(profileKey) as string : undefined;
+    try {
+        if (profile) {
+            await vscode.workspace.getConfiguration('terminal').update(profileKey, profile, true);
+        }
+        return vscode.window.createTerminal(options);
+    } finally {
+        if (profile) {
+            vscode.workspace.getConfiguration('terminal').update(profileKey, currentProfile ? currentProfile : undefined, true);
+        }
+    }
+}
+
+async function configureWindowsEnvironment(): Promise<string | undefined> {
+    let configure: string | undefined = vscode.workspace.getConfiguration('native').get('buildtools.config.windows') as string;
+    if (!configure || !fs.existsSync(configure)) {
+        if (configure) {
+            vscode.workspace.getConfiguration('native').update('buildtools.config.windows', undefined, true);
+        }
+        const choices: string[] = findWindowsTools();
+        if (choices.length === 0) {
+            configure = await selectCustomWindowsTools();
+        } else {
+            configure = await selectWindowsTools(choices);
+        }
+        if (configure) {
+            await vscode.workspace.getConfiguration('native').update('buildtools.config.windows', configure, true);
+        }
+    }
+    if (configure && configure.includes(' ')) {
+        configure = `"${configure}"`;
+    }
+    return configure;
+}
+
+function findWindowsTools(): string[] {
+    const predefinedLocations = [
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\vcvars64.bat',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\Tools\\vcvars64.bat',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\Tools\\vcvars64.bat',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
+    ];
+    const tools = [];
+    for (const location of predefinedLocations) {
+        if (fs.existsSync(location)) {
+            tools.push(location);
+        }
+    }
+    return tools;
+}
+
+async function selectWindowsTools(choices: string[]): Promise<string | undefined> {
+    const addCustom = 'Select Custom Script...';
+    choices.push(addCustom);
+    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script` })
+    if (selected === addCustom) {
+        selected = await selectCustomWindowsTools();
+    }
+    return selected;
+}
+
+async function selectCustomWindowsTools(): Promise<string | undefined> {
+    const sel = await vscode.window.showOpenDialog({title: 'Select Build Tools Configuration Script', openLabel: 'Select', canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
+    return sel && sel.length === 1 ? sel[0].fsPath : undefined;
 }
 
 

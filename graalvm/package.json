@@ -103,6 +103,12 @@
 					"default": "",
 					"description": "Path to the custom GU configuration file.",
 					"scope": "machine"
+				},
+				"native.buildtools.config.windows": {
+					"type": "string",
+					"default": "",
+					"description": "Optional path to Windows Build Tools Configuration Script",
+					"scope": "machine"
 				}
 			}
 		},
@@ -329,6 +335,12 @@
 				"category": "VisualVM"
 			},
 			{
+				"command": "extension.graalvm.openWindowsNITerminal",
+				"title": "Open Terminal Preconfigured For Native Image",
+				"icon": "$(terminal)",
+				"category": "GraalVM"
+			},
+			{
 				"command": "extension.graalvm.showDocsNativeImage",
 				"title": "Documentation",
 				"icon": "$(question)",
@@ -535,6 +547,10 @@
 					"when": "false"
 				},
 				{
+					"command": "extension.graalvm.openWindowsNITerminal",
+					"when": "isWindows"
+				},
+				{
 					"command": "extension.graalvm.showDocsNativeImage",
 					"when": "false"
 				},
@@ -654,6 +670,11 @@
 					"command": "extension.graalvm.toggleSourcesIntegrationVisualVM_",
 					"when": "view == visualvm-control-panel && visualvm.projectOpen && !visualvm.sourcesIntegration && visualvm.featureSet >= 2",
 					"group": "vcp_group_3@2"
+				},
+				{
+					"command": "extension.graalvm.openWindowsNITerminal",
+					"when": "view == ni-control-panel && isWindows",
+					"group": "navigation@1"
 				}
 			],
 			"view/item/context": [

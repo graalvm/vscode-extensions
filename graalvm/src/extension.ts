@@ -170,6 +170,12 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 	}
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.createWindowsNITerminal', (options: vscode.TerminalOptions): Promise<vscode.Terminal | undefined> => {
+		return nativeImage.createWindowsNITerminal(options);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.openWindowsNITerminal', () => {
+		nativeImage.openWindowsNITerminal();
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.showDocsNativeImage', (...params: any[]) => {
 		nativeImage.showDocumentation(params);
 	}));
