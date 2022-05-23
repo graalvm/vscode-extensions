@@ -107,7 +107,8 @@
 				"native.buildtools.config.windows": {
 					"type": "string",
 					"default": "",
-					"description": "Optional path to Windows Build Tools Configuration Script"
+					"description": "Optional path to Windows Build Tools Configuration Script",
+					"scope": "machine"
 				}
 			}
 		},
