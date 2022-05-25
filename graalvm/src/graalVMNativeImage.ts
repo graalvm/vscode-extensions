@@ -353,7 +353,7 @@ function findWindowsTools(): string[] {
 async function selectWindowsTools(choices: string[]): Promise<string | undefined> {
     const addCustom = 'Select Custom Script...';
     choices.push(addCustom);
-    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script` })
+    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script (vcvars64.bat)` })
     if (selected === addCustom) {
         selected = await selectCustomWindowsTools();
     }
@@ -361,7 +361,7 @@ async function selectWindowsTools(choices: string[]): Promise<string | undefined
 }
 
 async function selectCustomWindowsTools(): Promise<string | undefined> {
-    const sel = await vscode.window.showOpenDialog({title: 'Select Build Tools Configuration Script', openLabel: 'Select', canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
+    const sel = await vscode.window.showOpenDialog({title: 'Select Build Tools Configuration Script (vcvars64.bat)', openLabel: 'Select', canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
     return sel && sel.length === 1 ? sel[0].fsPath : undefined;
 }
 
