@@ -830,6 +830,18 @@ async function getGU(graalVMHome?: string): Promise<string> {
     throw new Error(NO_GU_FOUND);
 }
 
+async function isGUJSON(guCmd: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+        cp.exec(`${guCmd} --help`, (error, stdout, _stderr) => {
+            if (error || _stderr) {
+                reject(error ?? new Error(_stderr));
+            } else {
+                resolve(stdout.includes("-J, --json"));
+            }
+        })
+    });
+}
+
 function makeGUProxy(executable:string, proxy?: string): string {
     if (!proxy || getConf('http').get('proxySupport') === 'off') {
         return `"${executable}"`;
@@ -1104,31 +1116,33 @@ async function selectInstalledComponents(graalVMHome: string): Promise<string[]>
 }
 
 async function getAvailableComponents(graalVMHome: string): Promise<{label: string, detail: string, installed?: boolean}[]> {
-    return new Promise<{label: string, detail: string, installed?: boolean}[]>((resolve, reject) => {
-        getGU(graalVMHome).then(executablePath => {
-            const binGVM = join(graalVMHome, 'bin');
-            cp.exec(`${executablePath} list -v`, { cwd: binGVM }, (error, stdout, _stderr) => {
-                if (error || _stderr) {
-                    reject(error ?? new Error(_stderr));
-                } else {
-                    const installed: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
-                    const args = ['available', '-v'];
-                    cp.exec(`${executablePath} ${args.join(' ')}`, { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
-                        if (error || _stderr) {
-                            notifyConnectionProblem('GraalVM components');
-                            reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
-                        } else {
-                            const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout);
-                            available.forEach(avail => {
-                                const found = installed.find(item => item.label === avail.label);
-                                avail.installed = found ? true : false;
-                            });
-                            resolve(available);
-                        }
-                    });
-                }
-            });
-        }).catch(err => reject(err));
+    return new Promise<{label: string, detail: string, installed?: boolean}[]>(async (resolve, reject) => {
+        const executablePath = await getGU(graalVMHome);
+        const binGVM = join(graalVMHome, 'bin');
+        const guListCmd = `${executablePath} list`;
+        const isListJson = await isGUJSON(guListCmd);
+        cp.exec(`${guListCmd} ` + (isListJson ? '-J' : '-v'), { cwd: binGVM }, async (error, stdout, _stderr) => {
+            if (error || _stderr) {
+                reject(error ?? new Error(_stderr));
+            } else {
+                const guAvailCmd = `${executablePath} available`;
+                const isAvailJson = await isGUJSON(guAvailCmd);
+                const installed: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout, isListJson);
+                cp.exec(`${guAvailCmd} ` + (isAvailJson ? '-J' : '-v'), { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
+                    if (error || _stderr) {
+                        notifyConnectionProblem('GraalVM components');
+                        reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
+                    } else {
+                        const available: {label: string, detail: string, installed?: boolean}[] = processsGUOutput(stdout, isAvailJson);
+                        available.forEach(avail => {
+                            const found = installed.find(item => item.label === avail.label);
+                            avail.installed = found ? true : false;
+                        });
+                        resolve(available);
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -1166,26 +1180,34 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
 
 const ID_PATTERN: RegExp = /ID\s*:\s*(\S+)/;
 const NAME_PATTERN: RegExp = /Name\s*:\s*(\S+(\s+\S+)*)/;
-function processsGUOutput(stdout: string): { label: string, detail: string }[] {
+function processsGUOutput(stdout: string, isJson: boolean = false): { label: string, detail: string }[] {
     const components: { label: string, detail: string }[] = [];
     let id: string | undefined = undefined;
     let name: string | undefined = undefined;
-    stdout.split('\n').forEach((line: string) => {
-        const compId: string[] | null = line.match(ID_PATTERN);
-        if (compId) {
-            id = compId[1];
-        } else {
-            const compName: string[] | null = line.match(NAME_PATTERN);
-            if (compName) {
-                name = compName[1];
+    if (isJson) {
+        JSON.parse(stdout).components.forEach((comp: {id?: string, name?: string}) => {
+            if (comp.id && comp.name) {
+                components.push({ label: comp.id, detail: comp.name });
             }
-        }
-        if (id && name) {
-            components.push({ label: id, detail: name });
-            id = undefined;
-            name = undefined;
-        }
-    });
+        });
+    } else {
+        stdout.split('\n').forEach((line: string) => {
+            const compId: string[] | null = line.match(ID_PATTERN);
+            if (compId) {
+                id = compId[1];
+            } else {
+                const compName: string[] | null = line.match(NAME_PATTERN);
+                if (compName) {
+                    name = compName[1];
+                }
+            }
+            if (id && name) {
+                components.push({ label: id, detail: name });
+                id = undefined;
+                name = undefined;
+            }
+        });
+    }
     return components;
 }
 
