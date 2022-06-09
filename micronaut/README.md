@@ -31,7 +31,7 @@ If you install GraalVM Tools for Micronaut extension, the others will be install
 
 The entrypoint to the Micronaut extension is the Micronaut Tools page which opens as soon as the extension is installed or using the Command Palette command **Micronaut: Show Micronaut Tools Page**.
 
- ![Micronaut Tools Page](images/micronaut_tools_page.png)
+![Micronaut Tools Page](images/micronaut_tools_page.png)
 
 ## Extension Settings
 
@@ -47,7 +47,7 @@ The extension provides two possibilities to create a new Micronaut project: usin
 To create a new project using the project creation wizard, go to  **View**, **Command Palette**, search for "micronaut" and invoke the **Micronaut: Create Micronaut Project** command. Then follow the prompts.
 It supports generating Micronaut applications, CLI applications, and other types of applications. 
 
-  ![Micronaut VS Code Commands](images/micronaut-vs-code-commands.png)
+![Micronaut VS Code Commands](images/micronaut-vs-code-commands.png)
 
 Check the [extension documentation](https://www.graalvm.org/tools/vscode/micronaut-extension/) for more information.
 
@@ -58,18 +58,18 @@ The GraalVM Tools for Micronaut extension provides complete support for applicat
 You can package a Micronaut application into a runnable JAR and run it in different ways:
 - Invoking special quick commands
 
-   ![Micronaut Build Commands](images/micronaut-build-commands.png)
+  ![Micronaut Build Commands](images/micronaut-build-commands.png)
 
 - Calling Maven or Gradle jobs explicitly from the command line
 - Running the application `main` method
 
-   ![Run main method](images/run_main_method.png) 
+  ![Run main method](images/run_main_method.png) 
 
 The default nature of the Micronaut framework offers reduced use of Java reflection, runtime proxy generation, and dynamic classloading. It results in performance, memory and startup improvements, and makes it easier to debug Micronaut applications.
 
 To run the Micronaut application in debug mode, switch to the **Run and Debug** view by clicking on the bug icon in the left-hand side panel, select the **Java 8+** environment:
 
- ![Run and Debug with Java 8+ activity](images/run_debug_activity.png)
+![Run and Debug with Java 8+ activity](images/run_debug_activity.png)
 
 It will run your current Micronaut project, letting you debug it.
 
@@ -87,7 +87,7 @@ With this extension, you can build a Docker image of a Micronaut application, or
 
 Build and push Docker images to a Docker registry from VS Code:
 
-  ![Micronaut Deploy Commands](images/micronaut-deploy-commands.png)
+![Micronaut Deploy Commands](images/micronaut-deploy-commands.png)
 
 A particular Docker Registry can be configured in the build, see the [Micronaut Deploying Application](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/examples/deploy.html) documentation.
 
@@ -96,9 +96,9 @@ A particular Docker Registry can be configured in the build, see the [Micronaut 
 GraalVM Tools for Micronaut provides all of the necessary tooling for a complete developer experience in VS Code, including Kubernetes support for automated deployment, scaling and management of containers. 
 You can deploy a containerized Micronaut application into a Kubernetes cluster to a container registry, interactively run and debug it directly from VS Code. The following quick commands are available for you:
 
-  ![Quick commands for Kubernetes deployments](images/create_k8s_deployment.png)
+![Quick commands for Kubernetes deployments](images/create_k8s_deployment.png)
 
-To learn more, [check this guide](https://www.graalvm.org/tools/vscode/micronaut-extension/#deploy-and-run-micronaut-applications-in-a-kubernetes-cluster) that walks you through deploying a Micronaut application with [Oracle Container Engine for Kubernetes (OKE)](https://www.oracle.com/uk/cloud-native/container-engine-kubernetes/).
+<!-- To learn more, [check this guide](https://www.graalvm.org/tools/vscode/micronaut-extension/#deploy-and-run-micronaut-applications-in-a-kubernetes-cluster) that walks you through deploying a Micronaut application with [Oracle Container Engine for Kubernetes (OKE)](https://www.oracle.com/uk/cloud-native/container-engine-kubernetes/). -->
 
 ## Database Support
 
@@ -106,8 +106,8 @@ The GraalVM Tools for Micronaut extension provides out of the box integration wi
 The database management can be done using the **DATABASES** explorer which finds available connections and allows you to connect to a database using the appropriate JDBC driver.
 The database support covers the whole development workflow from creating a database, adding a connection, to setting up the runtime environment for a Micronaut application with the selected database. 
 You can generate `@Entity` classes from an existing database schema, and use SQL code completion in the `@Query` annotation.
-
-  ![Database management with Database Explorer](images/database-explorer-actions.png)
+  
+![Database management with Database Explorer](images/database-explorer-actions.png)
 
 ## Integration with Oracle Cloud and Oracle Autonomous Database
 
@@ -115,7 +115,7 @@ This extension is the best solution to "communicate" with and transfer data to O
 Thanks to the **CLOUD** explorer, you can create and/or connect to [Oracle Autonomous Database](https://www.oracle.com/autonomous-database). 
 The extension integrates with [Oracle Developer Tools for VS Code (SQL and PLSQL)](https://marketplace.visualstudio.com/items?itemName=Oracle.oracledevtools) which enables you to add JDBC connection to the database.
 
-  ![Oracle Autonomous Database support](images/oracle_db_support.png)
+![Oracle Autonomous Database support](images/oracle_db_support.png)
 
 ## Provide Feedback or Seek Help
 
