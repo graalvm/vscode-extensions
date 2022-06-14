@@ -1231,14 +1231,14 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
             return getAvailableComponents(element.home).then(components => {
                 const ret: vscode.TreeItem[] = [new InstallationFolder(element.home)];
                 components.forEach((comp: { id: string; name: string; installed?: boolean; }) => {
-                    ret.push(new Component(element, comp.id, comp.name, comp.installed));
+                    ret.push(new Component(element, comp.name, comp.id, comp.installed));
                 });
                 return ret;
             }).catch(out => {
                 const ret: vscode.TreeItem[] = [new InstallationFolder(element.home)];
                 if (out.list) {
-                    out.list.forEach((comp: { detail: string; label: string; installed?: boolean; }) => 
-                        ret.push(new Component(element, comp.detail, comp.label, comp.installed)));
+                    out.list.forEach((comp: { id: string; name: string; installed?: boolean; }) => 
+                        ret.push(new Component(element, comp.name, comp.id, comp.installed)));
                     ret.push(new ConnectionError('Could not resolve components', out?.error?.message));
                 } else {
                     if (out?.message === NO_GU_FOUND && process.platform === 'linux') {
