@@ -17,6 +17,7 @@ import { LicenseCheckPanel } from './graalVMLicenseCheck';
 import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName } from './graalVMConfiguration';
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
+import { componentsChanged } from './graalVMVisualVM';
 import assert = require('assert');
 
 const GITHUB_URL: string = 'https://api.github.com';
@@ -783,7 +784,8 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
         return;
     }).then(() => {
         vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
-        if (graalVMHome === getGVMHome()) {
+        const activeGVM = graalVMHome === getGVMHome();
+        if (activeGVM) {
             if (action === 'remove') {
                 startLanguageServer(graalVMHome);
             } else {
@@ -791,6 +793,9 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             }
         }
         unlockComponents(graalVMHome, componentIds);
+        if (activeGVM) {
+            componentsChanged(action);
+        }
     });
 }
 
