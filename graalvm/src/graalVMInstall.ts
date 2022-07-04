@@ -407,9 +407,9 @@ export async function checkForMissingComponents(homeFolder: string): Promise<voi
             {option: itemText, fnc: () => vscode.commands.executeCommand('extension.graalvm.installGraalVMComponent', undefined, homeFolder)}
         ]);
     } else if (components.length === 1) {
-        const itemText = INSTALL + components[0].id;
-        return utils.ask(components[0].id + ' is not installed in your GraalVM.', [
-            {option: itemText, fnc: () => vscode.commands.executeCommand('extension.graalvm.installGraalVMComponent', components[0].name, homeFolder)}
+        const itemText = INSTALL + components[0].name;
+        return utils.ask(components[0].name + ' is not installed in your GraalVM.', [
+            {option: itemText, fnc: () => vscode.commands.executeCommand('extension.graalvm.installGraalVMComponent', components[0].id, homeFolder)}
         ]);
     }
 }
@@ -1085,7 +1085,7 @@ async function selectAvailableComponents(graalVMHome: string): Promise<string[]>
             if (components.length > 0) {
                 vscode.window.showQuickPick(toQuickPick(components), { placeHolder: `Select GraalVM components to install to: "${await getGraalVMVersion(graalVMHome)}"`, canPickMany: true }).then(selected => {
                     if (selected) {
-                        resolve(selected.map(component => component.label));
+                        resolve(selected.filter(component => component.detail !== undefined).map(component => component.detail as string));
                     } else {
                         resolve([]);
                     }
@@ -1104,7 +1104,7 @@ async function selectInstalledComponents(graalVMHome: string): Promise<string[]>
             if (components.length > 0) {
                 vscode.window.showQuickPick(toQuickPick(components), { placeHolder: `Select GraalVM components to uninstall from: "${await getGraalVMVersion(graalVMHome)}"`, canPickMany: true }).then(selected => {
                     if (selected) {
-                        resolve(selected.map(component => component.label));
+                        resolve(selected.filter(component => component.detail !== undefined).map(component => component.detail as string));
                     } else {
                         resolve([]);
                     }
@@ -1140,7 +1140,7 @@ async function getAvailableComponents(graalVMHome: string): Promise<{id: string,
                     } else {
                         const available: {id: string, name: string, installed?: boolean}[] = processsGUOutput(stdout, isAvailJson);
                         available.forEach(avail => {
-                            const found = installed.find(item => item.name === avail.name);
+                            const found = installed.find(item => item.id === avail.id);
                             avail.installed = found ? true : false;
                         });
                         resolve(available);
@@ -1205,6 +1205,9 @@ function processsGUOutput(stdout: string, isJson: boolean = false): { id: string
             }
             component[`${line.slice(0, index).trim().toLowerCase()}`] = line.slice(index + 1).trim();
         });
+        if (component !== undefined) {
+            components.push(component);
+        }
     }
     assert(components.every(component => 'id' in component && 'name' in component), "GU catalog doesn't contain necessary values.");
     return components;
