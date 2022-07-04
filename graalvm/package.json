@@ -405,7 +405,12 @@
 			{
 				"view": "visualvm-control-panel",
 				"contents": "Set active GraalVM installation to use VisualVM.",
-				"when": "!extension.graalvm.remoteMode"
+				"when": "!extension.graalvm.remoteMode && visualvm.featureSet == 0"
+			},
+			{
+				"view": "visualvm-control-panel",
+				"contents": "VisualVM component not installed in the active GraalVM installation.\n[Install VisualVM Component](command:extension.graalvm.installVisualVMComponent)",
+				"when": "!extension.graalvm.remoteMode && visualvm.featureSet == -1"
 			},
 			{
 				"view": "visualvm-control-panel",

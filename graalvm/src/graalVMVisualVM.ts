@@ -32,9 +32,11 @@ const PERSISTENT_JFR_SETTINGS: string = 'visualvm.persistent.jfrSettings';
 let projectName: string | undefined;
 
 // Supported features based on the currently active GraalVM installation
-// 0 - no active GraalVM set
-// 1 - GraalVM 21.1.x and older | supports start VisualVM, open process (timeout may occur), defined tab
-// 2 - GraalVM 21.2 and newer   | supports thread/heap dumps, sampler, jfr, go to source, bring to front, customizable search process timeout
+// -1 - GraalVM 22.2 and newer   | VisualVM component not installed in the active GraalVM 
+//  0 - no active GraalVM set
+//  1 - GraalVM 21.1.x and older | supports start VisualVM, open process (timeout may occur), defined tab
+//  2 - GraalVM 21.2 and newer   | supports thread/heap dumps, sampler, jfr, go to source, bring to front, customizable search process timeout
+//  3 - GraalVM 22.2 and newer   | VisualVM as an optional component, may not be installed
 let featureSet: number = 0;
 
 // Current active GraalVM installation
@@ -72,6 +74,7 @@ export function initialize(context: vscode.ExtensionContext) {
     initializeCpuSamplingRate(context);
     initializeMemorySamplingRate(context);
     initializeJfrSettings(context);
+    setFeatureSet(0);
     initializeGraalVM(context, getGVMHome());
     initializeProcessHandler();    
 }
@@ -79,9 +82,19 @@ export function initialize(context: vscode.ExtensionContext) {
 // invoked when active GraalVM changes
 export function initializeGraalVM(context: vscode.ExtensionContext, gvmHome: string) {
     graalVMHome = gvmHome;
-
-    setFeatureSet(0);
     initializeGraalVMAsync(context);
+}
+
+export function componentsChanged(action: string) {
+    if (featureSet === -1 && action === 'install') {
+        if (utils.findExecutable('jvisualvm', graalVMHome)) {
+            setFeatureSet(3);
+        }
+    } else if (featureSet >= 3 && action === 'remove') {
+        if (!utils.findExecutable('jvisualvm', graalVMHome)) {
+            setFeatureSet(-1);
+        }
+    }
 }
 
 async function initializeGraalVMAsync(context: vscode.ExtensionContext) {
@@ -108,7 +121,13 @@ function resolveFeatureSet(major: number, minor: number, _update: number, _dev: 
     if (major === 21 && minor < 2) {
         return 1;
     }
-    return 2;
+    if (major === 22 && minor < 2) {
+        return 2;
+    }
+    if (!utils.findExecutable('jvisualvm', graalVMHome)) {
+        return -1;
+    }
+    return 3;
 }
 
 async function setFeatureSet(features: number) {
@@ -309,6 +328,10 @@ function configureJfrSettings(context: vscode.ExtensionContext) {
 async function getLaunchCommand(openPID: boolean = false): Promise<string | undefined> {
     if (!graalVMHome || featureSet === 0) {
         setupGraalVM(extContext, true);
+        return;
+    }
+    if (featureSet === -1) {
+        vscode.window.showErrorMessage("VisualVM component not installed in active GraalVM installation.");
         return;
     }
     const executable = utils.findExecutable('jvisualvm', graalVMHome);
@@ -1010,6 +1033,10 @@ async function troubleshootNBLS(parameters: ((pid: number) => string) | undefine
         vscode.window.showErrorMessage('Troubleshoot Language Server: No active GraalVM installation found');
         return;
     }
+    if (featureSet === -1) {
+        vscode.window.showErrorMessage("VisualVM component not installed in active GraalVM installation.");
+        return;
+    }
     if (featureSet < 2) {
         vscode.window.showErrorMessage('Troubleshoot Language Server: Active GraalVM version not supported');
         return;
@@ -1438,7 +1465,7 @@ export class VisualVMNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 
 	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
         if (!element) {
-            if (featureSet === 0) {
+            if (featureSet < 1) {
                 return [];
             } else if (featureSet === 1) {
                 return [ processNode, emptyNode, latestGralVMNode ];

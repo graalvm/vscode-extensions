@@ -117,6 +117,9 @@ export function activate(context: vscode.ExtensionContext) {
 		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.attachVisualVM', (): string => {
 			return visualvm.attachVisualVM();
 		}));
+		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installVisualVMComponent', () => {
+			installGraalVMComponent(context, 'visualvm', getGVMHome());
+		}));
 		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectProcessVisualVM', () => {
 			visualvm.selectProcessVisualVM();
 		}));
