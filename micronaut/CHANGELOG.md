@@ -1,7 +1,10 @@
 # Change Log
 
+## Version 0.5.13
+* Special preconfigured terminal for building native image on Windows. GraalVM 22.2.0 and later is required
 ## Version 0.5.12
 * Micronaut CLI setting is Remote SSH aware
+* Documentation updates
 
 ## Version 0.5.11
 * Logo change to comply with trademarks
