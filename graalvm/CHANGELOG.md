@@ -1,7 +1,10 @@
 # Change Log
+## Version 0.5.19
+* Special preconfigured terminal for building native image on Windows. GraalVM 22.2.0 and later is required
 
 ## Version 0.5.18
 * GraalVM settings like `graalvm.home` are Remote SSH aware
+* Documentation updates
 
 ## Version 0.5.17
 * Disable VisualVM integration for Remote SSH development sessions
