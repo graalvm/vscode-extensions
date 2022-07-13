@@ -34,6 +34,10 @@ export function findExecutable(program: string, graalVMHome?: string): string | 
     return undefined;
 }
 
+export function findExecutables(programs: string[], graalVMHome?: string): string | undefined {
+	return programs.map(program => findExecutable(program, graalVMHome)).find(executable => executable !== undefined);
+}
+
 export async function ask(question: string, options: {option: string, fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
 	const select = await vscode.window.showInformationMessage(question, ...options.map(o => o.option));
 	if (!select) {

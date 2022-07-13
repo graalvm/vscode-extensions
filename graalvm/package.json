@@ -1110,7 +1110,7 @@
 							"type": "graalvm",
 							"request": "launch",
 							"name": "Launch Python Script",
-							"runtimeExecutable": "graalpython",
+							"runtimeExecutable": "graalpy",
 							"program": "^\"${1:\\${file\\}}\""
 						}
 					},
