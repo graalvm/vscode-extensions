@@ -73,7 +73,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 							config.runtimeExecutable = 'js';
 							break;
 						case 'python':
-							config.runtimeExecutable = 'graalpython';
+							config.runtimeExecutable = 'graalpy';
 							break;
 						case 'r':
 							config.runtimeExecutable = 'Rscript';
@@ -89,6 +89,10 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 						config.program = '${file}';
 					}
 				}
+			}
+
+			if (config.runtimeExecutable === 'graalpy' && !utils.findExecutable('graalpy') && utils.findExecutable('graalpython')) {
+				config.runtimeExecutable = 'graalpython';
 			}
 
 			if (config.request === 'launch' && config.name === 'Launch R Term') {
