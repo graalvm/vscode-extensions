@@ -21,7 +21,7 @@ export function getRConfigurations(): ConfigurationPickItem[] {
     ret.push(new ConfigurationPickItem(
         'Set as R runtime',
         `(r.${getConfigSection()})`,
-        graalVMHome => utils.findExecutable('R', graalVMHome) !== undefined && utils.checkRecommendedExtension('Ikuyadeu.r', 'R Language'),
+        graalVMHome => utils.findExecutable('R', graalVMHome) !== undefined && utils.checkRecommendedExtension('REditorSupport.r', 'R Language'),
         graalVMHome => utils.findExecutable('R', graalVMHome) === getConf('r').get(getConfigSection()), 
         async graalVMHome => {
             const executable = utils.findExecutable('R', graalVMHome);
