@@ -183,7 +183,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
 	createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-		if (session.configuration.protocol === 'debugAdapter') {
+		if (session.configuration.protocol === 'debugAdapter' && !session.configuration.noDebug) {
 			if (session.configuration.request === 'attach') {
 				return new vscode.DebugAdapterServer(session.configuration.port, session.configuration.address);
 			} else if (session.configuration.request === 'launch') {
