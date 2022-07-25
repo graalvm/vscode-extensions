@@ -2,7 +2,7 @@
 	"name": "micronaut",
 	"displayName": "GraalVM Tools for Micronaut",
 	"description": "Micronaut support for VS Code",
-	"version": "0.5.13",
+	"version": "0.5.14",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
