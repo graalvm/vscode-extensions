@@ -14,6 +14,8 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as graalVMConfiguration from './graalVMConfiguration';
 
+const GDS_URL = 'https://oca.opensource.oracle.com/gds/meta-data.json'; // production GDS URL
+const CUSTOM_GDS_URL_KEY = 'gds.url';// key to customize the GDS URL (settings.json)
 const GDS_COMPONENT_CATALOG = 'https://gds.oracle.com/api/20220101'; // production GDS address
 const CUSTOM_GDS_COMPONENT_CATALOG_KEY = 'gds.component.catalog'; // key to customize the GDS address (settings.json)
 const ENDPOINT_ARTIFACTS = 'artifacts';
@@ -50,6 +52,13 @@ export interface Token {
     value: string,
     origin: TokenOrigin,
     pendingLicense: boolean
+}
+
+export function getGDSUrl(): string {
+    const gvmConfig = graalVMConfiguration.getGVMConfig();
+    const customUrl: string | undefined = gvmConfig ? gvmConfig.get(CUSTOM_GDS_URL_KEY) : undefined;
+    const url: string = customUrl ? customUrl : GDS_URL;
+    return url;
 }
 
 function getGDSAddress(): string {

@@ -23,7 +23,6 @@ import assert = require('assert');
 const GITHUB_URL: string = 'https://api.github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-builds/releases';
 const GRAALVM_DEV_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-dev-builds/releases';
-const GDS_URL: string = 'https://oca.opensource.oracle.com/gds/meta-data.json';
 const LINUX_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-amd64-\S*.tar.gz$/gmi;
 const LINUX_AARCH64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-linux-aarch64-\S*.tar.gz$/gmi;
 const MAC_AMD64_LINK_REGEXP: RegExp = /graalvm-ce-java\S*-(darwin|macos)-amd64-\S*.tar.gz$/gmi;
@@ -1179,7 +1178,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
                         java: javaVersion
                     }
                 } else {
-                    const rawData = await get(GDS_URL, /^application\/json/) ?? '{}';
+                    const rawData = await get(gdsUtils.getGDSUrl(), /^application\/json/) ?? '{}';
                     return Object.values(JSON.parse(rawData).Releases).find((release: any) => release.version === versionInfo[2] && release.java === javaVersion);
                 }
             }
