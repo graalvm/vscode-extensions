@@ -1,5 +1,7 @@
 # Change Log
 
+## Version 0.5.14
+* Update of terser npm to v. 5.14.12 due to CVE-2022-25858 
 ## Version 0.5.13
 * Special preconfigured terminal for building native image on Windows. GraalVM 22.2.0 and later is required
 ## Version 0.5.12
