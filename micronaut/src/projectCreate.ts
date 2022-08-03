@@ -80,7 +80,6 @@ export async function createProject(context: vscode.ExtensionContext) {
                     await vscode.commands.executeCommand('extension.graalvm.selectGraalVMHome', options.java, true);
                 }
             }
-            updateGitIgnore(options);
             const uri = vscode.Uri.file(options.target);
             if (vscode.workspace.workspaceFolders) {
                 const value = await vscode.window.showInformationMessage('New Micronaut project created', OPEN_IN_NEW_WINDOW, ADD_TO_CURRENT_WORKSPACE);
@@ -99,26 +98,6 @@ export async function createProject(context: vscode.ExtensionContext) {
             }
         }
     }
-}
-
-const GRADLE: string = 'gradle';
-const WRAPPER: string = 'wrapper';
-const GRADLE_WRAPPER: string = path.join(GRADLE, WRAPPER);
-const GRADLE_JAR: string = path.join(GRADLE_WRAPPER, `${GRADLE}-${WRAPPER}.jar`);
-const GRADLE_PROPERTIES: string = path.join(GRADLE_WRAPPER, `${GRADLE}-${WRAPPER}.properties`);
-function updateGitIgnore(options: {url: string, name: string, target: string, buildTool: string}) {
-    if (options.buildTool !== 'GRADLE') {
-        return;
-    }
-    const filePath = path.join(options.target, '.gitignore');
-    let content = fs.readFileSync(filePath).toString();
-    if (!content.includes(GRADLE_JAR)) {
-        content = `${content.trim()}\n${GRADLE_JAR}`;
-    }
-    if (!content.includes(GRADLE_PROPERTIES)) {
-        content = `${content.trim()}\n${GRADLE_PROPERTIES}`;
-    }
-    fs.writeFileSync(filePath, content);
 }
 
 async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{url: string, args?: string[], name: string, target: string, buildTool: string, java?: string} | undefined> {
