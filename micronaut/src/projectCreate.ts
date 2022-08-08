@@ -69,7 +69,7 @@ export async function createProject(context: vscode.ExtensionContext) {
             try {
                 const out = cp.execFileSync(options.url, options.args, { cwd: path.dirname(options.target), env: {JAVA_HOME: getJavaHome() } });
                 created = out.toString().indexOf('Application created') >= 0;
-            } catch (e) {
+            } catch (e: any) {
                 vscode.window.showErrorMessage(`Cannot create Micronaut project: ${e.message}`);
             }
         }
@@ -230,12 +230,22 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	}
 
 	async function pickFeatures(input: MultiStepInput, state: Partial<State>) {
+        const features = state.micronautVersion && state.applicationType && state.javaVersion ? await getFeatures(state.micronautVersion, state.applicationType, state.javaVersion) : [];
+        const items: vscode.QuickPickItem[] = [];
+        let category: string | undefined;
+        for (const feature of features) {
+            if (feature.category !== category) {
+                category = feature.category;
+                items.push({label: category, kind: vscode.QuickPickItemKind.Separator});
+            }
+            items.push(feature);
+        }
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 7,
 			totalSteps: totalSteps(state),
             placeholder: 'Pick project features',
-            items: state.micronautVersion && state.applicationType && state.javaVersion ? await getFeatures(state.micronautVersion, state.applicationType, state.javaVersion) : [],
+            items,
             activeItems: state.features,
             canSelectMany: true,
 			shouldResume: () => Promise.resolve(false)
@@ -420,17 +430,17 @@ function getTestFrameworks() {
     ];
 }
 
-async function getFeatures(micronautVersion: {label: string, serviceUrl: string}, applicationType: {label: string, name: string}, javaVersion: {target: string}): Promise<{label: string, detail?: string, name: string}[]> {
+async function getFeatures(micronautVersion: {label: string, serviceUrl: string}, applicationType: {label: string, name: string}, javaVersion: {target: string}): Promise<{label: string, detail?: string, category: string, name: string}[]> {
+    const comparator = (f1: any, f2: any) => f1.category < f2.category ? -1 : f1.category > f2.category ? 1 : f1.label < f2.label ? -1 : 1;
     if (micronautVersion.serviceUrl.startsWith(HTTP_PROTOCOL) || micronautVersion.serviceUrl.startsWith(HTTPS_PROTOCOL)) {
         return get(micronautVersion.serviceUrl + APPLICATION_TYPES + '/' + applicationType.name + FEATURES).then(data => {
-            return JSON.parse(data).features.map((feature: any) => ({label: `${feature.category}: ${feature.title}`, detail: feature.description, name: feature.name})).sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
+            return JSON.parse(data).features.map((feature: any) => ({label: feature.title, detail: feature.description, category: feature.category, name: feature.name})).sort(comparator);
         });
     }
     try {
         // will throw an error if javaVersion.target is not supported by the CLI
-        const features: {label: string, detail?: string, name: string}[] = getMNFeatures(micronautVersion.serviceUrl, applicationType.name, javaVersion.target);
-        return features.sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
-    } catch (e) {
+        return getMNFeatures(micronautVersion.serviceUrl, applicationType.name, javaVersion.target).sort(comparator);
+    } catch (e: any) {
         let msg = e.message.toString();
         const err = `Unsupported JDK version: ${javaVersion.target}. Supported values are `;
         const idx = msg.indexOf(err);
@@ -440,10 +450,10 @@ async function getFeatures(micronautVersion: {label: string, serviceUrl: string}
             const supportedVersions = msg.substring(idx + err.length + 1, msg.length - 3).split(', ');
             const supportedVersion = normalizeJavaVersion(javaVersion.target, supportedVersions);
             try {
-                const features: {label: string, detail?: string, name: string}[] = getMNFeatures(micronautVersion.serviceUrl, applicationType.name, supportedVersion);
+                const features: {label: string, detail?: string, category: string, name: string}[] = getMNFeatures(micronautVersion.serviceUrl, applicationType.name, supportedVersion);
                 javaVersion.target = supportedVersion; // update the target platform
-                return features.sort((f1: any, f2: any) => f1.label < f2.label ? -1 : 1);
-            } catch (e) {
+                return features.sort(comparator);
+            } catch (e: any) {
                 msg = e.message.toString();
             }
         }
@@ -506,8 +516,8 @@ function getMNApplicationTypes(mnPath: string): {label: string, name: string}[] 
     return types;
 }
 
-function getMNFeatures(mnPath: string, applicationType: string, javaVersion: string): {label: string, detail?: string, name: string}[] {
-    const features: {label: string, detail?: string, name: string}[] = [];
+function getMNFeatures(mnPath: string, applicationType: string, javaVersion: string): {label: string, detail?: string, category: string, name: string}[] {
+    const features: {label: string, detail?: string, category: string, name: string}[] = [];
     let header: boolean = true;
     let category: string | undefined;
     cp.execFileSync(mnPath, [applicationType, '--list-features', `--java-version=${javaVersion}`]).toString().split('\n').map(line => line.trim()).forEach(line => {
@@ -521,7 +531,7 @@ function getMNFeatures(mnPath: string, applicationType: string, javaVersion: str
             } else if (category) {
                 const info: string[] | null = line.match(/(\S*)\s*(\[PREVIEW\]|\(\*\))?\s*(.*)/);
                 if (info && info.length >= 4) {
-                    features.push({ label: `${category}: ${info[1]}`, detail: info[3], name: info[1] });
+                    features.push({ label: info[1], detail: info[3], category, name: info[1] });
                 }
             } else {
                 category = line;
