@@ -1,0 +1,65 @@
+mx : {
+  packages : {
+    mx: "HEAD"
+  }
+}
+
+oraclejdk11 : {
+  downloads : {
+    JAVA_HOME : {"name": "labsjdk", "version": "ce-11.0.12+5-jvmci-21.3-b01", "platformspecific": true }
+  }
+}
+
+common : ${mx} ${oraclejdk11} {
+  timelimit : "30:00",
+  catch_files : [
+    "Graal diagnostic output saved in (?P<filename>.+\.zip)"
+  ],
+  environment: {
+    npm_config_registry: "https://artifactory-slc.oraclecorp.com/artifactory/api/npm/npm-virtual/"
+  }
+}
+
+linux : ${common} {
+  packages: {
+    nodejs : ">=14.16.0"
+    maven: ">=3.6.3"
+  }
+}
+
+darwin : ${common} {
+}
+
+windows : ${common} {
+}
+
+linux-amd64 : ${linux} {
+  capabilities : [linux, amd64],
+  docker: {
+    "image": "phx.ocir.io/oraclelabs2/c_graal/buildslave:buildslave_ol7", # Use this docker image
+    "mount_modules": true
+  }
+}
+
+darwin-amd64 : ${darwin} {
+  capabilities : [darwin, amd64]
+}
+
+windows-amd64 : ${windows} {
+  capabilities : [windows, amd64]
+}
+
+vscodeCommon: {
+  timelimit : "30:00"
+}
+
+vscodeBuildGate : ${vscodeCommon} {
+  targets : [ gate ],
+  run : [
+    ["mx", "gate"]
+  ]
+}
+
+builds += [
+  ${linux-amd64} ${vscodeBuildGate} { name: "gate-vscode-build" },
+]
