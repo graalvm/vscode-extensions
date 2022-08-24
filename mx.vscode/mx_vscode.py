@@ -40,12 +40,20 @@
 #
 import mx
 import os
+import mx_gate
 from os.path import join, isfile, exists
+from mx_gate import Task
 
 _suite = mx.suite('vscode')
 
 BUILD_NUMBER = mx.get_env("BUILD_NUMBER", None)
 JOB_NAME = mx.get_env("JOB_NAME", None)
+
+def _vscode_gate_runner(args, tasks):
+    with Task('VSCode UnitTests', tasks, tags=['test']) as t:
+        if t: mx.run(['mx', 'build'], nonZeroIsFatal=True)
+
+mx_gate.add_gate_runner(_suite, _vscode_gate_runner)
 
 class VSCodeExtensionProject(mx.ArchivableProject):
     def __init__(self, suite, name, deps, workingSets, theLicense, mxLibs=None, **args):
@@ -61,9 +69,9 @@ class VSCodeExtensionProject(mx.ArchivableProject):
     def getResults(self, replaceVar=False):
         results = []
         for root, _, files in os.walk(self.output_dir()):
-            for file in files:
-                if file.endswith(".vsix"):
-                    results.append(join(root, file))
+            for fil in files:
+                if fil.endswith(".vsix"):
+                    results.append(join(root, fil))
         return results
 
     def getBuildTask(self, args):
@@ -98,14 +106,14 @@ class VSCodeExtensionBuildTask(mx.ArchivableBuildTask):
             command_output = mx.OutputCapture()
             mx.run(['node', '-pe', 'require(\'./package.json\').version'], nonZeroIsFatal=True, cwd=self.subject.dir, out=command_output)
             mx.run(['npm', 'version', command_output.data.strip() + '-' + BUILD_NUMBER], nonZeroIsFatal=True, cwd=self.subject.dir)
-            mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
+            mx.run([vsce, 'package', '--allow-star-activation', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
             mx.run(['npm', 'version', command_output.data.strip()], nonZeroIsFatal=True, cwd=self.subject.dir)
         else:
-            mx.run([vsce, 'package', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
+            mx.run([vsce, 'package', '--allow-star-activation', '--baseImagesUrl', 'https://github.com/graalvm/vscode-extensions/raw/master/' + self.subject.name], nonZeroIsFatal=True, cwd=self.subject.dir)
 
     def clean(self, forBuild=False):
-        for file in self.subject.getResults():
-            os.remove(file)
+        for fil in self.subject.getResults():
+            os.remove(fil)
         for path in [join(self.subject.dir, m) for m in ['dist', 'node_modules']]:
             if exists(path):
                 mx.rmtree(path)
