@@ -183,7 +183,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
 	createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-		if (session.configuration.protocol === 'debugAdapter' && !session.configuration.noDebug) {
+		if ((!session.configuration.protocol || session.configuration.protocol === 'debugAdapter') && !session.configuration.noDebug) {
 			if (session.configuration.request === 'attach') {
 				return new vscode.DebugAdapterServer(session.configuration.port, session.configuration.address);
 			} else if (session.configuration.request === 'launch') {
@@ -536,13 +536,13 @@ async function getLaunchInfo(config: vscode.DebugConfiguration | ILaunchRequestA
 	const programArgs = config.args || [];
 	let launchArgs = [];
 	if (!config.noDebug) {
-		if (!config.protocol || config.protocol === 'chromeDevTools') {
+		if (config.protocol === 'chromeDevTools') {
 			if (path.basename(runtimeExecutable) === NODE) {
 				launchArgs.push(`--inspect-brk=${port}`);
 			} else {
 				launchArgs.push(`--inspect=${port}`);
 			}
-		} else if (config.protocol === 'debugAdapter') {
+		} else if (!config.protocol || config.protocol === 'debugAdapter') {
 			launchArgs.push(`--dap=${port}`);
 		}
 	}

@@ -1021,7 +1021,7 @@
 									"debugAdapter"
 								],
 								"description": "Protocol used to connect the debug target: Debug Adapter Protocol, or Chrome DevTools Protocol.",
-								"default": "chromeDevTools"
+								"default": "debugAdapter"
 							}
 						}
 					},
@@ -1048,7 +1048,7 @@
 									"debugAdapter"
 								],
 								"description": "Protocol used to connect the debug target: Debug Adapter Protocol, or Chrome DevTools Protocol.",
-								"default": "chromeDevTools"
+								"default": "debugAdapter"
 							},
 							"localRoot": {
 								"type": [
