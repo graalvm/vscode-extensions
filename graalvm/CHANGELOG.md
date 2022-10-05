@@ -1,7 +1,14 @@
 # Change Log
 
+## Version 0.5.21
+* Do not use `'*'` for GraalVM VSCode extension activation
+* Debug Adapter Protocol is the default over Chrome Inspector
+* GDS URL can be customized via Settings.
+
 ## Version 0.5.20
 * Update of terser npm to v. 5.14.12 due to CVE-2022-25858 
+* Allow for run without debugging for launch configurations with the Debug Adapter protocol specified
+
 ## Version 0.5.19
 * Special preconfigured terminal for building native image on Windows. GraalVM 22.2.0 and later is required
 
