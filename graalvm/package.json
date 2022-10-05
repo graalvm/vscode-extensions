@@ -35,7 +35,32 @@
 		"native image"
 	],
 	"activationEvents": [
-		"*"
+		"onDebug",
+		"onLanguage:javascript",
+		"onLanguage:typescript",
+		"onLanguage:sl",
+		"onLanguage:python",
+		"onLanguage:r",
+		"onLanguage:ruby",
+		"onCommand:extension.graalvm.selectGraalVMHome",
+		"onCommand:extension.graalvm.installGraalVM",
+		"onCommand:extension.graalvm.addExistingGraalVM",
+		"onCommand:extension.graalvm.refreshInstallations",
+		"onCommand:extension.graalvm.installGraalVMComponent",
+		"onCommand:extension.graalvm.uninstallGraalVMComponent",
+		"onCommand:extension.graalvm.gds.showConfiguration",
+		"onCommand:extension.graalvm.addNativeImageToPOM",
+		"onCommand:extension.graalvm.toggleCodeCoverage",
+		"onCommand:extension.graalvm.installRLanguageServer",
+		"onCommand:extension.graalvm.installRubyLanguageServer",
+		"onCommand:extension.graalvm.setupProxy",
+		"onCommand:extension.graalvm.removeInstallation",
+		"onCommand:extension.graalvm.runVisualVMForPID",
+		"onCommand:extension.graalvm.startVisualVM",
+		"onCommand:extension.graalvm.heapReplay",
+		"onView:graalvm-installations",
+		"onView:ni-control-panel",
+		"onView:visualvm-control-panel"
 	],
 	"main": "./dist/extension",
 	"contributes": {
