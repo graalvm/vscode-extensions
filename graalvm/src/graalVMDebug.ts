@@ -163,7 +163,13 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 	}
 
 	resolveDebugConfigurationWithSubstitutedVariables?(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        return getLaunchInfo(config, getGVMHome()).then(launchInfo => {
+		if (config.request == 'attach') {
+			if (!config.protocol) {
+				config.protocol = 'debugAdapter';
+				return config;
+			}
+		}
+		return getLaunchInfo(config, getGVMHome()).then(launchInfo => {
 			config.graalVMLaunchInfo = launchInfo;
 			if (config.program) {
 				const languageServerStart = getGVMConfig().get('languageServer.start') as 'none' | 'single' | 'inProcess';

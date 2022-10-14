@@ -1054,8 +1054,8 @@
 						"properties": {
 							"port": {
 								"type": "number",
-								"description": "Debug port to attach to. Default is 9229.",
-								"default": 9229
+								"description": "Debug port to attach to. Default is 4711.",
+								"default": 4711
 							},
 							"address": {
 								"type": "string",
