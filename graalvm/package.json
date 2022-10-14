@@ -1029,8 +1029,8 @@
 						"properties": {
 							"port": {
 								"type": "number",
-								"description": "Debug port to attach to. Default is 9229.",
-								"default": 9229
+								"description": "Debug port to attach to. Default is 4711.",
+								"default": 4711
 							},
 							"address": {
 								"type": "string",
@@ -1048,7 +1048,7 @@
 									"debugAdapter"
 								],
 								"description": "Protocol used to connect the debug target: Debug Adapter Protocol, or Chrome DevTools Protocol.",
-								"default": "chromeDevTools"
+								"default": "debugAdapter"
 							},
 							"localRoot": {
 								"type": [
