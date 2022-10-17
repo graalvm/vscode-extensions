@@ -5,6 +5,7 @@
 const path = require('path');
 const maven = require('maven');
 const CopyPlugin = require("copy-webpack-plugin");
+const webpack = require('webpack');
 
 
 /**@type {import('webpack').Configuration}*/
@@ -83,6 +84,7 @@ const devConf = {
                 }
             ],
         }),
+        new webpack.AutomaticPrefetchPlugin()
     ],
 
     entry: {
@@ -118,6 +120,17 @@ const devConf = {
                 }
             }]
         }]
+    },
+    optimization: {
+        minimize: false
+    },
+    cache: {
+        type: 'filesystem',
+        buildDependencies: {
+            // This makes all dependencies of this file - build dependencies
+            config: [__filename],
+            // By default webpack and loaders are build dependencies
+        },
     },
 }
 // https://webpack.js.org/configuration/mode/#mode-none
