@@ -196,7 +196,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 			totalSteps: totalSteps(state),
 			value: state.projectName || 'demo',
 			prompt: 'Provide project name',
-			validate: () => Promise.resolve(undefined),
+			validate: (value: string) => Promise.resolve((/^[a-z_][a-z0-9_]*(-[a-z_][a-z0-9_]*)*$/.test(value)) ? undefined : 'Invalid project name'),
 			shouldResume: () => Promise.resolve(false)
 		});
 		return (input: MultiStepInput) => basePackage(input, state);
@@ -209,7 +209,7 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 			totalSteps: totalSteps(state),
 			value: state.basePackage || 'com.example',
 			prompt: 'Provide base package',
-			validate: () => Promise.resolve(undefined),
+			validate: (value: string) => Promise.resolve((/^[a-z_][a-z0-9_]*(\.[a-z0-9_]+)*$/.test(value)) ? undefined : 'Invalid base package'),
 			shouldResume: () => Promise.resolve(false)
 		});
 		return (input: MultiStepInput) => pickLanguage(input, state);
