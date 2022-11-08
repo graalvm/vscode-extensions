@@ -7,9 +7,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import * as http from "http";
 import * as https from "https";
-import * as url from "url";
 import * as sax from "sax";
 import * as fs from 'fs';
 import { getGVMHome } from "./graalVMConfiguration";
@@ -62,29 +60,42 @@ export async function addNativeImageToPOM() {
         return;
     }
     const rawArtefactInfo: Promise<string> = new Promise<string>((resolve, reject) => {
-        let result: string = "";
-        https.get(url.parse(`${URL_SEARCH}?q=g:"${GID}"+AND+a:"${AID}"+AND+v:"${version[0]}"&vt=json`), (res: http.IncomingMessage) => {
-            res.on("data", chunk => {
-                result = result.concat(chunk.toString());
-            });
-            res.on("end", () => {
-                resolve(result);
-            });
-            res.on("error", err => {
-                reject(err);
-            });
-        });
+        const url = `${URL_SEARCH}?q=g:${GID}+AND+a:${AID}+AND+v:${version[0]}&wt=json`;
+        https.get(url, res => {
+            const { statusCode, statusMessage } = res;
+            const contentType = res.headers['content-type'] || '';
+            let error;
+            if (statusCode !== 200) {
+                error = `Request Failed for URL: '${url}'. Status: ${statusCode} ${statusMessage}`;
+            } else if (!/^application\/json/.test(contentType)) {
+                error = `Invalid content-type. Expected application/json but received ${contentType}`;
+            }
+            if (error) {
+                res.resume();
+                reject(error);
+            } else {
+                let rawData: string = '';
+                res.on('data', chunk => { rawData += chunk; });
+                res.on('end', () => {
+                    resolve(rawData);
+                });
+            }
+        }).on('error', e => {
+            reject(e.message);
+        }).end();
     });
 
     let artefactAvailable: boolean = false;
     try {
         const artefactInfo: any = JSON.parse(await rawArtefactInfo);
         artefactAvailable = artefactInfo.response.numFound > 0;
-    } catch (error) {}
+    } catch (error) {
+        vscode.window.showErrorMessage(error);
+    }
 
     let install: boolean = true;
     if (!artefactAvailable) {
-        if (NO === await vscode.window.showInformationMessage(`Unable to verify the native-image artefact version ${version[0]}. Continue anyway?`, YES, NO)) {
+        if (YES !== await vscode.window.showInformationMessage(`Cannot verify that native-image-maven-plugin version ${version[0]} is available on Maven Central. Continue anyway?`, YES, NO)) {
             return;
         }
     }
