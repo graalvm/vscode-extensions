@@ -61,7 +61,7 @@ export async function addNativeImageToPOM() {
     }
     const rawArtefactInfo: Promise<string> = new Promise<string>((resolve, reject) => {
         const url = `${URL_SEARCH}?q=g:${GID}+AND+a:${AID}+AND+v:${version[0]}&wt=json`;
-        https.get(url, res => {
+        https.get(url, {headers: {'User-Agent' : 'vscode-graalvm-extension'}}, res => {
             const { statusCode, statusMessage } = res;
             const contentType = res.headers['content-type'] || '';
             let error;
