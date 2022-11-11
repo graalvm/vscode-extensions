@@ -1,5 +1,8 @@
 # Change Log
 
+# Version 0.5.16
+* Update of 3rd party libraries
+
 # Version 0.5.15
 * Using QuickPick separators for project wizard feature categories
 * Do not `.gitignore` gradle wrapper

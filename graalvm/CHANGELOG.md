@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.5.22
+* Prevent `403 Forbidden` while trying to verify native-image-maven-plugin
+* Improved messages when working with Native Image Plugin
+* Update of 3rd party libraries
+
 ## Version 0.5.21
 * Do not use `'*'` for GraalVM VSCode extension activation
 * Debug Adapter Protocol is the default over Chrome Inspector
