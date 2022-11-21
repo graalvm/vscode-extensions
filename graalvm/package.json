@@ -58,6 +58,7 @@
 		"onCommand:extension.graalvm.runVisualVMForPID",
 		"onCommand:extension.graalvm.startVisualVM",
 		"onCommand:extension.graalvm.heapReplay",
+		"onCommand:extension.graalvm.debugKubernetes",
 		"onView:graalvm-installations",
 		"onView:ni-control-panel",
 		"onView:visualvm-control-panel"
@@ -811,7 +812,7 @@
 				{
 					"command": "extension.graalvm.debugKubernetes",
 					"group": "2@5",
-					"when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.pod/i"
+					"when": "nbJavaLSReady && config.netbeans.javaSupport.enabled && view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.pod/i"
 				}
 			]
 		},
