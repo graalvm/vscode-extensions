@@ -88,7 +88,7 @@ export async function createProject(context: vscode.ExtensionContext) {
                 } else if (value === ADD_TO_CURRENT_WORKSPACE) {
                     vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, undefined, { uri });
                 }
-            } else if (vscode.window.visibleTextEditors.length > 0) {
+            } else if (vscode.window.activeTextEditor) {
                 const value = await vscode.window.showInformationMessage('New Micronaut project created', OPEN_IN_NEW_WINDOW, OPEN_IN_CURRENT_WINDOW);
                 if (value) {
                     await vscode.commands.executeCommand('vscode.openFolder', uri, OPEN_IN_NEW_WINDOW === value);
