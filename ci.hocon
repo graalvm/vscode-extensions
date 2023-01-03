@@ -16,7 +16,7 @@ common : ${mx} ${oraclejdk11} {
     "Graal diagnostic output saved in (?P<filename>.+\.zip)"
   ],
   environment: {
-    npm_config_registry: "https://artifactory-slc.oraclecorp.com/artifactory/api/npm/npm-virtual/"
+    npm_config_registry: "https://artifacthub-phx.oci.oraclecorp.com/api/npm/npm-virtual/"
   }
 }
 
