@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.5.23
+* Update of 3rd libraries
+* Updated documentation
+* VisualVM and Native image agent launcher work with MS Java Ext pack
+* Clean up of java8+ launchers  
+
 ## Version 0.5.22
 * Prevent `403 Forbidden` while trying to verify native-image-maven-plugin
 * Improved messages when working with Native Image Plugin
