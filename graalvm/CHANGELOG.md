@@ -1,7 +1,7 @@
 # Change Log
 
 ## Version 0.5.23
-* Update of 3rd perty libraries
+* Update of 3rd party libraries
 * Updated documentation
 * VisualVM and Native image agent launcher work with MS Java Ext pack
 * Clean up of java8+ launchers  
