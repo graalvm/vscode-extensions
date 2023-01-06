@@ -14,7 +14,7 @@ import * as utils from './utils';
 import * as gdsUtils from './gdsUtils';
 import { basename, dirname, join, normalize, delimiter } from 'path';
 import { LicenseCheckPanel } from './graalVMLicenseCheck';
-import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName } from './graalVMConfiguration';
+import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName, setJavaRuntime } from './graalVMConfiguration';
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
 import { componentsChanged } from './graalVMVisualVM';
@@ -297,6 +297,31 @@ export function getInstallConfigurations(context: vscode.ExtensionContext): Conf
         async _graalVMHome => getConf('java').update('home', undefined, true))
     );
     
+    ret.push(new ConfigurationPickItem(
+        'Set as default Java runtime',
+        '(java.configuration.runtimes)',
+        _graalVMHome => vscode.extensions.getExtension('redhat.java') !== undefined,
+        graalVMHome => {
+            const runtimes = getConf('java').get('configuration.runtimes') as object[] || [];
+            const runtime: any = runtimes.find((runtime: any) => runtime.path === graalVMHome);
+            return runtime?.default;
+        },
+        async graalVMHome => {
+            const version = await getGraalVMVersion(graalVMHome);
+            if (version) {
+                return await setJavaRuntime(version, graalVMHome, true);
+            }
+        },
+        async graalVMHome => {
+            const runtimes = getConf('java').get('configuration.runtimes') as object[] || [];
+            const runtime: any = runtimes.find((runtime: any) => runtime.path === graalVMHome);
+            if (runtime?.default) {
+                delete runtime.default;
+                return getConf('java').update('configuration.runtimes', runtimes, true)
+            }
+        }
+    ));
+
     let section: string = getTerminalEnvName();
     ret.push(new ConfigurationPickItem(
         'Set as Java for Terminal',
@@ -1042,10 +1067,10 @@ function updateGraalVMLocations(context: vscode.ExtensionContext, homeFolder: st
             if (version) {
                 installations.push(homeFolder);
                 setGVMInsts(gr, installations);
+                setJavaRuntime(version, homeFolder);
                 const graalVMHome = getGVMHome(gr);
                 if (!graalVMHome) {
                     configureGraalVMHome(context, homeFolder);
-
                 } else if (graalVMHome !== homeFolder) {
                     utils.askYesNo(`Set ${version} as active GraalVM?`, () => configureGraalVMHome(context, homeFolder));
                 }

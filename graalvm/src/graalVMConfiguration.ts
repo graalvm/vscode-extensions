@@ -41,6 +41,52 @@ export function getGVMInsts(gvmConfig?: vscode.WorkspaceConfiguration): string[]
 	return getGVMConfig(gvmConfig).get(CONFIG_INSTALLATIONS) as string[] || [];
 }
 
+const CONFIG_RUNTIMES = 'configuration.runtimes';
+export async function setJavaRuntime(version: string, path: string, setAsDefault?: boolean): Promise<void> {
+    const javaConf = getConf('java');
+    const runtimes = javaConf.get(CONFIG_RUNTIMES) as object[] || [];
+    const idx = version.lastIndexOf(', Java ');
+    if (idx >= 0) {
+        const javaVersion = `JavaSE-${version.slice(idx + 7).trim()}`;
+        let runtime: any = runtimes.find((runtime: any) => runtime.name === javaVersion);
+        if (runtime) {
+            if (runtime.path !== path) {
+                const update = () => {
+                    runtime.path = path;
+                    delete runtime.sources;
+                    if (setAsDefault) {
+                        runtime.default = true;
+                    } else {
+                        delete runtime.default;
+                    }
+                };
+                if (setAsDefault) {
+                    update();
+                } else {
+                    await utils.askYesNo(`Set ${version} as runtime for ${javaVersion}?`, update);
+                }
+            }
+        } else {
+            runtime = { name: javaVersion, path };
+            if (setAsDefault) {
+                runtime.default = true;
+            }
+            runtimes.push(runtime);
+        }
+    }
+    return javaConf.update(CONFIG_RUNTIMES, runtimes, true);
+}
+
+export function removeJavaRuntime(path: string): Thenable<void> {
+    const javaConf = getConf('java');
+    const runtimes = javaConf.get(CONFIG_RUNTIMES) as object[] || [];
+    const idx = runtimes.findIndex((runtime: any) => runtime.path === path);
+    if (idx > -1) {
+        runtimes.splice(idx, 1);
+    }
+    return javaConf.update(CONFIG_RUNTIMES, runtimes, true);
+}
+
 export function setGVMInsts(gvmConfig: vscode.WorkspaceConfiguration, installations: string[]): Thenable<void> {
 	return gvmConfig.update(CONFIG_INSTALLATIONS, installations, true);
 }
@@ -130,6 +176,7 @@ export async function configureGraalVMHome(context: vscode.ExtensionContext, gra
 export async function removeGraalVMconfiguration(context: vscode.ExtensionContext, graalVMHome: string) {
     await removeDefaultConfigurations(context, graalVMHome);
     await removeConfigurations(context, graalVMHome);
+    removeJavaRuntime(graalVMHome);
 }
 
 function validateProxySettings(proxy: string) {
