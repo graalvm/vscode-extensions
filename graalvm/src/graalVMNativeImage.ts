@@ -513,24 +513,28 @@ export function initialize(context: vscode.ExtensionContext) {
 // invoked when active GraalVM changes
 export function initializeGraalVM(gvmHome: string) {
     graalVMHome = gvmHome;
-
-    setFeatureSet(0);
     initializeGraalVMAsync();
 }
 
 async function initializeGraalVMAsync() {
-    const graalVMVersion: string[] | undefined = graalVMHome ? (await getGraalVMVersion(graalVMHome))?.split(' ') : undefined;
-    if (graalVMVersion) {
-        let version = graalVMVersion[2].slice(0, graalVMVersion[2].length - 1);
-        const dev = version.endsWith('-dev');
-        if (dev) {
-            version = version.slice(0, version.length - '-dev'.length);
+	const netbeansExt = vscode.extensions.getExtension('asf.apache-netbeans-java');
+	const redhatExt = vscode.extensions.getExtension('redhat.java');
+    if (netbeansExt || redhatExt) {
+        const graalVMVersion: string[] | undefined = graalVMHome ? (await getGraalVMVersion(graalVMHome))?.split(' ') : undefined;
+        if (graalVMVersion) {
+            let version = graalVMVersion[2].slice(0, graalVMVersion[2].length - 1);
+            const dev = version.endsWith('-dev');
+            if (dev) {
+                version = version.slice(0, version.length - '-dev'.length);
+            }
+            const numbers: string[] = version.split('.');
+            const features = resolveFeatureSet(parseInt(numbers[0]), parseInt(numbers[1]), parseInt(numbers[2]), dev);
+            setFeatureSet(features);
+        } else {
+            setFeatureSet(0);
         }
-        const numbers: string[] = version.split('.');
-        const features = resolveFeatureSet(parseInt(numbers[0]), parseInt(numbers[1]), parseInt(numbers[2]), dev);
-        setFeatureSet(features);
     } else {
-        setFeatureSet(0);
+        setFeatureSet(-1);
     }
 }
 
@@ -538,7 +542,7 @@ function resolveFeatureSet(_major: number, _minor: number, _update: number, _dev
     return 1;
 }
 
-async function setFeatureSet(features: number) {
+export async function setFeatureSet(features: number) {
     featureSet = features;
     await vscode.commands.executeCommand('setContext', 'nativeimage.featureSet', featureSet);
     agentNode.updateFeatures();
@@ -857,7 +861,7 @@ export class NativeImageNodeProvider implements vscode.TreeDataProvider<vscode.T
 
 	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
         if (!element) {
-            if (featureSet === 0) {
+            if (featureSet <= 0) {
                 return [];
             } else {
                 return [ agentNode ];
