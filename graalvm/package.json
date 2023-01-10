@@ -408,6 +408,16 @@
 				"command": "extension.graalvm.heapReplay",
 				"title": "Replay Heap Recording",
 				"category": "GraalVM"
+			},
+			{
+				"command": "extension.graalvm.installNBJava",
+				"title": "Install Language Server for Java by Apache NetBeans",
+				"category": "GraalVM"
+			},
+			{
+				"command": "extension.graalvm.installRHJava",
+				"title": "Install Language Support for Java by Red Hat",
+				"category": "GraalVM"
 			}
 		],
 		"viewsContainers": {
@@ -426,7 +436,18 @@
 			},
 			{
 				"view": "ni-control-panel",
-				"contents": "Set active GraalVM installation to use Native Image."
+				"contents": "Set active GraalVM installation to use Native Image.",
+				"when" : "nativeImageInitialized && nativeimage.featureSet == 0"
+			},
+			{
+				"view": "ni-control-panel",
+				"contents": "Install language support for Java to use Native Image.\n[Install Support by Apache NetBeans](command:extension.graalvm.installNBJava)\n[Install Support by Red Hat](command:extension.graalvm.installRHJava)",
+				"when" : "nativeImageInitialized && nativeimage.featureSet == -1"
+			},
+			{
+				"view": "ni-control-panel",
+				"contents": "Installing language support for Java...",
+				"when" : "nativeImageInitialized && nativeimage.featureSet == -2"
 			},
 			{
 				"view": "visualvm-control-panel",
@@ -595,6 +616,14 @@
 				},
 				{
 					"command": "extension.graalvm.debugKubernetes",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.installNBJava",
+					"when": "false"
+				},
+				{
+					"command": "extension.graalvm.installRHJava",
 					"when": "false"
 				}
 			],
@@ -1231,8 +1260,5 @@
 		"typescript": "^3.8.3",
 		"webpack": "^5.40.0",
 		"webpack-cli": "^4.7.2"
-	},
-    "extensionDependencies": [
-      "asf.apache-netbeans-java"
-    ]
+	}
 }

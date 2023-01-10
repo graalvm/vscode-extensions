@@ -426,15 +426,31 @@ function findVSCodeLauncher(): string | undefined {
 
 async function supportsProjectSourceRoots(): Promise<boolean> {
     const commands: string[] = await vscode.commands.getCommands();
-    return commands.includes('java.get.project.source.roots');
+    if (commands.includes('java.get.project.source.roots')) {
+        return true;
+    }
+    return vscode.extensions.getExtension('redhat.java')?.exports;
 }
 
 async function findProjectSourceRoots(): Promise<string | undefined> {
     const folders = vscode.workspace.workspaceFolders;
     if (folders) {
+        const commands: string[] = await vscode.commands.getCommands();
+        const hasSourceRootsCommand = commands.includes('java.get.project.source.roots');
         let ret: string | undefined = undefined;
         for (const folder of folders) {
-            let roots: string[] | undefined = await vscode.commands.executeCommand('java.get.project.source.roots', folder.uri.toString());
+            let roots: string[] | undefined;
+            if (hasSourceRootsCommand) {
+                roots = await vscode.commands.executeCommand('java.get.project.source.roots', folder.uri.toString());
+            } else {
+                const api: any = vscode.extensions.getExtension('redhat.java')?.exports;
+                if (api?.getProjectSettings) {
+                    const settings = await api.getProjectSettings(folder.uri.toString(), ['org.eclipse.jdt.ls.core.sourcePaths']);
+                    if (settings) {
+                        roots = settings['org.eclipse.jdt.ls.core.sourcePaths'];
+                    }
+                }
+            }
             if (roots) {
                 for (const root of roots) {
                     if (ret === undefined) ret = ''; else ret += path.delimiter;

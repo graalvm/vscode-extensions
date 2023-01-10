@@ -198,6 +198,14 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.debugKubernetes', debug.attachToKubernetes));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.heapReplay', debug.heapReplay));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installNBJava', () => {
+		vscode.commands.executeCommand('workbench.extensions.installExtension', 'asf.apache-netbeans-java');
+		nativeImage.setFeatureSet(-2);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installRHJava', () => {
+		vscode.commands.executeCommand('workbench.extensions.installExtension', 'redhat.java');
+		nativeImage.setFeatureSet(-2);
+	}));
 	if (!remoteMode) {
 		context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
 	}
@@ -237,9 +245,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 	context.subscriptions.push(vscode.extensions.onDidChange(() => {
+		const graalVMHome = getGVMHome();
+		nativeImage.initializeGraalVM(graalVMHome);
 		const netbeansExt = vscode.extensions.getExtension('asf.apache-netbeans-java');
 		if (netbeansExt) {
-			configureGraalVMHome(context, getGVMHome(), true);
+			configureGraalVMHome(context, graalVMHome, true);
 		}
 	}));
 	const graalVMHome = getGVMHome();
