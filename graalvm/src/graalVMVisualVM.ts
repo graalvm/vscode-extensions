@@ -429,7 +429,8 @@ async function supportsProjectSourceRoots(): Promise<boolean> {
     if (commands.includes('java.get.project.source.roots')) {
         return true;
     }
-    return vscode.extensions.getExtension('redhat.java')?.exports;
+    const ext = vscode.extensions.getExtension('redhat.java');
+    return ext?.isActive && ext?.exports;
 }
 
 async function findProjectSourceRoots(): Promise<string | undefined> {
@@ -492,15 +493,37 @@ function getJdkPackages(): string {
 
 async function supportsProjectPackages(): Promise<boolean> {
     const commands: string[] = await vscode.commands.getCommands();
-    return commands.includes('java.get.project.packages');
+    return commands.includes('java.get.project.packages') || commands.includes('java.execute.workspaceCommand');
 }
 
 async function getProjectPackages(): Promise<string | undefined> {
     const folders = vscode.workspace.workspaceFolders;
     if (folders) {
+        const commands: string[] = await vscode.commands.getCommands();
+        const hasProjectPackagesCommand = commands.includes('java.get.project.packages');
         let ret: string | undefined = undefined;
         for (const folder of folders) {
-            let packages: string[] | undefined = await vscode.commands.executeCommand('java.get.project.packages', folder.uri.toString(), true);
+            let packages: string[] | undefined;
+            if (hasProjectPackagesCommand) {
+                packages = await vscode.commands.executeCommand('java.get.project.packages', folder.uri.toString(), true);
+            } else {
+                const pkgSet = new Set<string>();
+                const srcRoots = await getPackageData({ kind: 2, projectUri: folder.uri.toString() });
+                for (const root of srcRoots) {
+                    if (root.entryKind === 3) {
+                        const rootPackages = await getPackageData({ kind: root.kind, projectUri: folder.uri.toString(), path: root.path });
+                        for (const rootPkg of rootPackages) {
+                            const pkgs = await getPackageData({ kind: rootPkg.kind, projectUri: folder.uri.toString(), rootPath: rootPkg.path, handlerIdentifier: rootPkg.handlerIdentifier, isHierarchicalView: false });
+                            for (const pkg of pkgs) {
+                                if (pkg.kind === 5) {
+                                    pkgSet.add(pkg.name);
+                                }
+                            }
+                        }
+                    }
+                }
+                packages = Array.from(pkgSet);
+            }
             if (packages) {
                 for (const packg of packages) {
                     if (ret === undefined) ret = ''; else ret += ', ';
@@ -512,6 +535,10 @@ async function getProjectPackages(): Promise<string | undefined> {
     } else {
         return undefined;
     }
+}
+
+async function getPackageData(params: { [key: string]: any }): Promise<any[]> {
+    return await vscode.commands.executeCommand('java.execute.workspaceCommand', 'java.getPackageData', params) || [];
 }
 
 export function defineDisplayName(): string {
