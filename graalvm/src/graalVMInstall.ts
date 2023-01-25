@@ -225,9 +225,26 @@ function findImplicitGraalVMs(context: vscode.ExtensionContext, paths: string[],
         if (process.env.JAVA_HOME) {
             addPathToJava(context, normalize(process.env.JAVA_HOME), paths, comparator);
         }
-        if (process.env.PATH) {
+        if (utils.platform() === utils.PLATFORM_OSX) {
+            const java_home_exec = '/usr/libexec/java_home';
+            if (fs.existsSync(java_home_exec)) {
+                const ret = cp.spawnSync(java_home_exec, ['-V'], { encoding: 'utf8' });
+                if (ret.stderr) {
+                    ret.stderr.split('\n').forEach((line, index) => {
+                        if (index > 0) {
+                            const idx = line.lastIndexOf('"');
+                            if (idx >= 0) {
+                                addPathToJava(context, normalize(line.slice(idx + 1).trim()), paths, comparator);
+                            }
+                        }
+                    });
+                }
+            }
+        } else if (process.env.PATH) {
             process.env.PATH.split(delimiter)
-                .filter(p => basename(p) === 'bin')
+                .filter(p => {
+                    return basename(p) === 'bin' && dirname(p) !== '/usr/local' && dirname(p) !== '/usr' && dirname(p) !== '/';
+                })
                 .forEach(p => addPathToJava(context, dirname(p), paths, comparator));
         }
         obtainSDKmanGVMInstallations()
