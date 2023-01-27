@@ -558,8 +558,9 @@ async function selectGraalVMRelease(context: vscode.ExtensionContext): Promise<{
         if (state.graalVMDistribution.label === 'Enterprise') {
             const artifactId = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].id;
             const licenseId = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].licenseId;
+            const implicitlyAccepted = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].isImplicitlyAccepted;
             releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url = (): Promise<string | undefined> => {
-                return gdsUtils.getEEArtifactURL(artifactId, licenseId);
+                return gdsUtils.getEEArtifactURL(artifactId, licenseId, implicitlyAccepted);
             };
             installdir += 'ee-';
         } else {
@@ -957,6 +958,7 @@ async function getGraalVMEEReleases(): Promise<any> {
         for (let artifact of artifacts.items) {
             const id = artifact.id;
             const licenseId = artifact.licenseId;
+            const implicitlyAccepted = artifact.implicitlyAccepted;
             const metadata: any = {};
             for (let pair of artifact.metadata) {
                 metadata[pair.key] = pair.value;
@@ -967,6 +969,7 @@ async function getGraalVMEEReleases(): Promise<any> {
             const releaseJavaVersion = releaseVersion[java] ?? (releaseVersion[java] = {});
             releaseJavaVersion.id = id;
             releaseJavaVersion.licenseId = licenseId;
+            releaseJavaVersion.implicitlyAccepted = implicitlyAccepted;
         }
     } catch (err) {
         if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {

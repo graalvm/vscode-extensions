@@ -113,8 +113,11 @@ export function showConfiguration() {
     });
 }
 
-export async function getEEArtifactURL(artifactId: string, licenseId: string): Promise<string | undefined> {
+export async function getEEArtifactURL(artifactId: string, licenseId: string, implicitlyAccepted?: boolean): Promise<string | undefined> {
     try {
+        if(implicitlyAccepted){
+            return await getArtifactLocation(artifactId);
+        }
         const token = await getDownloadToken(true, licenseId);
         if (token) {
             if (token.pendingLicense) {
@@ -585,8 +588,8 @@ async function acceptLicense(token: string, licenseId: string): Promise<void> {
 }
 
 // Get the download link for an artifact
-async function getArtifactLocation(artifactId: string, token: string): Promise<string> {
-    const options: https.RequestOptions = {
+async function getArtifactLocation(artifactId: string, token: string | undefined = undefined): Promise<string> {
+    const options: https.RequestOptions = token === undefined ? {} : {
         headers: {
             'x-download-token': token
         }
