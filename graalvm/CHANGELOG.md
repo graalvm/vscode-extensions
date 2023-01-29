@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.5.24
+* Don't set JAVA_HOME to `/usr` on macOS
+* Get Java project packages from MS Java Ext Pack
+* Removed dependency on Apache NetBeans Language Server for Java
+* Register GraalVM as JDK for MS Java Ext Pack
+
 ## Version 0.5.23
 * Update of 3rd party libraries
 * Updated documentation

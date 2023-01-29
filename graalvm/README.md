@@ -43,9 +43,9 @@ For more information about GraalVM's installation and setup, consult the [extens
 
 ## Java Development and Debugging
 
-The [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=ASF.apache-netbeans-java) (installed with the extension) enables Java language support. There are several launch configurations available by default, and you can add more. 
+ [Extension Pack for Java from Microsoft](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) has to be installed to develop Java. 
 
-You can use the [Extension Pack for Java from Microsoft](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) instead. If VS Code detects the Extension Pack for Java from Microsoft installed, it deactivates the Apache NetBeans Language Server.
+The [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=ASF.apache-netbeans-java) enables Java language support as well. If VS Code detects the Extension Pack for Java from Microsoft installed, it deactivates the Apache NetBeans Language Server.
 
 ## Integration with VisualVM
 
