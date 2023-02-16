@@ -7,23 +7,24 @@
 
 import * as vscode from 'vscode';
 import { pathToFileURL } from 'url';
+import { extContext } from './extension';
 
 const coverageOn = new Set<string>();
 let coveredDecoration: vscode.TextEditorDecorationType;
 let uncoveredDecoration: vscode.TextEditorDecorationType;
 
-export async function toggleCodeCoverage(context: vscode.ExtensionContext) {
+export async function toggleCodeCoverage() {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
         if (!uncoveredDecoration) {
             uncoveredDecoration = vscode.window.createTextEditorDecorationType({
                 dark: {
-                    gutterIconPath: context.asAbsolutePath('images/gutter-dark-red.svg'),
+                    gutterIconPath: extContext.asAbsolutePath('images/gutter-dark-red.svg'),
                     gutterIconSize: 'contain',
                     overviewRulerColor: '#630417',
                 },
                 light: {
-                    gutterIconPath: context.asAbsolutePath('images/gutter-light-red.svg'),
+                    gutterIconPath: extContext.asAbsolutePath('images/gutter-light-red.svg'),
                     gutterIconSize: 'contain',
                     overviewRulerColor: '#f29494',
                 },
@@ -33,12 +34,12 @@ export async function toggleCodeCoverage(context: vscode.ExtensionContext) {
         if (!coveredDecoration) {
             coveredDecoration = vscode.window.createTextEditorDecorationType({
                 dark: {
-                    gutterIconPath: context.asAbsolutePath('images/gutter-dark-green.svg'),
+                    gutterIconPath: extContext.asAbsolutePath('images/gutter-dark-green.svg'),
                     gutterIconSize: 'contain',
                     overviewRulerColor: '#144014',
                 },
                 light: {
-                    gutterIconPath: context.asAbsolutePath('images/gutter-light-green.svg'),
+                    gutterIconPath: extContext.asAbsolutePath('images/gutter-light-green.svg'),
                     gutterIconSize: 'contain',
                     overviewRulerColor: '#a6e3a6',
                 },
