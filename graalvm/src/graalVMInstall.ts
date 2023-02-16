@@ -19,6 +19,7 @@ import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
 import { componentsChanged } from './graalVMVisualVM';
 import assert = require('assert');
+import { Component } from './types';
 
 const GITHUB_URL: string = 'https://api.github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-builds/releases';
@@ -137,11 +138,11 @@ export async function removeGraalVMInstallation(context: vscode.ExtensionContext
     }
 }
 
-export async function installGraalVMComponent(context: vscode.ExtensionContext, component: string | Component | undefined, homeFolder?: string): Promise<void> {
+export async function installGraalVMComponent(context: vscode.ExtensionContext, component: string | TreeItemComponent | undefined, homeFolder?: string): Promise<void> {
     _callIdGVMHome(component, homeFolder, context, _installGraalVMComponent);
 }
 
-export async function uninstallGraalVMComponent(context: vscode.ExtensionContext, component: string | Component | undefined, homeFolder?: string): Promise<void> {
+export async function uninstallGraalVMComponent(context: vscode.ExtensionContext, component: string | TreeItemComponent | undefined, homeFolder?: string): Promise<void> {
     _callIdGVMHome(component, homeFolder, context, _uninstallGraalVMComponent);
 }
 
@@ -441,8 +442,8 @@ export async function checkForMissingComponents(homeFolder: string): Promise<voi
     if (!utils.checkFolderWritePermissions(homeFolder, true)) {
         return;
     }
-    const available = await getAvailableComponents(homeFolder);
-    const components = available.filter(availableItem => !availableItem.installed);
+    const available: Component[] = await getAvailableComponents(homeFolder);
+    const components: Component[] = available.filter(availableItem => !availableItem.installed);
     if (components.length > 1) {
         const itemText = INSTALL + OPTIONAL_COMPONENTS;
         return utils.ask('Optional GraalVM components are not installed in your GraalVM.', [
@@ -678,40 +679,44 @@ async function extractGraalVM(downloadedFile: string, targetDir: string): Promis
     });
 }
 
-async function _callIdGVMHome(component: string | Component | undefined, homeFolder: string | undefined, context: vscode.ExtensionContext, fnc: (id: string | undefined, graalVMHome: string, context: vscode.ExtensionContext) => Promise<void>): Promise<void>{
-    if (component instanceof Component) {
-        return fnc(component.componentId, component.installation.home, context);
-    } else {
+async function _callIdGVMHome(component: string | TreeItemComponent | undefined, homeFolder: string | undefined, context: vscode.ExtensionContext, fnc: (id: Component | undefined, graalVMHome: string, context: vscode.ExtensionContext) => Promise<void>): Promise<void>{
+    if (component instanceof TreeItemComponent) {
+        return fnc(component.component, component.installation.home, context);
+    } else if (component != undefined) {
         homeFolder = homeFolder || await _selectInstalledGraalVM(context, false);
         if (homeFolder) {
-            return fnc(component, homeFolder, context);
+            return fnc(await findComponent(homeFolder, component), homeFolder, context);
         }
     }
 }
 
-async function _installGraalVMComponent(componentId: string | undefined, graalVMHome: string, context: vscode.ExtensionContext): Promise<void> {
+async function findComponent(gvmHome: string, componentId: string): Promise<Component | undefined> {
+    return (await getAvailableComponents(gvmHome)).find(comp => comp.id == componentId);
+}
+
+async function _installGraalVMComponent(component: Component | undefined, graalVMHome: string, context: vscode.ExtensionContext): Promise<void> {
     if (utils.checkFolderWritePermissions(graalVMHome)) {
-        const componentIds: string[] = componentId ? [componentId] : await selectAvailableComponents(graalVMHome).catch((error) => {
+        const components: Component[] = component ? [component] : await selectAvailableComponents(graalVMHome).catch((error) => {
             vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
             return [];
         });
-        changeGraalVMComponent(graalVMHome, componentIds, 'install', context);
+        changeGraalVMComponent(graalVMHome, components, 'install', context);
     }
 }
 
-async function _uninstallGraalVMComponent(componentId: string | undefined, graalVMHome: string, context: vscode.ExtensionContext): Promise<void> {
+async function _uninstallGraalVMComponent(component: Component | undefined, graalVMHome: string, context: vscode.ExtensionContext): Promise<void> {
     if (utils.checkFolderWritePermissions(graalVMHome)) {
-        const componentIds: string[] = componentId ? [componentId] : await selectInstalledComponents(graalVMHome).catch((error) => {
+        const components: Component[] = component ? [component] : await selectInstalledComponents(graalVMHome).catch((error) => {
             vscode.window.showWarningMessage(error.toString().replace('Error: ', ''));
             return [];
         });
-        changeGraalVMComponent(graalVMHome, componentIds.reverse(), 'remove', context);
+        changeGraalVMComponent(graalVMHome, components.reverse(), 'remove', context);
     }
 }
 
-function lockComponents(graalVMHome: string, componentIds: string[]): string[] {
-    return componentIds.filter((element) => {
-        const key = graalVMHome + element;
+function lockComponents(graalVMHome: string, components: Component[]): Component[] {
+    return components.filter((element) => {
+        const key = graalVMHome + element.id;
         if (lockedComponentIds.indexOf(key) === -1) {
             lockedComponentIds.push(key);
             return true;
@@ -720,18 +725,18 @@ function lockComponents(graalVMHome: string, componentIds: string[]): string[] {
     });
 }
 
-function unlockComponents(graalVMHome: string, componentIds: string[]): void {
-    componentIds.forEach((element) => {
-        const idx = lockedComponentIds.indexOf(graalVMHome + element);
+function unlockComponents(graalVMHome: string, components: Component[]): void {
+    components.forEach((component) => {
+        const idx = lockedComponentIds.indexOf(graalVMHome + component.id);
         if (idx !== -1) {
             lockedComponentIds.splice(idx, 1);
         }
     });
 }
 
-async function changeGraalVMComponent(graalVMHome: string, componentIds: string[], action: string, context: vscode.ExtensionContext): Promise<void> {
-    componentIds = lockComponents(graalVMHome, componentIds);
-    if (componentIds.length === 0) {
+async function changeGraalVMComponent(graalVMHome: string, components: Component[], action: string, context: vscode.ExtensionContext): Promise<void> {
+    components = lockComponents(graalVMHome, components);
+    if (components.length === 0) {
         return;
     }
     const executablePath = await getGU(graalVMHome);
@@ -746,7 +751,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
                 email = await LicenseCheckPanel.show(context, eeInfo.licenseLabel, license.split('\n').join('<br>'));
             }
             if (!email) {
-                unlockComponents(graalVMHome, componentIds);
+                unlockComponents(graalVMHome, components);
                 return;
             }
         } else if (!eeInfo.license) {
@@ -754,7 +759,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             dtoken = await gdsUtils.getDownloadToken(true);
             // Make sure the download token is defined before invoking GU
             if (!dtoken) {
-                unlockComponents(graalVMHome, componentIds);
+                unlockComponents(graalVMHome, components);
                 return;
             }
         }
@@ -777,16 +782,16 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
     const args = eeVersion ? `${resolveEEArgs(eeVersion)} ` : '';
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: `${action === 'install' ? 'I' : 'Uni'}nstalling GraalVM Component${componentIds.length > 1 ? 's' : ' ' + componentIds[0]} of: "${await getGraalVMVersion(graalVMHome)}"`,
-        cancellable: componentIds.length > 1
+        title: `${action === 'install' ? 'I' : 'Uni'}nstalling GraalVM Component${components.length > 1 ? 's' : ' ' + components[0].id} of: "${await getGraalVMVersion(graalVMHome)}"`,
+        cancellable: components.length > 1
     }, async (progress, token) => {
-        const incr = 100/componentIds.length;
-        for (const id of componentIds) {
+        const incr = 100/components.length;
+        for (const component of components) {
             if (token.isCancellationRequested) {
                 return;
             }
             if (incr !== 100) {
-                progress.report({message: id, increment: incr});
+                progress.report({message: component.id, increment: incr});
             }
             let guErrorType: string | undefined = undefined;
             const dataListener = dtoken ? function (chunk: any) {
@@ -798,7 +803,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
             } : undefined;
             async function execute() {
                 try {
-                    await execCancellable(`${executablePath} ${action} ${args}${id}`, token, { cwd: join(graalVMHome, 'bin'), env: { [gdsUtils.DOWNLOAD_TOKEN_ENV]: dtoken?.value } }, dataListener);
+                    await execCancellable(`${executablePath} ${action} ${args}${component.id}`, token, { cwd: join(graalVMHome, 'bin'), env: { [gdsUtils.DOWNLOAD_TOKEN_ENV]: dtoken?.value } }, dataListener);
                     await checkGraalVMconfiguration(context, graalVMHome);
                 } catch (error) {
                     if (dtoken && guErrorType && gdsUtils.isHandledGUError(error)) {
@@ -834,7 +839,7 @@ async function changeGraalVMComponent(graalVMHome: string, componentIds: string[
                 stopLanguageServer().then(() => startLanguageServer(graalVMHome));
             }
         }
-        unlockComponents(graalVMHome, componentIds);
+        unlockComponents(graalVMHome, components);
         if (activeGVM) {
             componentsChanged(action);
         }
@@ -1127,14 +1132,14 @@ function addPathToJava(context: vscode.ExtensionContext, folder: string, paths: 
     }
 }
 
-async function selectAvailableComponents(graalVMHome: string): Promise<string[]> {
-    return new Promise<string[]>((resolve, reject) => {
+async function selectAvailableComponents(graalVMHome: string): Promise<Component[]> {
+    return new Promise<Component[]>((resolve, reject) => {
         getAvailableComponents(graalVMHome).then(async available => {
-            const components = available.filter(availableItem => !availableItem.installed);
+            const components: Component[] = available.filter(availableItem => !availableItem.installed);
             if (components.length > 0) {
                 vscode.window.showQuickPick(toQuickPick(components), { placeHolder: `Select GraalVM components to install to: "${await getGraalVMVersion(graalVMHome)}"`, canPickMany: true }).then(selected => {
                     if (selected) {
-                        resolve(selected.filter(component => component.detail !== undefined).map(component => component.detail as string));
+                        resolve(selected.filter(component => component.detail !== undefined).map(component => component.component));
                     } else {
                         resolve([]);
                     }
@@ -1146,14 +1151,14 @@ async function selectAvailableComponents(graalVMHome: string): Promise<string[]>
     });
 }
 
-async function selectInstalledComponents(graalVMHome: string): Promise<string[]> {
-    return new Promise<string[]>((resolve, reject) => {
+async function selectInstalledComponents(graalVMHome: string): Promise<Component[]> {
+    return new Promise<Component[]>((resolve, reject) => {
         getAvailableComponents(graalVMHome).then(async available => {
             const components = available.filter(availableItem => availableItem.installed);
             if (components.length > 0) {
                 vscode.window.showQuickPick(toQuickPick(components), { placeHolder: `Select GraalVM components to uninstall from: "${await getGraalVMVersion(graalVMHome)}"`, canPickMany: true }).then(selected => {
                     if (selected) {
-                        resolve(selected.filter(component => component.detail !== undefined).map(component => component.detail as string));
+                        resolve(selected.filter(component => component.detail !== undefined).map(component => component.component));
                     } else {
                         resolve([]);
                     }
@@ -1165,12 +1170,12 @@ async function selectInstalledComponents(graalVMHome: string): Promise<string[]>
     });
 }
 
-function toQuickPick(items: {id: string, name: string}[]): vscode.QuickPickItem[] {
-    return items.map(item => {return {label: item.name, detail: item.id};});
+function toQuickPick(items: Component[]): (vscode.QuickPickItem & {component: Component})[] {
+    return items.map(item => {return {label: item.name, detail: item.id, component: item};});
 }
 
-async function getAvailableComponents(graalVMHome: string): Promise<{id: string, name: string, installed?: boolean}[]> {
-    return new Promise<{id: string, name: string, installed?: boolean}[]>(async (resolve, reject) => {
+async function getAvailableComponents(graalVMHome: string): Promise<Component[]> {
+    return new Promise<Component[]>(async (resolve, reject) => {
         const executablePath = await getGU(graalVMHome);
         const binGVM = join(graalVMHome, 'bin');
         const guListCmd = `${executablePath} list`;
@@ -1181,13 +1186,13 @@ async function getAvailableComponents(graalVMHome: string): Promise<{id: string,
             } else {
                 const guAvailCmd = `${executablePath} available`;
                 const isAvailJson = await isGUJSON(guAvailCmd);
-                const installed: {id: string, name: string, installed?: boolean}[] = processsGUOutput(stdout, isListJson);
+                const installed: Component[] = processsGUOutput(stdout, isListJson);
                 cp.exec(`${guAvailCmd} ` + (isAvailJson ? '-J' : '-v'), { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
                     if (error || _stderr) {
                         notifyConnectionProblem('GraalVM components');
                         reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
                     } else {
-                        const available: {id: string, name: string, installed?: boolean}[] = processsGUOutput(stdout, isAvailJson);
+                        const available: Component[] = processsGUOutput(stdout, isAvailJson);
                         available.forEach(avail => {
                             const found = installed.find(item => item.id === avail.id);
                             avail.installed = found ? true : false;
@@ -1232,8 +1237,8 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
     return undefined;
 }
 
-function processsGUOutput(stdout: string, isJson: boolean = false): { id: string, name: string }[] {
-    let components: { id: string, name: string }[];
+function processsGUOutput(stdout: string, isJson: boolean = false): Component[] {
+    let components: Component[];
     if (isJson) {
         components = JSON.parse(stdout).components;
     } else {
@@ -1282,15 +1287,15 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
 		if (element instanceof Installation) {
             return getAvailableComponents(element.home).then(components => {
                 const ret: vscode.TreeItem[] = [new InstallationFolder(element.home)];
-                components.forEach((comp: { id: string; name: string; installed?: boolean; }) => {
-                    ret.push(new Component(element, comp.name, comp.id, comp.installed));
+                components.forEach((comp: Component) => {
+                    ret.push(new TreeItemComponent(element, comp.name, comp.id, comp, comp.installed));
                 });
                 return ret;
             }).catch(out => {
                 const ret: vscode.TreeItem[] = [new InstallationFolder(element.home)];
                 if (out.list) {
-                    out.list.forEach((comp: { id: string; name: string; installed?: boolean; }) => 
-                        ret.push(new Component(element, comp.name, comp.id, comp.installed)));
+                    out.list.forEach((comp: Component) => 
+                        ret.push(new TreeItemComponent(element, comp.name, comp.id, comp, comp.installed)));
                     ret.push(new ConnectionError('Could not resolve components', out?.error?.message));
                 } else {
                     if (out?.message === NO_GU_FOUND && process.platform === 'linux') {
@@ -1330,12 +1335,13 @@ export class Installation extends vscode.TreeItem {
     contextValue = this.active ? 'graalvmInstallationActive' : 'graalvmInstallation';
 }
 
-export class Component extends vscode.TreeItem {
+export class TreeItemComponent extends vscode.TreeItem {
 
 	constructor(
         public readonly installation: Installation,
         public readonly label: string,
         public readonly componentId: string,
+        public readonly component: Component,
         private readonly installed?: boolean,
 	) {
 		super(label);

@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import { toggleCodeCoverage, activeTextEditorChaged } from './graalVMCoverage';
 import * as kubernetes from 'vscode-kubernetes-tools-api';
 import * as debug from './graalVMDebug';
-import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMComponent, uninstallGraalVMComponent, selectActiveGraalVM, findGraalVMs, InstallationNodeProvider, Component, Installation, removeGraalVMInstallation } from './graalVMInstall';
+import { setupGraalVM, installGraalVM, addExistingGraalVM, installGraalVMComponent, uninstallGraalVMComponent, selectActiveGraalVM, findGraalVMs, InstallationNodeProvider, TreeItemComponent, Installation, removeGraalVMInstallation } from './graalVMInstall';
 import { onClientNotification, startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
@@ -34,10 +34,10 @@ export function activate(context: vscode.ExtensionContext) {
 		const graalVMHome = getGVMHome();
 		return (await findGraalVMs(context)).map(item => ({name: item.name, path: item.path, active: item.path === graalVMHome}));
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installGraalVMComponent', (component: string | Component | undefined, homeFolder?: string) => {
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installGraalVMComponent', (component: string | TreeItemComponent | undefined, homeFolder?: string) => {
 		installGraalVMComponent(context, component, homeFolder);
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.uninstallGraalVMComponent', (component: string | Component | undefined, homeFolder?: string) => {
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.uninstallGraalVMComponent', (component: string | TreeItemComponent | undefined, homeFolder?: string) => {
 		uninstallGraalVMComponent(context, component, homeFolder);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.addNativeImageToPOM', () => {
