@@ -222,6 +222,21 @@ export function readFileToString(file: string): string {
 	return fs.readFileSync(file).toString();
 }
 
+export function readReleaseFile(gvmHome?: string): any {
+	gvmHome = gvmHome == undefined ? getGVMHome() : gvmHome;
+	let content: string = readFileToString(path.join(gvmHome, "release"));
+	return parsePropertiesString(content);
+}
+
+export function parsePropertiesString(content: string): any {
+	return content.split("\n")
+	.reduce((acc: any, line: string) => {
+		const i = line.indexOf("=");
+		acc[line.slice(0, i)] = line.slice(i + 1);
+		return acc;
+	}, {});
+}
+
 class InputFlowAction {
 	static back = new InputFlowAction();
 	static cancel = new InputFlowAction();

@@ -236,7 +236,7 @@ function findImplicitGraalVMs(paths: string[], comparator = utils.isSamePath()) 
                         if (index > 0) {
                             const idx = line.lastIndexOf('"');
                             if (idx >= 0) {
-                                addPathToJava(context, normalize(line.slice(idx + 1).trim()), paths, comparator);
+                                addPathToJava(normalize(line.slice(idx + 1).trim()), paths, comparator);
                             }
                         }
                     });
@@ -557,12 +557,10 @@ async function selectGraalVMRelease(): Promise<{url: any, location: string, inst
 
     if (state.graalVMDistribution && state.graalVMVersion && state.javaVersion) {
         let installdir = 'graalvm-';
+        const gvm = releaseInfos[state.graalVMVersion.label][state.javaVersion.label];
         if (state.graalVMDistribution.label === 'Enterprise') {
-            const artifactId = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].id;
-            const licenseId = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].licenseId;
-            const implicitlyAccepted = releaseInfos[state.graalVMVersion.label][state.javaVersion.label].isImplicitlyAccepted;
-            releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url = (): Promise<string | undefined> => {
-                return gdsUtils.getEEArtifactURL(artifactId, licenseId, implicitlyAccepted);
+            gvm.url = (): Promise<string | undefined> => {
+                return gdsUtils.getEEArtifactURL(gvm.id, gvm.licenseId, gvm.implicitlyAccepted);
             };
             installdir += 'ee-';
         } else {
@@ -590,7 +588,7 @@ async function selectGraalVMRelease(): Promise<{url: any, location: string, inst
         });
         if (location && location.length > 0 && utils.checkFolderWritePermissions(location[0].fsPath)) {
             await extContext.globalState.update(LAST_GRAALVM_PARENTDIR, location[0].toString());
-            return { url: releaseInfos[state.graalVMVersion.label][state.javaVersion.label].url, location: location[0].fsPath, installdir: installdir };
+            return { url: gvm.url, location: location[0].fsPath, installdir: installdir };
         }
     }
 
@@ -755,8 +753,8 @@ async function changeGraalVMComponent(graalVMHome: string, components: Component
                 unlockComponents(graalVMHome, components);
                 return;
             }
-        } else if (!eeInfo.license) {
-            // GraalVM EE >= 22.1
+        } else if (!eeInfo.license && components.some(comp => !comp.isLicenseImplicitlyAccepted)) {
+            // GraalVM EE with new GDS
             dtoken = await gdsUtils.getDownloadToken(true);
             // Make sure the download token is defined before invoking GU
             if (!dtoken) {
@@ -769,7 +767,7 @@ async function changeGraalVMComponent(graalVMHome: string, components: Component
         await stopLanguageServer();
     }
     function resolveEEArgs(eeVersion: string[]) {
-        if (dtoken) { // new GDS
+        if (dtoken || gdsUtils.canNewGDS(graalVMHome)) { // new GDS
             return '-N';
         } else { // original GDS
             if (parseInt(eeVersion[0]) < 21) {
@@ -962,9 +960,6 @@ async function getGraalVMEEReleases(): Promise<any> {
     try {
         const artifacts = await gdsUtils.getGraalVMEECoreArtifacts();
         for (let artifact of artifacts.items) {
-            const id = artifact.id;
-            const licenseId = artifact.licenseId;
-            const implicitlyAccepted = artifact.implicitlyAccepted;
             const metadata: any = {};
             for (let pair of artifact.metadata) {
                 metadata[pair.key] = pair.value;
@@ -973,9 +968,9 @@ async function getGraalVMEEReleases(): Promise<any> {
             const java = metadata.java;
             const releaseVersion = releases[release] ?? (releases[release] = {});
             const releaseJavaVersion = releaseVersion[java] ?? (releaseVersion[java] = {});
-            releaseJavaVersion.id = id;
-            releaseJavaVersion.licenseId = licenseId;
-            releaseJavaVersion.implicitlyAccepted = implicitlyAccepted;
+            releaseJavaVersion.id = artifact.id;
+            releaseJavaVersion.licenseId = artifact.licenseId;
+            releaseJavaVersion.implicitlyAccepted = artifact.isLicenseImplicitlyAccepted;
         }
     } catch (err) {
         if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {
@@ -1222,7 +1217,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
                 const javaVersion = `jdk${versionInfo[3]}`;
                 const version = versionInfo[2].split('.');
                 const major = parseInt(version[0]);
-                if (major > 22 || (major == 22 && parseInt(version[1]) >= 1)) {
+                if (gdsUtils.canNewGDS(graalVMHome) || major > 22 || (major == 22 && parseInt(version[1]) >= 1)) {
                     return {
                         version: versionInfo[2],
                         edition: 'ee',
