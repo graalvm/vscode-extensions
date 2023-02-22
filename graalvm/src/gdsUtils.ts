@@ -116,7 +116,7 @@ export function showConfiguration() {
 export async function getEEArtifactURL(artifactId: string, licenseId: string, implicitlyAccepted?: boolean): Promise<string | undefined> {
     try {
         if(implicitlyAccepted){
-            return await getArtifactLocation(artifactId);
+            return getArtifactLocation(artifactId);
         }
         const token = await getDownloadToken(true, licenseId);
         if (token) {
