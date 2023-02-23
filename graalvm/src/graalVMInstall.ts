@@ -448,7 +448,7 @@ export async function checkForMissingComponents(homeFolder: string): Promise<voi
     if (components.length > 1) {
         const itemText = INSTALL + OPTIONAL_COMPONENTS;
         return utils.ask('Optional GraalVM components are not installed in your GraalVM.', [
-            {option: itemText, fnc: () => vscode.commands.executeCommand('extension.graalvm.installGraalVMComponent', undefined, homeFolder)}
+            {option: itemText, fnc: () => installGraalVMComponent(undefined, homeFolder)}
         ]);
     } else if (components.length === 1) {
         const itemText = INSTALL + components[0].name;
@@ -681,10 +681,10 @@ async function extractGraalVM(downloadedFile: string, targetDir: string): Promis
 async function _callIdGVMHome(component: string | TreeItemComponent | undefined, homeFolder: string | undefined, fnc: (id: GraalVMComponent | undefined, graalVMHome: string) => Promise<void>): Promise<void>{
     if (component instanceof TreeItemComponent) {
         return fnc(component.component, component.installation.home);
-    } else if (component != undefined) {
+    } else {
         homeFolder = homeFolder || await _selectInstalledGraalVM(false);
         if (homeFolder) {
-            return fnc(await findComponent(homeFolder, component), homeFolder);
+            return fnc(component === undefined ? undefined : await findComponent(homeFolder, component), homeFolder);
         }
     }
 }
