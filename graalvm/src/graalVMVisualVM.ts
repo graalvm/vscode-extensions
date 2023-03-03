@@ -60,11 +60,8 @@ let memorySamplingRate: number = 3;
 
 let jfrSettings: number = 0;
 
-let extContext: vscode.ExtensionContext;
-
 // invoked on extension startup
 export function initialize(context: vscode.ExtensionContext) {
-    extContext = context;
     initializeProject();
     initializeHandleProjectProcess(context);
     initializePreselectView(context);
@@ -327,7 +324,7 @@ function configureJfrSettings(context: vscode.ExtensionContext) {
 
 async function getLaunchCommand(openPID: boolean = false): Promise<string | undefined> {
     if (!graalVMHome || featureSet === 0) {
-        setupGraalVM(extContext, true);
+        setupGraalVM(true);
         return;
     }
     if (featureSet === -1) {

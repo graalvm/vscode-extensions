@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as mustache from 'mustache';
+import { extContext } from './extension';
 
 export class LicenseCheckPanel {
 
@@ -20,14 +21,14 @@ export class LicenseCheckPanel {
 	private readonly _panel: vscode.WebviewPanel;
 	private _disposables: vscode.Disposable[] = [];
 
-	public static show(context: vscode.ExtensionContext, licenseLabel: string, license: string): Promise<string | undefined> {
-		const userAcceptedLicenses = JSON.parse(context.globalState.get(LicenseCheckPanel.userAcceptedLicenses) || '{}');
+	public static show(licenseLabel: string, license: string): Promise<string | undefined> {
+		const userAcceptedLicenses = JSON.parse(extContext.globalState.get(LicenseCheckPanel.userAcceptedLicenses) || '{}');
 		return new Promise<string | undefined>(resolve => {
-			new LicenseCheckPanel(context.extensionPath, licenseLabel, license, userAcceptedLicenses.userEmail, (message: any) => {
+			new LicenseCheckPanel(extContext.extensionPath, licenseLabel, license, userAcceptedLicenses.userEmail, (message: any) => {
 				if (message?.command === 'accepted') {
 					if (message.email) {
 						userAcceptedLicenses.userEmail = message.email;
-						context.globalState.update(LicenseCheckPanel.userAcceptedLicenses, JSON.stringify(userAcceptedLicenses));
+						extContext.globalState.update(LicenseCheckPanel.userAcceptedLicenses, JSON.stringify(userAcceptedLicenses));
 					}
 					resolve(userAcceptedLicenses.userEmail);
 				} else {

@@ -113,8 +113,11 @@ export function showConfiguration() {
     });
 }
 
-export async function getEEArtifactURL(artifactId: string, licenseId: string): Promise<string | undefined> {
+export async function getEEArtifactURL(artifactId: string, licenseId: string, implicitlyAccepted?: boolean): Promise<string | undefined> {
     try {
+        if(implicitlyAccepted){
+            return getArtifactLocation(artifactId);
+        }
         const token = await getDownloadToken(true, licenseId);
         if (token) {
             if (token.pendingLicense) {
@@ -350,6 +353,15 @@ export async function getDownloadToken(interactive: boolean, licenseId?: string)
     return undefined;
 }
 
+// cache to reduce reads from disc
+const newGDSGVMs: {[key: string]: boolean} = {};
+export function canNewGDS(gvmHome: string): boolean {
+    if(gvmHome in newGDSGVMs) {
+        return newGDSGVMs[gvmHome];
+    }
+    return newGDSGVMs[gvmHome] = utils.readReleaseFile(gvmHome)["component_catalog"]?.includes("rest://") || false;
+}
+
 function handleValidToken(token: Token) {
     if (token.origin === TokenOrigin.User) {
         saveTokenToFile(token.value);
@@ -494,13 +506,16 @@ export async function getGraalVMEECoreArtifacts() {
     const supported = 'True';
     const status = 'PUBLISHED';
     const includeMetadata = 'notFilteredOnly';
-    const responseFields1 = 'id';
-    const responseFields2 = 'licenseId';
-    const responseFields3 = 'metadata';
+    const responseFields = [
+        'id',
+        'licenseId',
+        'metadata',
+        'isLicenseImplicitlyAccepted'
+    ];
     const sortOrder = 'DESC';
     const sortBy = 'timeCreated';
     // Throws error for broken gunzip, catched by the caller
-    const response = await getDataRetry(`${ENDPOINT_ARTIFACTS}?metadata=arch%3A${arch}&metadata=os%3A${os}&metadata=isBase%3A${isBase}&metadata=edition%3A${edition}&metadata=supported%3A${supported}&productId=${getGraalVMProductID()}&status=${status}&includeMetadata=${includeMetadata}&responseFields=${responseFields1}&responseFields=${responseFields2}&responseFields=${responseFields3}&limit=${limit}&page=${page}&sortOrder=${sortOrder}&sortBy=${sortBy}`);
+    const response = await getDataRetry(`${ENDPOINT_ARTIFACTS}?metadata=arch%3A${arch}&metadata=os%3A${os}&metadata=isBase%3A${isBase}&metadata=edition%3A${edition}&metadata=supported%3A${supported}&productId=${getGraalVMProductID()}&status=${status}&includeMetadata=${includeMetadata}${makeResponseFields(responseFields)}&limit=${limit}&page=${page}&sortOrder=${sortOrder}&sortBy=${sortBy}`);
     if (response.code === 200) {
         const artifacts = JSON.parse(response.data);
         return artifacts;
@@ -514,6 +529,10 @@ export async function getGraalVMEECoreArtifacts() {
         }
     }
     throw { code: response.code, status: data?.code, message: data?.message };
+}
+
+function makeResponseFields(fields: string[]): string {
+    return fields.reduce((out, part) => out + "&responseFields=" + part, "");
 }
 
 // Request download token using email address (no license)
@@ -585,8 +604,8 @@ async function acceptLicense(token: string, licenseId: string): Promise<void> {
 }
 
 // Get the download link for an artifact
-async function getArtifactLocation(artifactId: string, token: string): Promise<string> {
-    const options: https.RequestOptions = {
+async function getArtifactLocation(artifactId: string, token: string | undefined = undefined): Promise<string> {
+    const options: https.RequestOptions = token === undefined ? {} : {
         headers: {
             'x-download-token': token
         }
