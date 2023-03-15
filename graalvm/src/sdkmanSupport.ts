@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import * as cp from "child_process";
 import * as fs from "fs";
 import { join } from "path";
+import { readDirSyncSafe } from './utils';
 
 const SDKMAN_DIR: string = process.env.SDKMAN_DIR ?? "";
 const SDKMAN_INIT: string = join(SDKMAN_DIR, "bin", "sdkman-init.sh");
@@ -31,7 +32,7 @@ export function obtainSDKmanGVMInstallations(): [string, string][] {
 }
 
 function _obtainSDKmanGVMInstallations(): [string, string][] {
-    return fs.readdirSync(SDKMAN_CANDIDATES_JAVA)
+    return readDirSyncSafe(SDKMAN_CANDIDATES_JAVA)
         .map<[string, string]>(c => [join(SDKMAN_CANDIDATES_JAVA, c), c])
         .filter(c => !fs.lstatSync(c[0]).isSymbolicLink() && c[1].endsWith("grl"));
 }
@@ -43,7 +44,7 @@ export function obtainSDKmanUnclassifiedInstallations(): [string, string][] {
 }
 
 function _obtainSDKmanUnclassifiedInstallations(): [string, string][] {
-    return fs.readdirSync(SDKMAN_CANDIDATES_JAVA)
+    return readDirSyncSafe(SDKMAN_CANDIDATES_JAVA)
         .map<[string, string]>(c => [join(SDKMAN_CANDIDATES_JAVA, c), c])
         .filter(c => fs.lstatSync(c[0]).isSymbolicLink() && c[0] !== SDKMAN_CURRENT_JAVA);
 }

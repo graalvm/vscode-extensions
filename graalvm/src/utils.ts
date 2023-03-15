@@ -38,6 +38,12 @@ export function findExecutables(programs: string[], graalVMHome?: string): strin
 	return programs.map(program => findExecutable(program, graalVMHome)).find(executable => executable !== undefined);
 }
 
+export function readDirSyncSafe(path: string): string[] {
+    if(fs.existsSync(path))
+        return fs.readdirSync(path);
+    return [];
+}
+
 export async function ask(question: string, options: {option: string, fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
 	const select = await vscode.window.showInformationMessage(question, ...options.map(o => o.option));
 	if (!select) {
