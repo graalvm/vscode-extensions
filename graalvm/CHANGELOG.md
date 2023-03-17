@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 0.5.25
+* Tokenless download from GDS service
+* Update of 3rd party libraries
+
 ## Version 0.5.24
 * Don't set JAVA_HOME to `/usr` on macOS
 * Get Java project packages from MS Java Ext Pack
