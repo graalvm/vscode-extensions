@@ -15,6 +15,10 @@ import * as os from 'os';
 
 import { ILaunchRequestArguments, IAttachRequestArguments } from './graalVMDebugInterfaces';
 
+interface DAPEnv {
+    [key: string]: string | null;
+};
+
 export class GraalVMDebugAdapter extends ChromeDebugAdapter {
     private static TIMEOUT = 5000;
 
@@ -23,6 +27,18 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
     private _lastEarlyNodeMsgSeen: boolean | undefined;
     private _captureStdOutput: boolean | undefined;
     private _killChildProcess: boolean = true;
+
+    private convertProcessEnvToDAPEnv(pEnv : NodeJS.ProcessEnv) : DAPEnv {
+        let dEnv: DAPEnv = {};
+        for (let [ek, ev] of Object.entries(pEnv)) {
+            if (ev) {
+                dEnv[ek] = ev;
+            } else {
+                dEnv[ek] = null;
+            }
+        }
+        return dEnv;
+    }
 
     public initialize(args: DebugProtocol.InitializeRequestArguments): DebugProtocol.Capabilities {
         this._supportsRunInTerminalRequest = args.supportsRunInTerminalRequest;
@@ -51,6 +67,7 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
                 kind: args.console === 'integratedTerminal' ? 'integrated' : 'external',
                 title: 'GraalVM Debug Console',
                 cwd: args.graalVMLaunchInfo.cwd,
+                env: this.convertProcessEnvToDAPEnv(args.graalVMLaunchInfo.env),
                 args: [args.graalVMLaunchInfo.exec].concat(args.graalVMLaunchInfo.args || [])
             };
             await this.launchInTerminal(termArgs);
@@ -58,7 +75,7 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
                 this.terminateSession('cannot track process');
             }
         } else if (!args.console || args.console === 'internalConsole') {
-            await this.launchInInternalConsole(args.graalVMLaunchInfo.exec, args.graalVMLaunchInfo.args, args.graalVMLaunchInfo.cwd);
+            await this.launchInInternalConsole(args.graalVMLaunchInfo.exec, args.graalVMLaunchInfo.args, args.graalVMLaunchInfo.env, args.graalVMLaunchInfo.cwd);
         } else {
             throw new ErrorWithMessage({
                 id: 2028,
@@ -138,8 +155,8 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
         });
     }
 
-    private launchInInternalConsole(runtimeExecutable: string, launchArgs: string[], cwd?: string): Promise<void> {
-        const spawnOpts: cp.SpawnOptions = { cwd, env: process.env, detached: true };
+    private launchInInternalConsole(runtimeExecutable: string, launchArgs: string[], env: NodeJS.ProcessEnv, cwd?: string): Promise<void> {
+        const spawnOpts: cp.SpawnOptions = { cwd, env, detached: true };
         this.logLaunchCommand(runtimeExecutable, launchArgs);
         const childProcess = cp.spawn(runtimeExecutable, launchArgs, spawnOpts);
         return new Promise<void>((resolve, reject) => {

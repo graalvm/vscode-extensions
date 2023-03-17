@@ -169,7 +169,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 				return config;
 			}
 		}
-		return getLaunchInfo(config, getGVMHome()).then(launchInfo => {
+		return getLaunchInfo(_folder, config, getGVMHome()).then(launchInfo => {
 			config.graalVMLaunchInfo = launchInfo;
 			if (config.program) {
 				const languageServerStart = getGVMConfig().get('languageServer.start') as 'none' | 'single' | 'inProcess';
@@ -198,7 +198,11 @@ export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapter
 					if (terminal) {
 						terminal.sendText(`cd ${session.configuration.graalVMLaunchInfo.cwd}`);
 					} else {
-						terminal = vscode.window.createTerminal({name: DEBUG_TERMINAL_NAME,	cwd: session.configuration.graalVMLaunchInfo.cwd});
+						terminal = vscode.window.createTerminal({
+							name: DEBUG_TERMINAL_NAME,
+							cwd: session.configuration.graalVMLaunchInfo.cwd,
+							env: session.configuration.graalVMLaunchInfo.env
+						});
 					}
 					terminal.sendText(`${session.configuration.graalVMLaunchInfo.exec.replace(/(\s+)/g, '\\$1')} ${session.configuration.graalVMLaunchInfo.args.join(' ')}`);
 					terminal.show();
@@ -208,7 +212,7 @@ export class GraalVMDebugAdapterDescriptorFactory implements vscode.DebugAdapter
 						}, session.configuration.timeout | 3000);
 					});
 				} else if (!session.configuration.console || session.configuration.console === 'internalConsole') {
-					const spawnOpts: cp.SpawnOptions = {cwd: session.configuration.graalVMLaunchInfo.cwd, env: process.env, detached: true};
+					const spawnOpts: cp.SpawnOptions = {cwd: session.configuration.graalVMLaunchInfo.cwd, env: session.configuration.graalVMLaunchInfo.env, detached: true};
 					const childProcess = cp.spawn(session.configuration.graalVMLaunchInfo.exec, session.configuration.graalVMLaunchInfo.args, spawnOpts);
 					return new Promise<vscode.DebugAdapterServer>((resolve, reject) => {
 						let pending: boolean = true;
@@ -486,7 +490,7 @@ function updatePath(path: string | undefined, graalVMBin: string): string {
 	return pathItems.join(':');
 }
 
-async function getLaunchInfo(config: vscode.DebugConfiguration | ILaunchRequestArguments, graalVMHome: string | undefined): Promise<IGraalVMLaunchInfo> {
+async function getLaunchInfo(workspaceFolder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration | ILaunchRequestArguments, graalVMHome: string | undefined): Promise<IGraalVMLaunchInfo> {
 	const port = config.port || utils.random(3000, 50000);
 	let runtimeExecutable = config.runtimeExecutable;
 	if (runtimeExecutable) {
@@ -534,9 +538,36 @@ async function getLaunchInfo(config: vscode.DebugConfiguration | ILaunchRequestA
 		if (programPath) {
 			program = await utils.isSymlinked(cwd) ? programPath : path.relative(cwd, programPath);
 		}
+	} else if (workspaceFolder) {
+		cwd = workspaceFolder.uri.fsPath;
+		if (programPath) {
+			program = await utils.isSymlinked(cwd) ? programPath : path.relative(cwd, programPath);
+		}
 	} else if (programPath) {
 		cwd = path.dirname(programPath);
 		program = await utils.isSymlinked(cwd) ? programPath : path.basename(programPath);
+	}
+	let env;
+	let cenv = config.env;
+	if (cenv) {
+		env = Object.assign({}, process.env);
+		for (let [ek, ev] of Object.entries(cenv)) {
+			if (typeof ek === 'string') {
+				if (ev) {
+					if (typeof ev === 'string') {
+						env[ek] = ev;
+					} else {
+						return Promise.reject(new Error(`Attribute 'env' contains non-string value ('${ev}') of key '${ek}'.`));
+					}
+				} else {
+					delete env[ek];
+				}
+			} else {
+				return Promise.reject(new Error(`Attribute 'env' contains non-string key ('${ek}').`));
+			}
+		}
+	} else {
+		env = process.env;
 	}
 	const runtimeArgs = config.runtimeArgs || [];
 	const programArgs = config.args || [];
@@ -552,5 +583,5 @@ async function getLaunchInfo(config: vscode.DebugConfiguration | ILaunchRequestA
 			launchArgs.push(`--dap=${port}`);
 		}
 	}
-	return Promise.resolve({exec: runtimeExecutable, args: runtimeArgs.concat(launchArgs, program ? [program] : [], programArgs), cwd: cwd, port: port});
+	return Promise.resolve({exec: runtimeExecutable, args: runtimeArgs.concat(launchArgs, program ? [program] : [], programArgs), cwd: cwd, env: env, port: port});
 }

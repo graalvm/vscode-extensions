@@ -1039,6 +1039,11 @@
 								"description": "Absolute path to the working directory of the program being debugged.",
 								"default": "${workspaceFolder}"
 							},
+							"env": {
+								"type": "object",
+								"description": "Environment variables for the program execution. To set a variable specify \"NewVar\" : \"New Value\", to delete one specify \"EnvVar\" : null ",
+								"default": {}
+							},
 							"runtimeExecutable": {
 								"type": [
 									"string",
