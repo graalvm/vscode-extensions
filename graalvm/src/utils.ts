@@ -144,7 +144,8 @@ export function killProcess(pid: number) {
 		const groupPID = -pid;
 		try {
 			process.kill(groupPID, 'SIGKILL');
-		} catch (e) {
+		} catch (ex: unknown) {
+			const e = ex as Error;
 			if (e.message === 'kill ESRCH') {
 				try {
 					process.kill(pid, 'SIGKILL');
@@ -345,7 +346,8 @@ export class MultiStepInput {
 							input.busy = true;
 							try {
 								await postProcess(item);
-							} catch(e) {
+							} catch(ex: unknown) {
+								const e = ex as Error;
 								reject(InputFlowAction.cancel);
 								vscode.window.showErrorMessage(e.message);
 							}

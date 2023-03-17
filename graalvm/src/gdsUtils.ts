@@ -40,6 +40,7 @@ const USER_AGENT = `${VSCODE_AGENT} (${SYSTEM_INFO}) ${GRAALVMEXT_AGENT}`;
 
 const GET_RETRIES: number = 3;
 
+export type ConnectionError = { code: number | string; status: number; message: string };
 
 export enum TokenOrigin {
     Env,
@@ -134,7 +135,7 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string, im
                 } else {
                     vscode.window.showErrorMessage('Failed to obtain download location');
                 }
-            } catch (e) {
+            } catch (e: any) {
                 if (e.code === 401 && e.status === 'InvalidLicenseAcceptance') {
                     handleValidToken(token);
                     if (isLicenseAcceptancePending(token.value, licenseId)) {
@@ -150,7 +151,8 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string, im
                             if (await proceedAfterLicenseConfirmation()) {
                                 return getEEArtifactURL(artifactId, licenseId);
                             }
-                        } catch (e) {
+                        } catch (ex: unknown) {
+                            const e = ex as ConnectionError;
                             let msg = 'Failed to request required license confirmation';
                             if (e.message) {
                                 msg += `: ${e.message}`;
@@ -177,7 +179,8 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string, im
                 }
             }
         }
-    } catch (err) {
+    } catch (ex: unknown) {
+        const err = ex as Error;
         vscode.window.showErrorMessage(err?.message);
     }
     return undefined;
@@ -434,7 +437,8 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
             } else {
                 vscode.window.showErrorMessage('Failed to obtain download token');
             }
-        } catch (e) {
+        } catch (ex: unknown) {
+            const e = ex as ConnectionError;
             let msg = 'Failed to obtain download token';
             if (e.message) {
                 msg += `: ${e.message}`;
@@ -455,7 +459,8 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
                 ignoreFocusOut: true
             });
             return token;
-        } catch (e) {
+        } catch (ex: unknown) {
+            const e = ex as ConnectionError;
             let msg = 'Failed to obtain download token';
             if (e.message) {
                 msg += `: ${e.message}`;

@@ -86,7 +86,7 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
                 args.enableSourceMapCaching = true;
             }
             return super.attach(args);
-        } catch (err) {
+        } catch (err: any) {
             if (err.format && err.format.indexOf('Cannot connect to runtime process') >= 0) {
                 err.format = 'Ensure GraalVM was launched with --inspect. ' + err.format;
             }
@@ -109,7 +109,8 @@ export class GraalVMDebugAdapter extends ChromeDebugAdapter {
                 const groupPID = -this._childProcessId;
                 try {
                     process.kill(groupPID, 'SIGKILL');
-                } catch (e) {
+                } catch (ex: unknown) {
+                    const e = ex as Error;
                     if (e.message === 'kill ESRCH') {
                         try {
                             process.kill(this._childProcessId, 'SIGKILL');

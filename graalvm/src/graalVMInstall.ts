@@ -21,6 +21,7 @@ import { componentsChanged } from './graalVMVisualVM';
 import assert = require('assert');
 import { GraalVMComponent } from './types';
 import { extContext } from './extension';
+import { ExecOptions } from 'child_process';
 
 const GITHUB_URL: string = 'https://api.github.com';
 const GRAALVM_RELEASES_URL: string = GITHUB_URL + '/repos/graalvm/graalvm-ce-builds/releases';
@@ -110,7 +111,8 @@ export async function installGraalVM(): Promise<void> {
                 }
             }
         }
-    } catch (err) {
+    } catch (ex: unknown) {
+        const err = ex as Error;
         vscode.window.showErrorMessage(err?.message);
     }
 }
@@ -132,7 +134,8 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
         return utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
             try {
                 deleteFolder(graalFolder);
-            } catch (err) {
+            } catch (ex: unknown) {
+                const err = ex as Error;
                 vscode.window.showErrorMessage(err?.message);
             }
         }, 1000));
@@ -804,7 +807,8 @@ async function changeGraalVMComponent(graalVMHome: string, components: GraalVMCo
                 try {
                     await execCancellable(`${executablePath} ${action} ${args}${component.id}`, token, { cwd: join(graalVMHome, 'bin'), env: { [gdsUtils.DOWNLOAD_TOKEN_ENV]: dtoken?.value } }, dataListener);
                     await checkGraalVMconfiguration(graalVMHome);
-                } catch (error) {
+                } catch (ex: unknown) {
+                    const error = ex as Error;
                     if (dtoken && guErrorType && gdsUtils.isHandledGUError(error)) {
                         if (await gdsUtils.handleGUError(dtoken, guErrorType)) {
                             await execute();
@@ -845,7 +849,7 @@ async function changeGraalVMComponent(graalVMHome: string, components: GraalVMCo
     });
 }
 
-function execCancellable(cmd: string, token: vscode.CancellationToken, options?: ({ encoding?: string | null | undefined; } & cp.ExecOptions) | null | undefined, dataListener?: (chunk: any) => void): Promise<boolean> {
+function execCancellable(cmd: string, token: vscode.CancellationToken, options?: ExecOptions, dataListener?: (chunk: any) => void): Promise<boolean> {
     return new Promise((resolve, reject) => {
         let resolved: boolean = false;
         const child = cp.exec(cmd, options, (error, _stdout, _stderr) => {
@@ -972,7 +976,8 @@ async function getGraalVMEEReleases(): Promise<any> {
             releaseJavaVersion.licenseId = artifact.licenseId;
             releaseJavaVersion.implicitlyAccepted = artifact.isLicenseImplicitlyAccepted;
         }
-    } catch (err) {
+    } catch (ex: unknown) {
+        const err = ex as gdsUtils.ConnectionError;
         if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {
             notifyConnectionProblem('GraalVM Enterprise releases');
         } else {

@@ -89,7 +89,7 @@ export async function addNativeImageToPOM() {
     try {
         const artefactInfo: any = JSON.parse(await rawArtefactInfo);
         artefactAvailable = artefactInfo.response.numFound > 0;
-    } catch (error) {
+    } catch (error: any) {
         vscode.window.showErrorMessage(error);
     }
 
@@ -352,7 +352,7 @@ function findWindowsTools(): string[] {
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\Tools\\vcvars64.bat',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
     ];
-    const tools = [];
+    const tools: string[] = [];
     for (const location of predefinedLocations) {
         if (fs.existsSync(location)) {
             tools.push(location);
@@ -917,7 +917,8 @@ class NativeImageConfigurationProvider implements vscode.DebugConfigurationProvi
                             }
                             setLastExecuted(extContext, new Date().toLocaleString());
                         }
-                    } catch (err) {
+                    } catch (ex: unknown) {
+                        const err = ex as Error;
                         vscode.window.showErrorMessage(`${err.message} Launching without native-image agent.`);
                     }
                 } else {

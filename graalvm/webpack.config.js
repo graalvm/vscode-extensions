@@ -6,6 +6,7 @@ const path = require('path');
 const maven = require('maven');
 const CopyPlugin = require("copy-webpack-plugin");
 const webpack = require('webpack');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 
 /**@type {import('webpack').Configuration}*/
@@ -30,6 +31,7 @@ const config = {
                 }
             ],
         }),
+        new ESLintPlugin({extensions: ['ts']})
     ],
 
     entry: {

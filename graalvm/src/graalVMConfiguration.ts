@@ -145,7 +145,8 @@ export async function setupProxy() {
                         () => updateMavenProxy(out));
                 }
             }
-        } catch (e) {
+        } catch (ex: unknown) {
+            const e = ex as Error;
             vscode.window.showWarningMessage(e?.message);
         };
     });
@@ -393,7 +394,8 @@ async function configureInteractive(graalVMHome: string) {
                     } else {
                         await shown.unset(graalVMHome);
                     }
-                } catch (error) {
+                } catch (ex: unknown) {
+                    const error = ex as Error;
                     vscode.window.showErrorMessage(error?.message);
                 }
             }
