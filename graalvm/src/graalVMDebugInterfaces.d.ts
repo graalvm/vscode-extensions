@@ -25,8 +25,10 @@ export interface ILaunchRequestArguments extends Core.ILaunchRequestArgs, ICommo
     program: string;
     /** Optional arguments passed to the debuggee. */
     args?: string[];
-    /** Launch the debuggee in this working directory (specified as an absolute path). If omitted the debuggee is lauched in its own directory. */
+    /** Launch the debuggee in this working directory (specified as an absolute path). If omitted the debuggee is lauched in the workspace directory. */
     cwd: string;
+    /** Customize evironment variables. To set a variable specify: "NewVar" : "New Value", to delete one specify: "EnvVar" : null */
+    env: object;
     /** Absolute path to the runtime executable to be used. */
     runtimeExecutable?: string;
     /** Optional arguments passed to the runtime executable. */
@@ -55,6 +57,8 @@ export interface IGraalVMLaunchInfo {
     args: string[];
     /** Launch the runtime executable in this working directory (specified as an absolute path). */
     cwd: string;
+    /** Customize evironment variables. */
+    env: NodeJS.ProcessEnv;
     /** Selected debugging port. */
     port: number;
 }
