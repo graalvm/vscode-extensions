@@ -37,6 +37,8 @@ export interface ILaunchRequestArguments extends Core.ILaunchRequestArgs, ICommo
     console?: ConsoleType;
     /** Manually selected debugging port */
     port?: number;
+    /** Debugger-specific options passed to the debuggee. */
+    debugOptions: object;
     /** Source of the debug output */
     outputCapture?: OutputCaptureType;
     /** GraalVM launch info. */
