@@ -166,8 +166,8 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 		if (config.request == 'attach') {
 			if (!config.protocol) {
 				config.protocol = 'debugAdapter';
-				return config;
 			}
+			return config;
 		}
 		return getLaunchInfo(_folder, config, getGVMHome()).then(launchInfo => {
 			config.graalVMLaunchInfo = launchInfo;
@@ -573,14 +573,26 @@ async function getLaunchInfo(workspaceFolder: vscode.WorkspaceFolder | undefined
 	const programArgs = config.args || [];
 	let launchArgs = [];
 	if (!config.noDebug) {
+		let instrumentName: string;
 		if (config.protocol === 'chromeDevTools') {
+			instrumentName = "inspect";
 			if (path.basename(runtimeExecutable) === NODE) {
 				launchArgs.push(`--inspect-brk=${port}`);
 			} else {
 				launchArgs.push(`--inspect=${port}`);
 			}
 		} else if (!config.protocol || config.protocol === 'debugAdapter') {
+			instrumentName = "dap";
 			launchArgs.push(`--dap=${port}`);
+		} else {
+			return Promise.reject(new Error(`Unknown debugger protocol: ${config.protocol}.`));
+		}
+		launchArgs.push(`--${instrumentName}.WaitAttached=true`); // Debuggee always waits for the debugger to attach.
+		if (config.debugOptions) {
+			for (let [optName, optValue] of Object.entries(config.debugOptions)) {
+				optName = optName.charAt(0).toUpperCase() + optName.slice(1);
+				launchArgs.push(`--${instrumentName}.${optName}=${optValue}`);
+			}
 		}
 	}
 	return Promise.resolve({exec: runtimeExecutable, args: runtimeArgs.concat(launchArgs, program ? [program] : [], programArgs), cwd: cwd, env: env, port: port});
