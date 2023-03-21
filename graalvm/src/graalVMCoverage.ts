@@ -79,7 +79,7 @@ async function showCoverage(editor: vscode.TextEditor): Promise<boolean> {
             if (commands.includes('get_coverage')) {
                 vscode.commands.executeCommand('get_coverage', pathToFileURL(editor.document.uri.fsPath)).then((value) => {
                     if (value) {
-                        const coverage = value as {covered: vscode.Range[], uncovered: vscode.Range[]};
+                        const coverage = value as {covered: vscode.Range[]; uncovered: vscode.Range[]};
                         editor.setDecorations(coveredDecoration, coverage.covered);
                         editor.setDecorations(uncoveredDecoration, coverage.uncovered);
                         resolve(true);

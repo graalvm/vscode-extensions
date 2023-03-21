@@ -60,7 +60,7 @@ export class LicenseCheckPanel {
 		// This happens when the user closes the panel or when the panel is closed programatically
 		this._panel.onDidDispose(
 			() => {
-				this.dispose()
+				this.dispose();
 				messageHandler(result);
 			},
 			null,

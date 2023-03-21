@@ -204,14 +204,14 @@ export async function selectActiveGraalVM(graalVMHome?: string, nonInteractive?:
     }
 }
 
-export async function findGraalVMs(): Promise<{name: string, path: string}[]> {
+export async function findGraalVMs(): Promise<{name: string; path: string}[]> {
     const paths: string[] = [];
     const comparator = utils.isSamePath();
     addPathToJava(normalize(getGVMHome()), paths, comparator);
     const installations = getGVMInsts().map(inst => normalize(inst));
     installations.forEach(installation => addPathToJava(installation, paths, comparator, true));
     findImplicitGraalVMs(paths, comparator);
-    const vms: {name: string, path: string}[] = [];
+    const vms: {name: string; path: string}[] = [];
     for (let i = 0; i < paths.length; i++) {
         const version = await getGraalVMVersion(paths[i]);
         if (version) {
@@ -339,7 +339,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
             const runtime: any = runtimes.find((runtime: any) => runtime.path === graalVMHome);
             if (runtime?.default) {
                 delete runtime.default;
-                return getConf('java').update('configuration.runtimes', runtimes, true)
+                return getConf('java').update('configuration.runtimes', runtimes, true);
             }
         }
     ));
@@ -462,7 +462,7 @@ export async function checkForMissingComponents(homeFolder: string): Promise<voi
 }
 
 async function _selectInstalledGraalVM(explicit: boolean): Promise<string | undefined>{
-    const vms: {label: string, detail: string}[] = (await findGraalVMs()).map(item => {
+    const vms: {label: string; detail: string}[] = (await findGraalVMs()).map(item => {
         return {label: item.name, detail: item.path};
     });
     if (vms.length === 0) {
@@ -476,7 +476,7 @@ async function _selectInstalledGraalVM(explicit: boolean): Promise<string | unde
     return selected?.detail;
 }
 
-async function selectGraalVMRelease(): Promise<{url: any, location: string, installdir: string} | undefined> {
+async function selectGraalVMRelease(): Promise<{url: any; location: string; installdir: string} | undefined> {
 
     interface State {
 		graalVMDistribution: vscode.QuickPickItem;
@@ -894,7 +894,7 @@ async function isGUJSON(guCmd: string): Promise<boolean> {
             } else {
                 resolve(stdout.includes("-J, --json"));
             }
-        })
+        });
     });
 }
 
@@ -1227,7 +1227,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
                         version: versionInfo[2],
                         edition: 'ee',
                         java: javaVersion
-                    }
+                    };
                 } else {
                     const rawData = await get(gdsUtils.getGDSUrl(), /^application\/json/) ?? '{}';
                     return Object.values(JSON.parse(rawData).Releases).find((release: any) => release.version === versionInfo[2] && release.java === javaVersion);

@@ -44,7 +44,7 @@ export function readDirSyncSafe(path: string): string[] {
     return [];
 }
 
-export async function ask(question: string, options: {option: string, fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
+export async function ask(question: string, options: {option: string; fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
 	const select = await vscode.window.showInformationMessage(question, ...options.map(o => o.option));
 	if (!select) {
 		if (!otherwise) {
@@ -158,7 +158,7 @@ export function killProcess(pid: number) {
 export function checkFolderWritePermissions(graalVMHome: string, silent?: boolean): boolean {
     try {
 		if (platform() === PLATFORM_WINDOWS) {
-			const tmpFile = path.join(graalVMHome, 'tmp.tmp')
+			const tmpFile = path.join(graalVMHome, 'tmp.tmp');
 			fs.writeFileSync(tmpFile, '');
 			fs.unlinkSync(tmpFile);
 		} else {
@@ -197,7 +197,7 @@ export function getUserHome(): string | undefined{
 		const homePath = env['HOMEPATH'];
 		return drive && homePath ? drive + homePath : undefined;
 	} else {
-		return env['HOME']
+		return env['HOME'];
 	}
 }
 

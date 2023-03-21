@@ -364,7 +364,7 @@ function findWindowsTools(): string[] {
 async function selectWindowsTools(choices: string[]): Promise<string | undefined> {
     const addCustom = 'Select Custom Script...';
     choices.push(addCustom);
-    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script (vcvars64.bat)` })
+    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script (vcvars64.bat)` });
     if (selected === addCustom) {
         selected = await selectCustomWindowsTools();
     }
@@ -761,7 +761,7 @@ class AgentEnabledNode extends NativeImageNode implements Configurable {
     updateSettings() {
         this.description = getAgentEnabledChoices()[agentEnabled].label;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -797,7 +797,7 @@ class ConfigOutputNode extends NativeImageNode implements Configurable {
             destination = 'unable to resolve';
         }
         this.tooltip = `${this.label} ${destination}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -817,7 +817,7 @@ class LastExecutedNode extends NativeImageNode implements Configurable {
     async updateSettings() {
         this.description = lastExecuted ? lastExecuted : 'not executed yet';
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }

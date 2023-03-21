@@ -50,9 +50,9 @@ export enum TokenOrigin {
 }
 
 export interface Token {
-    value: string,
-    origin: TokenOrigin,
-    pendingLicense: boolean
+    value: string;
+    origin: TokenOrigin;
+    pendingLicense: boolean;
 }
 
 export function getGDSUrl(): string {
@@ -631,7 +631,7 @@ async function getArtifactLocation(artifactId: string, token: string | undefined
     throw { code: response.code, status: data?.code, message: data?.message };
 }
 
-async function getDataRetry(endpoint: string, options: https.RequestOptions = {}, retries: number = GET_RETRIES): Promise<{ code: number | undefined, headers: any, data: any }> {
+async function getDataRetry(endpoint: string, options: https.RequestOptions = {}, retries: number = GET_RETRIES): Promise<{ code: number | undefined; headers: any; data: any }> {
     const response = await getData(endpoint, options);
     if (retries > 1 && response?.code && response.code >= 500) {
         return getDataRetry(endpoint, options, retries - 1);
@@ -640,7 +640,7 @@ async function getDataRetry(endpoint: string, options: https.RequestOptions = {}
     }
 }
 
-async function getData(endpoint: string, options: https.RequestOptions = {}): Promise<{ code: number | undefined, headers: any, data: any }> {
+async function getData(endpoint: string, options: https.RequestOptions = {}): Promise<{ code: number | undefined; headers: any; data: any }> {
     return new Promise((resolve, reject) => {
         const addr = `${getGDSAddress()}/${endpoint}`;
         if (!options.headers) {
@@ -671,7 +671,7 @@ async function getData(endpoint: string, options: https.RequestOptions = {}): Pr
     });
 }
 
-async function postData(endpoint: string, data: any, options: https.RequestOptions = {}): Promise<{ code: number | undefined, headers: any, data: any }> {
+async function postData(endpoint: string, data: any, options: https.RequestOptions = {}): Promise<{ code: number | undefined; headers: any; data: any }> {
     return new Promise((resolve, reject) => {
         const addr = `${getGDSAddress()}/${endpoint}`;
         options.method = 'POST';
@@ -750,7 +750,7 @@ function readTokenFromFile(tokenfile?: string): string | undefined {
 function saveTokenToFile(token: string): boolean {
     const tokenfile = getTokenFile();
     const lines = readLines(tokenfile);
-    setProperty(DOWNLOAD_TOKEN_KEY, token, lines)
+    setProperty(DOWNLOAD_TOKEN_KEY, token, lines);
     return writeLines(tokenfile, lines);
 }
 
