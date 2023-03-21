@@ -6,8 +6,8 @@
  */
 
 export type GraalVMComponent = {
-    id: string,
-    name: string,
-    installed?: boolean,
-    isLicenseImplicitlyAccepted?: boolean
+    id: string;
+    name: string;
+    installed?: boolean;
+    isLicenseImplicitlyAccepted?: boolean;
 };

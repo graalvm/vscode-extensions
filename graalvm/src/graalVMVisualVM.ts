@@ -387,7 +387,7 @@ async function getLaunchCommand(openPID: boolean = false): Promise<string | unde
     // Optionally open predefined view for the process
     if (openPID && PID) {
         command += ` --openpid ${PID?.toString()}`;
-        if (preselect !== '1') command += `@${preselect}`
+        if (preselect !== '1') command += `@${preselect}`;
     }
     
     return command;
@@ -947,7 +947,7 @@ export async function troubleshootNBLSHeapDump() {
 let nblsSampling: boolean = false;
 export async function troubleshootNBLSCpuSampler() {
     if (nblsSampling) {
-        vscode.window.showWarningMessage('Troubleshoot Language Server: CPU sampling already in progress!')
+        vscode.window.showWarningMessage('Troubleshoot Language Server: CPU sampling already in progress!');
         return;
     } else {
         nblsSampling = true;
@@ -1021,7 +1021,7 @@ async function waitWithProgress(message: string, ms: number) {
             setTimeout(() => {
                 resolve(undefined);
             }, time);
-        })
+        });
     }
     async function waiter(progress: vscode.Progress<{ message?: string; increment?: number }>) {
         progress.report({
@@ -1300,7 +1300,7 @@ class WhenStartedNode extends VisualVMNode implements Configurable {
         const value = getWhenStartedChoices()[performWhenStarted].label;
         this.description = value.charAt(0).toLowerCase() + value.slice(1);
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1360,7 +1360,7 @@ class CpuSamplingFilterNode extends VisualVMNode implements Configurable {
         const value = getCpuSamplerFilters()[cpuSamplingFilter].label;
         this.description = value.charAt(0).toLowerCase() + value.slice(1);
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1379,9 +1379,9 @@ class CpuSamplingRateNode extends VisualVMNode implements Configurable {
 
     updateSamplingRate() {
         const frequency = getCpuSamplingFrequencies()[cpuSamplingRate];
-        this.description = `${frequency.label} ${frequency.description}`
+        this.description = `${frequency.label} ${frequency.description}`;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1409,9 +1409,9 @@ class MemorySamplerRateNode extends VisualVMNode implements Configurable {
 
     updateSamplingRate() {
         const frequency = getMemorySamplingFrequencies()[memorySamplingRate];
-        this.description = `${frequency.label} ${frequency.description}`
+        this.description = `${frequency.label} ${frequency.description}`;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1440,7 +1440,7 @@ class JfrSettingsNode extends VisualVMNode implements Configurable {
     updateSettings() {
         this.description = getJfrSettingsChoices()[jfrSettings].label;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -1466,7 +1466,7 @@ class ProcessNode extends VisualVMNode {
     updateProcName() {
         this.description = computeProcName();
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
     updateFeatures() {

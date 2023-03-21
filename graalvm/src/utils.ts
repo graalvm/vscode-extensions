@@ -44,7 +44,7 @@ export function readDirSyncSafe(path: string): string[] {
     return [];
 }
 
-export async function ask(question: string, options: {option: string, fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
+export async function ask(question: string, options: {option: string; fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
 	const select = await vscode.window.showInformationMessage(question, ...options.map(o => o.option));
 	if (!select) {
 		if (!otherwise) {
@@ -144,7 +144,8 @@ export function killProcess(pid: number) {
 		const groupPID = -pid;
 		try {
 			process.kill(groupPID, 'SIGKILL');
-		} catch (e) {
+		} catch (ex: unknown) {
+			const e = ex as Error;
 			if (e.message === 'kill ESRCH') {
 				try {
 					process.kill(pid, 'SIGKILL');
@@ -157,7 +158,7 @@ export function killProcess(pid: number) {
 export function checkFolderWritePermissions(graalVMHome: string, silent?: boolean): boolean {
     try {
 		if (platform() === PLATFORM_WINDOWS) {
-			const tmpFile = path.join(graalVMHome, 'tmp.tmp')
+			const tmpFile = path.join(graalVMHome, 'tmp.tmp');
 			fs.writeFileSync(tmpFile, '');
 			fs.unlinkSync(tmpFile);
 		} else {
@@ -196,7 +197,7 @@ export function getUserHome(): string | undefined{
 		const homePath = env['HOMEPATH'];
 		return drive && homePath ? drive + homePath : undefined;
 	} else {
-		return env['HOME']
+		return env['HOME'];
 	}
 }
 
@@ -345,7 +346,8 @@ export class MultiStepInput {
 							input.busy = true;
 							try {
 								await postProcess(item);
-							} catch(e) {
+							} catch(ex: unknown) {
+								const e = ex as Error;
 								reject(InputFlowAction.cancel);
 								vscode.window.showErrorMessage(e.message);
 							}

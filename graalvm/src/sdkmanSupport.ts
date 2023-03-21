@@ -70,5 +70,5 @@ function _currentSDKmanJavaInstallation(): string | undefined {
 }
 
 function execSDKmanSync(command: string): string {
-    return cp.spawnSync(SDKMAN_SOURCE + command, { encoding: "utf8", shell: vscode.env.shell}).stdout;
+    return cp.spawnSync(SDKMAN_SOURCE + command, { encoding: "utf8", shell: vscode.env.shell }).stdout;
 }

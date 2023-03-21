@@ -89,7 +89,7 @@ export async function addNativeImageToPOM() {
     try {
         const artefactInfo: any = JSON.parse(await rawArtefactInfo);
         artefactAvailable = artefactInfo.response.numFound > 0;
-    } catch (error) {
+    } catch (error: any) {
         vscode.window.showErrorMessage(error);
     }
 
@@ -352,7 +352,7 @@ function findWindowsTools(): string[] {
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\Tools\\vcvars64.bat',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
     ];
-    const tools = [];
+    const tools: string[] = [];
     for (const location of predefinedLocations) {
         if (fs.existsSync(location)) {
             tools.push(location);
@@ -364,7 +364,7 @@ function findWindowsTools(): string[] {
 async function selectWindowsTools(choices: string[]): Promise<string | undefined> {
     const addCustom = 'Select Custom Script...';
     choices.push(addCustom);
-    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script (vcvars64.bat)` })
+    let selected = await vscode.window.showQuickPick(choices, { placeHolder: `Select Build Tools Configuration Script (vcvars64.bat)` });
     if (selected === addCustom) {
         selected = await selectCustomWindowsTools();
     }
@@ -761,7 +761,7 @@ class AgentEnabledNode extends NativeImageNode implements Configurable {
     updateSettings() {
         this.description = getAgentEnabledChoices()[agentEnabled].label;
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -797,7 +797,7 @@ class ConfigOutputNode extends NativeImageNode implements Configurable {
             destination = 'unable to resolve';
         }
         this.tooltip = `${this.label} ${destination}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -817,7 +817,7 @@ class LastExecutedNode extends NativeImageNode implements Configurable {
     async updateSettings() {
         this.description = lastExecuted ? lastExecuted : 'not executed yet';
         this.tooltip = `${this.label} ${this.description}`;
-        refreshUI()
+        refreshUI();
     }
 
 }
@@ -917,7 +917,8 @@ class NativeImageConfigurationProvider implements vscode.DebugConfigurationProvi
                             }
                             setLastExecuted(extContext, new Date().toLocaleString());
                         }
-                    } catch (err) {
+                    } catch (ex: unknown) {
+                        const err = ex as Error;
                         vscode.window.showErrorMessage(`${err.message} Launching without native-image agent.`);
                     }
                 } else {

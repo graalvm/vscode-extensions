@@ -40,6 +40,7 @@ const USER_AGENT = `${VSCODE_AGENT} (${SYSTEM_INFO}) ${GRAALVMEXT_AGENT}`;
 
 const GET_RETRIES: number = 3;
 
+export type ConnectionError = { code: number | string; status: number; message: string };
 
 export enum TokenOrigin {
     Env,
@@ -49,9 +50,9 @@ export enum TokenOrigin {
 }
 
 export interface Token {
-    value: string,
-    origin: TokenOrigin,
-    pendingLicense: boolean
+    value: string;
+    origin: TokenOrigin;
+    pendingLicense: boolean;
 }
 
 export function getGDSUrl(): string {
@@ -134,7 +135,7 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string, im
                 } else {
                     vscode.window.showErrorMessage('Failed to obtain download location');
                 }
-            } catch (e) {
+            } catch (e: any) {
                 if (e.code === 401 && e.status === 'InvalidLicenseAcceptance') {
                     handleValidToken(token);
                     if (isLicenseAcceptancePending(token.value, licenseId)) {
@@ -150,7 +151,8 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string, im
                             if (await proceedAfterLicenseConfirmation()) {
                                 return getEEArtifactURL(artifactId, licenseId);
                             }
-                        } catch (e) {
+                        } catch (ex: unknown) {
+                            const e = ex as ConnectionError;
                             let msg = 'Failed to request required license confirmation';
                             if (e.message) {
                                 msg += `: ${e.message}`;
@@ -177,7 +179,8 @@ export async function getEEArtifactURL(artifactId: string, licenseId: string, im
                 }
             }
         }
-    } catch (err) {
+    } catch (ex: unknown) {
+        const err = ex as Error;
         vscode.window.showErrorMessage(err?.message);
     }
     return undefined;
@@ -434,7 +437,8 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
             } else {
                 vscode.window.showErrorMessage('Failed to obtain download token');
             }
-        } catch (e) {
+        } catch (ex: unknown) {
+            const e = ex as ConnectionError;
             let msg = 'Failed to obtain download token';
             if (e.message) {
                 msg += `: ${e.message}`;
@@ -455,7 +459,8 @@ async function generateToken(address: string, licenseId?: string): Promise<strin
                 ignoreFocusOut: true
             });
             return token;
-        } catch (e) {
+        } catch (ex: unknown) {
+            const e = ex as ConnectionError;
             let msg = 'Failed to obtain download token';
             if (e.message) {
                 msg += `: ${e.message}`;
@@ -626,7 +631,7 @@ async function getArtifactLocation(artifactId: string, token: string | undefined
     throw { code: response.code, status: data?.code, message: data?.message };
 }
 
-async function getDataRetry(endpoint: string, options: https.RequestOptions = {}, retries: number = GET_RETRIES): Promise<{ code: number | undefined, headers: any, data: any }> {
+async function getDataRetry(endpoint: string, options: https.RequestOptions = {}, retries: number = GET_RETRIES): Promise<{ code: number | undefined; headers: any; data: any }> {
     const response = await getData(endpoint, options);
     if (retries > 1 && response?.code && response.code >= 500) {
         return getDataRetry(endpoint, options, retries - 1);
@@ -635,7 +640,7 @@ async function getDataRetry(endpoint: string, options: https.RequestOptions = {}
     }
 }
 
-async function getData(endpoint: string, options: https.RequestOptions = {}): Promise<{ code: number | undefined, headers: any, data: any }> {
+async function getData(endpoint: string, options: https.RequestOptions = {}): Promise<{ code: number | undefined; headers: any; data: any }> {
     return new Promise((resolve, reject) => {
         const addr = `${getGDSAddress()}/${endpoint}`;
         if (!options.headers) {
@@ -666,7 +671,7 @@ async function getData(endpoint: string, options: https.RequestOptions = {}): Pr
     });
 }
 
-async function postData(endpoint: string, data: any, options: https.RequestOptions = {}): Promise<{ code: number | undefined, headers: any, data: any }> {
+async function postData(endpoint: string, data: any, options: https.RequestOptions = {}): Promise<{ code: number | undefined; headers: any; data: any }> {
     return new Promise((resolve, reject) => {
         const addr = `${getGDSAddress()}/${endpoint}`;
         options.method = 'POST';
@@ -745,7 +750,7 @@ function readTokenFromFile(tokenfile?: string): string | undefined {
 function saveTokenToFile(token: string): boolean {
     const tokenfile = getTokenFile();
     const lines = readLines(tokenfile);
-    setProperty(DOWNLOAD_TOKEN_KEY, token, lines)
+    setProperty(DOWNLOAD_TOKEN_KEY, token, lines);
     return writeLines(tokenfile, lines);
 }
 

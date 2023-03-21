@@ -145,7 +145,8 @@ export async function setupProxy() {
                         () => updateMavenProxy(out));
                 }
             }
-        } catch (e) {
+        } catch (ex: unknown) {
+            const e = ex as Error;
             vscode.window.showWarningMessage(e?.message);
         };
     });
@@ -199,8 +200,8 @@ function validateProxySettings(proxy: string) {
     }
 }
 
-type MavenProxy = { id?:string, active: boolean, protocol: string, host: string, port: number }
-type MavenSettings = { settings?: { proxies?: { proxy?: MavenProxy | MavenProxy[] }, [key: string]: any }}
+type MavenProxy = { id?:string; active: boolean; protocol: string; host: string; port: number };
+type MavenSettings = { settings?: { proxies?: { proxy?: MavenProxy | MavenProxy[] }; [key: string]: any }};
 function parseMavenProxies(mavenSettings: MavenSettings | undefined): MavenProxy[] {
     const proxies: MavenProxy | MavenProxy[] | undefined = mavenSettings?.settings?.proxies?.proxy;
     if (!proxies) {
@@ -295,7 +296,7 @@ function findMavenProxy(proxy: string): (mavenProxy: MavenProxy) => boolean {
         return mavenProxy.protocol === parts[0]
             && mavenProxy.host === parts[1]
             && mavenProxy.port === parseInt(parts[2]);
-    }
+    };
 }
 
 function splitProxy(proxy: string): [string, string, string] {
@@ -393,7 +394,8 @@ async function configureInteractive(graalVMHome: string) {
                     } else {
                         await shown.unset(graalVMHome);
                     }
-                } catch (error) {
+                } catch (ex: unknown) {
+                    const error = ex as Error;
                     vscode.window.showErrorMessage(error?.message);
                 }
             }
