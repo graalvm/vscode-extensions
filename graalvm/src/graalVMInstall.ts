@@ -970,13 +970,15 @@ async function getGraalVMEEReleases(): Promise<any> {
             for (let pair of artifact.metadata) {
                 metadata[pair.key] = pair.value;
             }
-            const release = metadata.version;
-            const java = metadata.java;
-            const releaseVersion = releases[release] ?? (releases[release] = {});
-            const releaseJavaVersion = releaseVersion[java] ?? (releaseVersion[java] = {});
-            releaseJavaVersion.id = artifact.id;
-            releaseJavaVersion.licenseId = artifact.licenseId;
-            releaseJavaVersion.implicitlyAccepted = artifact.isLicenseImplicitlyAccepted;
+            if(artifact.isLicenseImplicitlyAccepted) {
+                const release = metadata.version;
+                const java = metadata.java;
+                const releaseVersion = releases[release] ?? (releases[release] = {});
+                const releaseJavaVersion = releaseVersion[java] ?? (releaseVersion[java] = {});
+                releaseJavaVersion.id = artifact.id;
+                releaseJavaVersion.licenseId = artifact.licenseId;
+                releaseJavaVersion.implicitlyAccepted = artifact.isLicenseImplicitlyAccepted;
+            }
         }
     } catch (ex: unknown) {
         const err = ex as gdsUtils.ConnectionError;
