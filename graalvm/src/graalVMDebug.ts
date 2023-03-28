@@ -14,7 +14,7 @@ import * as path from 'path';
 import { pathToFileURL } from 'url';
 import * as utils from './utils';
 import { LSPORT, connectToLanguageServer, stopLanguageServer, lspArgs, hasLSClient, setLSPID } from './graalVMLanguageServer';
-import { StreamInfo } from 'vscode-languageclient';
+import { StreamInfo } from 'vscode-languageclient/node';
 import { ILaunchRequestArguments, IGraalVMLaunchInfo } from './graalVMDebugInterfaces';
 import { getGVMConfig, getConf, getGVMHome } from './graalVMConfiguration';
 

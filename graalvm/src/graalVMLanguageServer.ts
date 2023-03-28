@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as utils from './utils';
 import * as net from 'net';
-import { GenericNotificationHandler, LanguageClient, LanguageClientOptions, StreamInfo } from 'vscode-languageclient';
+import { GenericNotificationHandler, LanguageClient, LanguageClientOptions, StreamInfo } from 'vscode-languageclient/node';
 import { getGVMConfig } from './graalVMConfiguration';
 
 export const LSPORT: number = 8123;
@@ -75,7 +75,7 @@ export function startLanguageServer(graalVMHome?: string) {
 	}
 }
 
-export function connectToLanguageServer(connection: (() => Thenable<StreamInfo>)) {
+export function connectToLanguageServer(connection: () => Promise<StreamInfo>) {
 	const clientOptions: LanguageClientOptions = {
 		documentSelector: [
 			{ scheme: 'file', language: 'javascript' },
