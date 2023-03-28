@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.26
+* Update of 3rd party libraries
+
 ## Version 0.5.25
 * Tokenless download from GDS service
 * Update of 3rd party libraries
