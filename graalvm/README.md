@@ -1,4 +1,5 @@
 # GraalVM Tools for Java Extension
+*** **Technology Preview** ***
 
 Improve your developer productivity by leveraging the [GraalVM Tools for Java](http://www.graalvm.org/tools/vscode/graalvm-extension/) extension in VS Code. The extension enables you to manage GraalVM installations and their components in VS Code and locally. It includes the GraalVM Installation and Configuration Wizard. 
 
