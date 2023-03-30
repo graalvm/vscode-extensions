@@ -11,7 +11,7 @@ import * as net from 'net';
 import { TextEncoder } from 'util';
 import * as utils from './utils';
 import { registerLanguageServer } from './graalVMLanguageServer';
-import { ConfigurationPickItem, getConf, getGVMConfig, getGVMHome } from './graalVMConfiguration';
+import { ConfigurationPickItem, getConf, getGVMConfig, getGVMHome, setConf } from './graalVMConfiguration';
 
 export const R_LANGUAGE_SERVER_PACKAGE_NAME: string = 'languageserver';
 const INSTALL_R_LANGUAGE_SERVER: string = 'Install R Language Server';
@@ -51,7 +51,7 @@ function setConfig(path?: string) {
 	let section: string = getConfigSection();
 	const term = section ? config.inspect(section) : undefined;
 	if (term) {
-		config.update(section, path, true);
+		setConf(config, section, path);
 	}
 	const startRLS = getGVMConfig().get('languageServer.startRLanguageServer') as boolean;
 	if (path && startRLS) {

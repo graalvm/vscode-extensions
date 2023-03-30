@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as utils from './utils';
 import { registerLanguageServer } from './graalVMLanguageServer';
-import { ConfigurationPickItem, getConf, getGVMConfig } from './graalVMConfiguration';
+import { ConfigurationPickItem, getConf, getGVMConfig, setConf } from './graalVMConfiguration';
 
 export const RUBY_LANGUAGE_SERVER_GEM_NAME: string = 'solargraph';
 const INSTALL_RUBY_LANGUAGE_SERVER: string = 'Install Ruby Language Server';
@@ -36,7 +36,7 @@ function setConfig(section: string, path?: string) {
 	const config = getConf('ruby');
 	const term = config.inspect(section);
 	if (term) {
-		config.update(section, path, true);
+		setConf(config, section, path);
 	}
 	const startRLS = getGVMConfig().get('languageServer.startRubyLanguageServer') as boolean;
 	if (path && startRLS) {

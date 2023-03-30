@@ -17,9 +17,41 @@ import { getRubyConfigurations } from './graalVMRuby';
 import { extContext } from './extension';
 
 let configurations: ConfigurationPickItem[];
+const SAVE_SETTINGS: string = "graalvm.settings.savepoint";
 
 export function getConf(key: string): vscode.WorkspaceConfiguration {
 	return vscode.workspace.getConfiguration(key);
+}
+
+export async function setConf(config: vscode.WorkspaceConfiguration, key: string, value: any): Promise<void> {
+    return config.update(key, value, await getConfigTarget(config, key));
+}
+
+async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: string): Promise<vscode.ConfigurationTarget | boolean | undefined> {
+    const info: {
+        key: string;
+        defaultValue?: unknown;
+        globalValue?: unknown;
+        workspaceValue?: unknown;
+        workspaceFolderValue?: unknown;
+        defaultLanguageValue?: unknown;
+        globalLanguageValue?: unknown;
+        workspaceLanguageValue?: unknown;
+        workspaceFolderLanguageValue?: unknown;
+        languageIds?: string[] | undefined;
+    } | undefined = config.inspect(key);
+    if(info?.workspaceFolderValue)
+        return vscode.ConfigurationTarget.WorkspaceFolder;
+    if(info?.workspaceValue)
+        return vscode.ConfigurationTarget.Workspace;
+    if(info?.globalValue)
+        return vscode.ConfigurationTarget.Global;
+    let store: vscode.ConfigurationTarget | undefined = extContext.workspaceState.get(SAVE_SETTINGS);
+    if(store === undefined) {
+        store = await utils.askYesNo("Do you want to store GraalVM settings globaly?", () => vscode.ConfigurationTarget.Global, () => vscode.ConfigurationTarget.Workspace);
+        extContext.workspaceState.update(SAVE_SETTINGS, store);
+    }
+    return store;
 }
 
 export function getGVMConfig(gvmConfig?: vscode.WorkspaceConfiguration): vscode.WorkspaceConfiguration {
@@ -33,8 +65,8 @@ export function getGVMHome(gvmConfig?: vscode.WorkspaceConfiguration): string {
 	return getGVMConfig(gvmConfig).get('home') as string;
 }
 
-export async function setGVMHome(graalVMHome: string | undefined, gvmConfig?: vscode.WorkspaceConfiguration): Promise<void> {
-	return getGVMConfig(gvmConfig).update('home', graalVMHome, true);
+export function setGVMHome(graalVMHome: string | undefined, gvmConfig?: vscode.WorkspaceConfiguration): Thenable<void> {
+	return setConf(getGVMConfig(gvmConfig), 'home', graalVMHome);
 }
 
 const CONFIG_INSTALLATIONS = 'installations';
@@ -75,7 +107,7 @@ export async function setJavaRuntime(version: string, path: string, setAsDefault
             runtimes.push(runtime);
         }
     }
-    return javaConf.update(CONFIG_RUNTIMES, runtimes, true);
+    return setConf(javaConf, CONFIG_RUNTIMES, runtimes);
 }
 
 export function removeJavaRuntime(path: string): Thenable<void> {
@@ -85,11 +117,11 @@ export function removeJavaRuntime(path: string): Thenable<void> {
     if (idx > -1) {
         runtimes.splice(idx, 1);
     }
-    return javaConf.update(CONFIG_RUNTIMES, runtimes, true);
+    return setConf(javaConf, CONFIG_RUNTIMES, runtimes);
 }
 
 export function setGVMInsts(gvmConfig: vscode.WorkspaceConfiguration, installations: string[]): Thenable<void> {
-	return gvmConfig.update(CONFIG_INSTALLATIONS, installations, true);
+	return setConf(gvmConfig, CONFIG_INSTALLATIONS, installations);
 }
 
 const TERMINAL_INTEGRATED: string = 'terminal.integrated';
@@ -103,7 +135,7 @@ export function getTerminalEnv(): any {
 }
 
 export async function setTerminalEnv(env: any): Promise<any> {
-    return getConf(TERMINAL_INTEGRATED).update(`env.${utils.platform()}`, env, true).then(() => {
+    return setConf(getConf(TERMINAL_INTEGRATED),`env.${utils.platform()}`, env).then(() => {
         let collection = extContext.environmentVariableCollection;
         if (env.GRAALVM_HOME) {
             const separator = process.platform === 'win32' ? ';' : ':';
@@ -137,7 +169,7 @@ export async function setupProxy() {
                 validateProxySettings(out);
             }
             if (proxy !== out || mavenProxy !== out) {
-                await http.update('proxy', out, true);
+                await setConf(http, 'proxy', out);
                 await vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
                 if (isMvn && mavenProxy !== out) {
                     utils.askYesNo(`Change also Maven proxy in "${getMavenSettingsFilePath()}"?`,
@@ -353,7 +385,7 @@ async function removeDefaultConfigurations(graalVMHome: string) {
         const nbConf = getConf('netbeans');
         const nbHome = nbConf.get('jdkhome') as string;
         if (nbHome === graalVMHome) {
-            await nbConf.update('jdkhome', undefined, true);
+            await setConf(nbConf, 'jdkhome', undefined);
         }
     } catch(_err) {}
 }
@@ -421,7 +453,7 @@ async function defaultConfig(graalVMHome: string, gr: vscode.WorkspaceConfigurat
     }
 
     try {
-        await getConf('netbeans').update('jdkhome', graalVMHome, true);
+        await setConf(getConf('netbeans'), 'jdkhome', graalVMHome);
     } catch (error) {}
 
     let env: any = getTerminalEnv();
