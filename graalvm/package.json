@@ -1284,9 +1284,7 @@
 		"lint": "eslint src --ext ts"
 	},
 	"dependencies": {
-		"copy-webpack-plugin": "^10.2.4",
 		"decompress": "^4.2.1",
-		"maven": "^5.0.0",
 		"mustache": "^4.2.0",
 		"sax": "^1.2.4",
 		"vscode-chrome-debug-core": "^6.8.11",
@@ -1303,8 +1301,10 @@
 		"@types/xml2js": "^0.4.8",
 		"@typescript-eslint/eslint-plugin": "^5.55.0",
 		"@typescript-eslint/parser": "^5.55.0",
+		"copy-webpack-plugin": "^10.2.4",
 		"eslint": "^8.36.0",
 		"eslint-webpack-plugin": "^4.0.0",
+		"maven": "^5.0.0",
 		"ts-loader": "^6.2.1",
 		"typescript": "^5.0.2",
 		"webpack": "^5.76.2",
