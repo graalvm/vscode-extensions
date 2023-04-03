@@ -693,7 +693,7 @@ async function _callIdGVMHome(component: string | TreeItemComponent | undefined,
 }
 
 async function findComponent(gvmHome: string, componentId: string): Promise<GraalVMComponent | undefined> {
-    return (await getAvailableComponents(gvmHome)).find(comp => comp.id == componentId);
+    return (await getAvailableComponents(gvmHome)).find(comp => comp.id === componentId);
 }
 
 async function _installGraalVMComponent(component: GraalVMComponent | undefined, graalVMHome: string): Promise<void> {
@@ -1222,7 +1222,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
                 const javaVersion = `jdk${versionInfo[3]}`;
                 const version = versionInfo[2].split('.');
                 const major = parseInt(version[0]);
-                if (gdsUtils.canNewGDS(graalVMHome) || major > 22 || (major == 22 && parseInt(version[1]) >= 1)) {
+                if (gdsUtils.canNewGDS(graalVMHome) || major > 22 || (major === 22 && parseInt(version[1]) >= 1)) {
                     return {
                         version: versionInfo[2],
                         edition: 'ee',

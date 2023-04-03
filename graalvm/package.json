@@ -1289,7 +1289,7 @@
 		"sax": "^1.2.4",
 		"vscode-chrome-debug-core": "^6.8.11",
 		"vscode-kubernetes-tools-api": "^1.3.0",
-		"vscode-languageclient": "^7.0.0",
+		"vscode-languageclient": "^8.1.0",
 		"xml2js": "^0.4.23"
 	},
 	"devDependencies": {
