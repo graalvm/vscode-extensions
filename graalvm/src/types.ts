@@ -11,3 +11,5 @@ export type GraalVMComponent = {
     installed?: boolean;
     isLicenseImplicitlyAccepted?: boolean;
 };
+
+export type Cache<K extends string | number | symbol, T> = { [P in K]: T };

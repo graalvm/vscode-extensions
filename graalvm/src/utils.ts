@@ -244,6 +244,16 @@ export function parsePropertiesString(content: string): any {
 	}, {});
 }
 
+export function simpleProgress<T>(message: string, task: () => Thenable<T>): Thenable<T> {
+	return vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: message,
+		cancellable: false
+	}, (_progress, _token) => {
+		return task();
+	});
+}
+
 class InputFlowAction {
 	static back = new InputFlowAction();
 	static cancel = new InputFlowAction();

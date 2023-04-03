@@ -19,7 +19,7 @@ import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
 import { componentsChanged } from './graalVMVisualVM';
 import assert = require('assert');
-import { GraalVMComponent } from './types';
+import { Cache, GraalVMComponent } from './types';
 import { extContext } from './extension';
 import { ExecOptions } from 'child_process';
 
@@ -695,7 +695,7 @@ async function _callIdGVMHome(component: string | TreeItemComponent | undefined,
 }
 
 async function findComponent(gvmHome: string, componentId: string): Promise<GraalVMComponent | undefined> {
-    return (await getAvailableComponents(gvmHome)).find(comp => comp.id == componentId);
+    return (await getAvailableComponents(gvmHome)).find(comp => comp.id === componentId);
 }
 
 async function _installGraalVMComponent(component: GraalVMComponent | undefined, graalVMHome: string): Promise<void> {
@@ -738,7 +738,7 @@ function unlockComponents(graalVMHome: string, components: GraalVMComponent[]): 
     });
 }
 
-async function changeGraalVMComponent(graalVMHome: string, components: GraalVMComponent[], action: string): Promise<void> {
+async function changeGraalVMComponent(graalVMHome: string, components: GraalVMComponent[], action: "install" | "remove"): Promise<void> {
     components = lockComponents(graalVMHome, components);
     if (components.length === 0) {
         return;
@@ -1179,8 +1179,14 @@ function toQuickPick(items: GraalVMComponent[]): (vscode.QuickPickItem & {compon
     return items.map(item => {return {label: item.name, detail: item.id, component: item};});
 }
 
-async function getAvailableComponents(graalVMHome: string): Promise<GraalVMComponent[]> {
+const componentCache: Cache<string, GraalVMComponent[]> = {};
+async function getAvailableComponents(graalVMHome: string, force?: boolean): Promise<GraalVMComponent[]> {
     return new Promise<GraalVMComponent[]>(async (resolve, reject) => {
+        const components = force ? undefined : componentCache[graalVMHome];
+        if(components) {
+            resolve(components); 
+            return;
+        }
         const executablePath = await getGU(graalVMHome);
         const binGVM = join(graalVMHome, 'bin');
         const guListCmd = `${executablePath} list`;
@@ -1202,6 +1208,7 @@ async function getAvailableComponents(graalVMHome: string): Promise<GraalVMCompo
                             const found = installed.find(item => item.id === avail.id);
                             avail.installed = found ? true : false;
                         });
+                        componentCache[graalVMHome] = available;
                         resolve(available);
                     }
                 });
@@ -1287,7 +1294,7 @@ export class InstallationNodeProvider implements vscode.TreeDataProvider<vscode.
 
 	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
 		if (element instanceof Installation) {
-            return getAvailableComponents(element.home).then(components => {
+            return getAvailableComponents(element.home, true).then(components => {
                 const ret: vscode.TreeItem[] = [new InstallationFolder(element.home)];
                 components.forEach((comp: GraalVMComponent) => {
                     ret.push(new TreeItemComponent(element, comp.name, comp.id, comp, comp.installed));
