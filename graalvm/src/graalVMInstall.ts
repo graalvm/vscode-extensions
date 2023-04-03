@@ -38,6 +38,8 @@ const INSTALL_GRAALVM: string = 'Install GraalVM';
 const SELECT_EXISTING_GRAALVM: string = 'Select Existing GraalVM';
 const SELECT_ACTIVE_GRAALVM: string = 'Set Active GraalVM';
 const NO_GU_FOUND: string = 'Cannot find runtime \'gu\' within your GraalVM installation.';
+const GVM_EE_BRAND: string = "Oracle GraalVM";
+const GVM_CE_BRAND: string = "GraalVM Community Edition";
 
 const lockedComponentIds: string[] = [];
 
@@ -501,11 +503,11 @@ async function selectGraalVMRelease(): Promise<{url: any; location: string; inst
 			totalSteps,
 			placeholder: 'Pick GraalVM distribution',
 			items: [
-                { label: 'Community', description: '(Free for all purposes)' },
-                { label: 'Enterprise', description: '(Free for evaluation and development)' }
+                { label: GVM_EE_BRAND},
+                { label: GVM_CE_BRAND}
             ],
             activeItem: state.graalVMDistribution,
-            postProcess: async item => releaseInfos = await (item.label === 'Enterprise' ? getGraalVMEEReleases() : getGraalVMCEReleases()),
+            postProcess: async item => releaseInfos = await (item.label === GVM_EE_BRAND ? getGraalVMEEReleases() : getGraalVMCEReleases()),
 			shouldResume: () => Promise.resolve(false)
         });
 		return (input: utils.MultiStepInput) => pickGraalVMVersion(input, state);
@@ -561,7 +563,7 @@ async function selectGraalVMRelease(): Promise<{url: any; location: string; inst
     if (state.graalVMDistribution && state.graalVMVersion && state.javaVersion) {
         let installdir = 'graalvm-';
         const gvm = releaseInfos[state.graalVMVersion.label][state.javaVersion.label];
-        if (state.graalVMDistribution.label === 'Enterprise') {
+        if (state.graalVMDistribution.label === GVM_EE_BRAND) {
             gvm.url = (): Promise<string | undefined> => {
                 return gdsUtils.getEEArtifactURL(gvm.id, gvm.licenseId, gvm.implicitlyAccepted);
             };
@@ -918,7 +920,7 @@ async function getGraalVMCEReleases(): Promise<any> {
         getGraalVMReleaseURLs(GRAALVM_DEV_RELEASES_URL)
     ]).catch(err => {
         if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {
-            notifyConnectionProblem('GraalVM Community releases');
+            notifyConnectionProblem(GVM_CE_BRAND + ' releases');
             return [];
         } else {
             throw new Error('Cannot get data from server: ' + err.message);
@@ -926,7 +928,7 @@ async function getGraalVMCEReleases(): Promise<any> {
     }).then(urls => {
         const merged: string[] = Array.prototype.concat.apply([], urls);
         if (merged.length === 0) {
-            throw new Error(`No GraalVM Community release found for ${process.platform}/${process.arch}`);
+            throw new Error(`No ${GVM_CE_BRAND} release found for ${process.platform}/${process.arch}`);
         }
         const releases: any = {};
         merged.forEach(releaseUrl => {
@@ -968,24 +970,26 @@ async function getGraalVMEEReleases(): Promise<any> {
             for (let pair of artifact.metadata) {
                 metadata[pair.key] = pair.value;
             }
-            const release = metadata.version;
-            const java = metadata.java;
-            const releaseVersion = releases[release] ?? (releases[release] = {});
-            const releaseJavaVersion = releaseVersion[java] ?? (releaseVersion[java] = {});
-            releaseJavaVersion.id = artifact.id;
-            releaseJavaVersion.licenseId = artifact.licenseId;
-            releaseJavaVersion.implicitlyAccepted = artifact.isLicenseImplicitlyAccepted;
+            if(artifact.isLicenseImplicitlyAccepted) {
+                const release = metadata.version;
+                const java = metadata.java;
+                const releaseVersion = releases[release] ?? (releases[release] = {});
+                const releaseJavaVersion = releaseVersion[java] ?? (releaseVersion[java] = {});
+                releaseJavaVersion.id = artifact.id;
+                releaseJavaVersion.licenseId = artifact.licenseId;
+                releaseJavaVersion.implicitlyAccepted = artifact.isLicenseImplicitlyAccepted;
+            }
         }
     } catch (ex: unknown) {
         const err = ex as gdsUtils.ConnectionError;
         if (err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT') {
-            notifyConnectionProblem('GraalVM Enterprise releases');
+            notifyConnectionProblem(GVM_EE_BRAND + ' releases');
         } else {
             throw new Error('Cannot get data from server: ' + err.message);
         }
     }
     if (Object.keys(releases).length === 0) {
-        throw new Error(`No GraalVM Enterprise release found for ${process.platform}/${process.arch}`);
+        throw new Error(`No ${GVM_EE_BRAND} release found for ${process.platform}/${process.arch}`);
     }
     return releases;
 }
