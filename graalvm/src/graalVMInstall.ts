@@ -1233,7 +1233,7 @@ async function getEEReleaseInfo(graalVMHome: string): Promise<any> {
                 const javaVersion = `jdk${versionInfo[3]}`;
                 const version = versionInfo[2].split('.');
                 const major = parseInt(version[0]);
-                if (gdsUtils.canNewGDS(graalVMHome) || major > 22 || (major == 22 && parseInt(version[1]) >= 1)) {
+                if (gdsUtils.canNewGDS(graalVMHome) || major > 22 || (major === 22 && parseInt(version[1]) >= 1)) {
                     return {
                         version: versionInfo[2],
                         edition: 'ee',

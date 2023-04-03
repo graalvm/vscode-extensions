@@ -230,7 +230,7 @@ export function readFileToString(file: string): string {
 }
 
 export function readReleaseFile(gvmHome?: string): any {
-	gvmHome = gvmHome == undefined ? getGVMHome() : gvmHome;
+	gvmHome = gvmHome === undefined ? getGVMHome() : gvmHome;
 	let content: string = readFileToString(path.join(gvmHome, "release"));
 	return parsePropertiesString(content);
 }

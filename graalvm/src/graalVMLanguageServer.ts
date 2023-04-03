@@ -89,7 +89,7 @@ export function connectToLanguageServer(connection: () => Promise<StreamInfo>) {
 	languageClient = new Promise<LanguageClient>((resolve) => {
 		let client = new LanguageClient('GraalVMLanguageServer', 'GraalVM Language Client', connection, clientOptions);
 		let prepareStatus = vscode.window.setStatusBarMessage("Graal Language Client: Connecting to GraalLS");
-		client.onReady().then(() => {
+		client.start().then(() => {
 			prepareStatus.dispose();
 			vscode.window.setStatusBarMessage('GraalLS is ready.', 3000);
 			resolve(client);
@@ -98,7 +98,6 @@ export function connectToLanguageServer(connection: () => Promise<StreamInfo>) {
 			vscode.window.setStatusBarMessage('GraalLS failed to initialize.', 3000);
 			resolve(client);
 		});
-		client.start();
 	});
 }
 

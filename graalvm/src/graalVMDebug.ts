@@ -163,7 +163,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 	}
 
 	resolveDebugConfigurationWithSubstitutedVariables?(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-		if (config.request == 'attach') {
+		if (config.request === 'attach') {
 			if (!config.protocol) {
 				config.protocol = 'debugAdapter';
 			}
