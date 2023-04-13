@@ -388,7 +388,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
                     env.PATH = `${graalVMPath}${delimiter}${path}`;
                 }
             } else {
-                env.PATH = `${graalVMPath}${delimiter}${process.env.PATH}`;
+                env.PATH = `${graalVMPath}${delimiter}\${env:PATH}`;
             }
             return setTerminalEnv(env);
         },
