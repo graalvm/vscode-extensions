@@ -171,6 +171,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}));
 		visualvm.initializeConfiguration().then(initialized => {
 			if (initialized) {
+				context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java+', visualvm.configurationProvider));
 				context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java8+', visualvm.configurationProvider));
 				context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java', visualvm.configurationProvider));
 			}
@@ -193,6 +194,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	nativeImage.initializeConfiguration().then(initialized => {
 		if (initialized) {
+			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java+', nativeImage.configurationProvider));
 			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java8+', nativeImage.configurationProvider));
 			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java', nativeImage.configurationProvider));
 			vscode.commands.executeCommand('setContext', 'nativeImageInitialized', true);

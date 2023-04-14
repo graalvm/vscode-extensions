@@ -287,6 +287,8 @@ export async function attachToKubernetes(target?: any): Promise<void> {
 }
 
 export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string, namespace?: string) {
+	const debuggers: object[] | undefined = vscode.extensions.getExtension('asf.apache-netbeans-java')?.packageJSON?.contributes?.debuggers;
+	const debugTypes = debuggers?.map((d: any) => d.type);
 	const port = await getDebugPort(kubectl, podName, namespace);
 	if (!port) {
 		vscode.window.showErrorMessage(`Error checking pod state`);
@@ -313,7 +315,7 @@ export async function attachToPod(kubectl: kubernetes.KubectlV1, podName: string
 	if (forward) {
 		const workspaceFolder = await selectWorkspaceFolder();
 		const debugConfig : vscode.DebugConfiguration = {
-			type: "java8+",
+			type: debugTypes?.includes('java+') ? "java+" : "java8+",
 			name: "Attach to Kubernetes",
 			request: "attach",
 			hostName: "localhost",
