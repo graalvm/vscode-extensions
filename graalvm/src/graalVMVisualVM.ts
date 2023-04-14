@@ -233,7 +233,7 @@ async function setWhenStarted(context: vscode.ExtensionContext | undefined, code
 function configureWhenStarted(context: vscode.ExtensionContext) {
     let choices: QuickPickAction[] = getWhenStartedChoices();
     vscode.window.showQuickPick(choices, {
-        placeHolder: 'Select action when process is started (use "Launch VisualVM & Java 8+ Application" configuration)'
+        placeHolder: 'Select action when process is started (use "Launch VisualVM & Java Application" configuration)'
     }).then(selection => { if (selection) setWhenStarted(context, selection.code); });
 }
 
