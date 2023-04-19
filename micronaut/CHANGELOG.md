@@ -1,5 +1,9 @@
 # Change Log
 
+# Version 0.5.18
+* Dependency on the GraalVM Tools for Java extension removed
+* Update of 3rd party libraries
+
 # Version 0.5.17
 * Update of 3rd party libraries
 

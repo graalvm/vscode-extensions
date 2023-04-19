@@ -12,7 +12,8 @@ import * as http from 'http';
 import * as https from 'https';
 import * as path from 'path';
 import * as decompress from 'decompress';
-import { getMicronautHome, getMicronautLaunchURL, getJavaHome, MultiStepInput } from "./utils";
+import * as jdkUtils from 'jdk-utils';
+import { getMicronautHome, getMicronautLaunchURL, getJavaHome, MultiStepInput, getJavaVersion } from "./utils";
 
 const HTTP_PROTOCOL: string = 'http://';
 const HTTPS_PROTOCOL: string = 'https://';
@@ -103,7 +104,40 @@ export async function createProject(context: vscode.ExtensionContext) {
 async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{url: string, args?: string[], name: string, target: string, buildTool: string, java?: string} | undefined> {
 
     const commands: string[] = await vscode.commands.getCommands();
-    const graalVMs: {name: string, path: string, active: boolean}[] = commands.includes('extension.graalvm.findGraalVMs') ? await vscode.commands.executeCommand('extension.graalvm.findGraalVMs') || [] : [];
+    const javaVMs: {name: string; path: string; active: boolean}[] = commands.includes('extension.graalvm.findGraalVMs') ? await vscode.commands.executeCommand('extension.graalvm.findGraalVMs') || [] : [];
+    const javaRuntimes = await jdkUtils.findRuntimes({checkJavac: true});
+    if (javaRuntimes.length) {
+        for (const runtime of javaRuntimes) {
+            if (runtime.hasJavac && !javaVMs.find(vm => path.normalize(vm.path) === path.normalize(runtime.homedir))) {
+                const version = await getJavaVersion(runtime.homedir);
+                if (version) {
+                    javaVMs.push({name: version, path: runtime.homedir, active: false});
+                }
+            }
+        }
+    }
+    const configJavaRuntimes = vscode.workspace.getConfiguration('java').get('configuration.runtimes', []) as any[];
+    if (configJavaRuntimes.length) {
+        for (const runtime of configJavaRuntimes) {
+            if (runtime && typeof runtime === 'object' && runtime.path && !javaVMs.find(vm => path.normalize(vm.path) === path.normalize(runtime.path))) {
+                const version = await getJavaVersion(runtime.path);
+                if (version) {
+                    javaVMs.push({name: version, path: runtime.path, active: runtime.default});
+                }
+            }
+        }
+    }
+    javaVMs.sort((a, b) => {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+        if (nameA < nameB) {
+            return -1;
+        }
+        if (nameA > nameB) {
+            return 1;
+        }
+        return 0;
+    });
 
     interface State {
 		micronautVersion: {label: string, serviceUrl: string};
@@ -163,13 +197,13 @@ async function selectCreateOptions(context: vscode.ExtensionContext): Promise<{u
 	}
 
 	async function pickJavaVersion(input: MultiStepInput, state: Partial<State>) {
-        const items: {label: string, value: string, description?: string}[] = graalVMs.map(item => ({label: item.name, value: item.path, description: item.active ? '(active)' : undefined}));
+        const items: {label: string, value: string, description?: string}[] = javaVMs.map(item => ({label: item.name, value: item.path, description: item.active ? '(active)' : undefined}));
         items.push({label: 'Other Java', value: '', description: '(manual configuration)'});
 		const selected: any = await input.showQuickPick({
 			title,
 			step: 3,
 			totalSteps: totalSteps(state),
-			placeholder: graalVMs.length > 0 ? 'Pick project Java' : 'Pick project Java (no GraalVM registered)',
+			placeholder: 'Pick project Java',
 			items,
 			activeItems: state.javaVersion,
 			shouldResume: () => Promise.resolve(false)

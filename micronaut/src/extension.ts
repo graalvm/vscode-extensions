@@ -49,30 +49,37 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.kubernetes.debug', () => {
 		runProject(true);
 	}));
-        context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.odb.register', (dbNode) => {
-            let userId: string = dbNode.connectionProperties.userID;
-            let dataSource: string = dbNode.connectionProperties.dataSource;
-            let tnsAdmin: string = dbNode.connectionProperties.tnsAdmin;
-            let password: string = String.fromCharCode(...dbNode.connectionProperties.password);
-            let url = `jdbc:oracle:thin:@${dataSource}?TNS_ADMIN=\"${tnsAdmin}\"`;
-            let driver = "oracle.jdbc.OracleDriver";
-            let schema = userId.toUpperCase();
-            let displayName = dataSource;
-            let info = {userId, password, url, driver, schema, displayName};
-            vscode.commands.executeCommand('db.add.connection', info);
-        }));
-        context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.oci.register', (ociNode) => {
-            let id: string = ociNode.adbInstanceNodeProperties.adbInstanceID;
-            let name: string = ociNode.adbInstanceNodeProperties.adbInstanceDisplayName;
-            let info = {id, name};
-            vscode.commands.executeCommand('nbls:Tools:org.netbeans.modules.cloud.oracle.actions.DownloadWalletAction', info);
-        }));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.odb.register', (dbNode) => {
+		let userId: string = dbNode.connectionProperties.userID;
+		let dataSource: string = dbNode.connectionProperties.dataSource;
+		let tnsAdmin: string = dbNode.connectionProperties.tnsAdmin;
+		let password: string = String.fromCharCode(...dbNode.connectionProperties.password);
+		let url = `jdbc:oracle:thin:@${dataSource}?TNS_ADMIN=\"${tnsAdmin}\"`;
+		let driver = "oracle.jdbc.OracleDriver";
+		let schema = userId.toUpperCase();
+		let displayName = dataSource;
+		let info = {userId, password, url, driver, schema, displayName};
+		vscode.commands.executeCommand('db.add.connection', info);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.micronaut.oci.register', (ociNode) => {
+		let id: string = ociNode.adbInstanceNodeProperties.adbInstanceID;
+		let name: string = ociNode.adbInstanceNodeProperties.adbInstanceDisplayName;
+		let info = {id, name};
+		vscode.commands.executeCommand('nbls:Tools:org.netbeans.modules.cloud.oracle.actions.DownloadWalletAction', info);
+	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 		if (e.affectsConfiguration('micronaut.home')) {
 			creatorInit();
 		}
 	}));
 	creatorInit();
+	const graalVmExt = vscode.extensions.getExtension('oracle-labs-graalvm.graalvm');
+	if (graalVmExt) {
+		if (!graalVmExt.isActive) {
+			graalVmExt.activate();
+		}
+		vscode.commands.executeCommand('setContext', 'graalVMExt.available', true);
+	}
 	micronautProjectExists().then(exists => {
 		if (exists) {
 			vscode.commands.executeCommand('setContext', 'micronautProjectExists', true);
