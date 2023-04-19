@@ -6,6 +6,7 @@
  */
 
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -47,12 +48,68 @@ export function getJavaHome(): string {
 	if (javaHome) {
 		return javaHome;
 	}
+	const javaRuntimes = vscode.workspace.getConfiguration('java').get('configuration.runtimes') as any[];
+	for (const runtime of javaRuntimes) {
+		if (runtime && typeof runtime === 'object' && runtime.path && runtime.default) {
+			return runtime.path;
+		}
+	}
 	javaHome = vscode.workspace.getConfiguration('java').get('home') as string;
 	if (javaHome) {
 		return javaHome;
 	}
 	javaHome = process.env['JAVA_HOME'] as string;
 	return javaHome;
+}
+
+export async function getJavaVersion(homeFolder: string): Promise<string | undefined> {
+    return new Promise<string | undefined>(resolve => {
+        if (homeFolder && fs.existsSync(homeFolder)) {
+            const executable: string | undefined = findExecutable('java', homeFolder);
+            if (executable) {
+                cp.execFile(executable, ['-version'], { encoding: 'utf8' }, (_error, _stdout, stderr) => {
+                    if (stderr) {
+                        let javaVersion: string | undefined;
+                        let graalVMInfo: string | undefined;
+                        let javaVMInfo: string | undefined;
+                        stderr.split('\n').forEach((line: string) => {
+							const javaInfo: string[] | null = line.match(/version\s+"(\S+)"/);
+							const gvmInfo = line.match(/(GraalVM.*)\s+\(/);
+							const jvmInfo = line.match(/^(.*)\s+Runtime Environment/);
+							if (javaInfo && javaInfo.length > 1) {
+								javaVersion = javaInfo[1];
+							}
+							if (gvmInfo && gvmInfo.length > 1) {
+								graalVMInfo = gvmInfo[1];
+							}
+							if (jvmInfo && jvmInfo.length > 1) {
+								javaVMInfo = jvmInfo[1];
+							}
+                        });
+                        if (javaVersion && (javaVMInfo || graalVMInfo)) {
+							let majorVersion = javaVersion;
+                            if (majorVersion.startsWith('1.')) {
+                                majorVersion = majorVersion.slice(2);
+                            }
+                            let i = majorVersion.indexOf('.');
+                            if (i > -1) {
+                                majorVersion = majorVersion.slice(0, i);
+                            }
+                            resolve(graalVMInfo ? `${graalVMInfo}, Java ${majorVersion}` : `${javaVMInfo} ${javaVersion}, Java ${majorVersion}`);
+                        } else {
+                            resolve(undefined);
+                        }
+                    } else {
+                        resolve(undefined);
+                    }
+                });
+            } else {
+                resolve(undefined);
+            }
+        } else {
+            resolve(undefined);
+        }
+    });
 }
 
 export function findExecutable(program: string, home: string): string | undefined {
