@@ -62,7 +62,7 @@ export async function ask(question: string, options: {option: string; fnc?: (() 
 
 const YES: string = 'Yes';
 const NO: string = 'No';
-export async function askYesNo(question: string, ifYes: (() => any) | undefined, ifNo?: (() => any), otherwise?: (() => any)): Promise<any> {
+export async function askYesNo<Y, N, O>(question: string, ifYes: (() => Y) | undefined, ifNo?: (() => N), otherwise?: (() => O)): Promise<Y | N | O> {
 	return ask(question, [{option: YES, fnc: ifYes}, {option: NO, fnc: ifNo}], otherwise);
 }
 

@@ -6,7 +6,7 @@
  */
 
 import * as utils from './utils';
-import { ConfigurationPickItem, getConf } from './graalVMConfiguration';
+import { ConfigurationPickItem, getConf, setConf } from './graalVMConfiguration';
 
 export function getPythonConfigurations(): ConfigurationPickItem[] {
     const ret: ConfigurationPickItem[] = [];
@@ -30,6 +30,6 @@ function setConfig(section: string, path?: string) {
 	const config = getConf('python');
 	const term = config.inspect(section);
 	if (term) {
-		config.update(section, path, true);
+		setConf(config, section, path);
 	}
 }

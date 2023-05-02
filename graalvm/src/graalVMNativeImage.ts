@@ -10,7 +10,7 @@ import * as path from "path";
 import * as https from "https";
 import * as sax from "sax";
 import * as fs from 'fs';
-import { getGVMHome } from "./graalVMConfiguration";
+import { getConf, getGVMHome, setConf } from "./graalVMConfiguration";
 import { getGraalVMVersion } from './graalVMInstall';
 import { findExecutable, platform } from './utils';
 
@@ -308,24 +308,24 @@ export async function createWindowsNITerminal(options: vscode.TerminalOptions): 
 
 async function createTerminal(options: vscode.TerminalOptions, profile?: string): Promise<vscode.Terminal> {
     const profileKey = `integrated.defaultProfile.${platform()}`;
-    const currentProfile = profile ? vscode.workspace.getConfiguration('terminal').get(profileKey) as string : undefined;
+    const currentProfile = profile ? getConf('terminal').get(profileKey) as string : undefined;
     try {
         if (profile) {
-            await vscode.workspace.getConfiguration('terminal').update(profileKey, profile, true);
+            await setConf(getConf('terminal'), profileKey, profile);
         }
         return vscode.window.createTerminal(options);
     } finally {
         if (profile) {
-            vscode.workspace.getConfiguration('terminal').update(profileKey, currentProfile ? currentProfile : undefined, true);
+            setConf(getConf('terminal'), profileKey, currentProfile ? currentProfile : undefined);
         }
     }
 }
 
 async function configureWindowsEnvironment(): Promise<string | undefined> {
-    let configure: string | undefined = vscode.workspace.getConfiguration('native').get('buildtools.config.windows') as string;
+    let configure: string | undefined = getConf('native').get('buildtools.config.windows') as string;
     if (!configure || !fs.existsSync(configure)) {
         if (configure) {
-            vscode.workspace.getConfiguration('native').update('buildtools.config.windows', undefined, true);
+            await setConf(getConf('native'), 'buildtools.config.windows', undefined);
         }
         const choices: string[] = findWindowsTools();
         if (choices.length === 0) {
@@ -334,7 +334,7 @@ async function configureWindowsEnvironment(): Promise<string | undefined> {
             configure = await selectWindowsTools(choices);
         }
         if (configure) {
-            await vscode.workspace.getConfiguration('native').update('buildtools.config.windows', configure, true);
+            await setConf(getConf('native'), 'buildtools.config.windows', configure);
         }
     }
     if (configure && configure.includes(' ')) {

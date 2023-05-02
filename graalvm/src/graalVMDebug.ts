@@ -16,7 +16,7 @@ import * as utils from './utils';
 import { LSPORT, connectToLanguageServer, stopLanguageServer, lspArgs, hasLSClient, setLSPID } from './graalVMLanguageServer';
 import { StreamInfo } from 'vscode-languageclient/node';
 import { ILaunchRequestArguments, IGraalVMLaunchInfo } from './graalVMDebugInterfaces';
-import { getGVMConfig, getConf, getGVMHome } from './graalVMConfiguration';
+import { getGVMConfig, getConf, getGVMHome, setConf } from './graalVMConfiguration';
 
 const DEBUG_TERMINAL_NAME = 'GraalVM Debug Console';
 const NODE: string = "node";
@@ -52,7 +52,7 @@ export class GraalVMDebugAdapterTracker implements vscode.DebugAdapterTrackerFac
 			},
 			onWillStopSession() {
 				if (rTermArgs) {
-					getConf('r').update('rterm.option', rTermArgs, true);
+					setConf(getConf('r'), 'rterm.option', rTermArgs);
 				}
 			}
 		};
@@ -103,7 +103,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 				if (!args.find((arg: string) => arg.startsWith('--inspect'))) {
 					args.push('--inspect.Suspend=false');
 				}
-				conf.update('rterm.option', args, true);
+				setConf(conf, 'rterm.option', args);
 				setTimeout(() => {
 					vscode.commands.executeCommand('r.createRTerm');
 					setTimeout(() => {

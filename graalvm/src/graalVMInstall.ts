@@ -14,7 +14,7 @@ import * as utils from './utils';
 import * as gdsUtils from './gdsUtils';
 import { basename, dirname, join, normalize, delimiter } from 'path';
 import { LicenseCheckPanel } from './graalVMLicenseCheck';
-import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName, setJavaRuntime } from './graalVMConfiguration';
+import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName, setJavaRuntime, setConf } from './graalVMConfiguration';
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
 import { componentsChanged } from './graalVMVisualVM';
@@ -317,8 +317,8 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
         '(java.home)',
         _graalVMHome => vscode.extensions.getExtension('redhat.java') !== undefined,
         graalVMHome => getConf('java').get('home') === graalVMHome,
-        async graalVMHome => getConf('java').update('home', graalVMHome, true),
-        async _graalVMHome => getConf('java').update('home', undefined, true))
+        async graalVMHome => setConf(getConf('java'), 'home', graalVMHome),
+        async _graalVMHome => setConf(getConf('java'), 'home', undefined))
     );
     
     ret.push(new ConfigurationPickItem(
@@ -341,7 +341,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
             const runtime: any = runtimes.find((runtime: any) => runtime.path === graalVMHome);
             if (runtime?.default) {
                 delete runtime.default;
-                return getConf('java').update('configuration.runtimes', runtimes, true);
+                return setConf(getConf('java'), 'configuration.runtimes', runtimes);
             }
         }
     ));
@@ -425,9 +425,9 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
                 } else {
                     envs.push({environmentVariable: "JAVA_HOME", value: graalVMHome});
                 }
-                return getConf('maven').update('terminal.customEnv', envs, true);
+                return setConf(getConf('maven'), 'terminal.customEnv', envs);
             }
-            return getConf('maven').update('terminal.customEnv', [{environmentVariable: "JAVA_HOME", value: graalVMHome}], true);
+            return setConf(getConf('maven'), 'terminal.customEnv', [{environmentVariable: "JAVA_HOME", value: graalVMHome}]);
         },
         async graalVMHome => {
             const envs: any[] = getConf('maven').get('terminal.customEnv') as [];
@@ -435,7 +435,7 @@ export function getInstallConfigurations(): ConfigurationPickItem[] {
                 const env: any = envs.find(env => env["environmentVariable"] === "JAVA_HOME" && env["value"] === graalVMHome);
                 if (env) {
                     envs.splice(envs.indexOf(env), 1);
-                    return getConf('maven').update('terminal.customEnv', envs, true);                    
+                    return setConf(getConf('maven'), 'terminal.customEnv', envs);
                 }
             }
             return;
