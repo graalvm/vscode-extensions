@@ -40,16 +40,16 @@ async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: strin
         workspaceFolderLanguageValue?: unknown;
         languageIds?: string[] | undefined;
     } | undefined = config.inspect(key);
-    if(info?.workspaceFolderValue)
+    if(info?.workspaceFolderValue !== undefined)
         return vscode.ConfigurationTarget.WorkspaceFolder;
-    if(info?.workspaceValue)
+    if(info?.workspaceValue !== undefined)
         return vscode.ConfigurationTarget.Workspace;
-    if(info?.globalValue)
+    if(info?.globalValue !== undefined)
         return vscode.ConfigurationTarget.Global;
-    let store: vscode.ConfigurationTarget | undefined = extContext.workspaceState.get(SAVE_SETTINGS);
+    let store: vscode.ConfigurationTarget | undefined = extContext.globalState.get(SAVE_SETTINGS);
     if(store === undefined) {
-        store = await utils.askYesNo("Do you want to store GraalVM settings globaly?", () => vscode.ConfigurationTarget.Global, () => vscode.ConfigurationTarget.Workspace);
-        extContext.workspaceState.update(SAVE_SETTINGS, store);
+        store = await utils.askYesNo("Do you want to store GraalVM settings globally?", () => vscode.ConfigurationTarget.Global, () => vscode.ConfigurationTarget.Workspace);
+        extContext.globalState.update(SAVE_SETTINGS, store);
     }
     return store;
 }
