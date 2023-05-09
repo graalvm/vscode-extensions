@@ -80,8 +80,12 @@ export async function setJavaRuntime(version: string, path: string, setAsDefault
     const runtimes = javaConf.get(CONFIG_RUNTIMES) as object[] || [];
     const idx = version.lastIndexOf(', Java ');
     if (idx >= 0) {
-        const javaVersion = `JavaSE-${version.slice(idx + 7).trim()}`;
-        let runtime: any = runtimes.find((runtime: any) => runtime.name === javaVersion);
+        let javaVersion = version.slice(idx + 7).trim();
+        if (+javaVersion <= 8) {
+            javaVersion = '1.' + javaVersion;
+        }
+        const javaVersionName = `JavaSE-${javaVersion}`;
+        let runtime: any = runtimes.find((runtime: any) => runtime.name === javaVersionName);
         if (runtime) {
             if (runtime.path !== path) {
                 const update = () => {
@@ -96,11 +100,11 @@ export async function setJavaRuntime(version: string, path: string, setAsDefault
                 if (setAsDefault) {
                     update();
                 } else {
-                    await utils.askYesNo(`Set ${version} as runtime for ${javaVersion}?`, update);
+                    await utils.askYesNo(`Set ${version} as runtime for ${javaVersionName}?`, update);
                 }
             }
         } else {
-            runtime = { name: javaVersion, path };
+            runtime = { name: javaVersionName, path };
             if (setAsDefault) {
                 runtime.default = true;
             }
