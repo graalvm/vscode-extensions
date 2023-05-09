@@ -87,21 +87,23 @@ export async function setJavaRuntime(version: string, path: string, setAsDefault
         const javaVersionName = `JavaSE-${javaVersion}`;
         let runtime: any = runtimes.find((runtime: any) => runtime.name === javaVersionName);
         if (runtime) {
+            const update = () => {
+                runtime.path = path;
+                delete runtime.sources;
+                if (setAsDefault) {
+                    runtime.default = true;
+                } else {
+                    delete runtime.default;
+                }
+            };
             if (runtime.path !== path) {
-                const update = () => {
-                    runtime.path = path;
-                    delete runtime.sources;
-                    if (setAsDefault) {
-                        runtime.default = true;
-                    } else {
-                        delete runtime.default;
-                    }
-                };
                 if (setAsDefault) {
                     update();
                 } else {
                     await utils.askYesNo(`Set ${version} as runtime for ${javaVersionName}?`, update);
                 }
+            } else if (setAsDefault) {
+                update();
             }
         } else {
             runtime = { name: javaVersionName, path };
