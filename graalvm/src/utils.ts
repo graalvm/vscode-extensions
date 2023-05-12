@@ -19,17 +19,27 @@ export function random(low: number, high: number): number {
 export function findExecutable(program: string, graalVMHome?: string): string | undefined {
 	graalVMHome = graalVMHome || getGVMHome();
     if (graalVMHome) {
-        let executablePath = path.join(graalVMHome, 'bin', program);
-        if (process.platform === 'win32') {
-            if (fs.existsSync(executablePath + '.cmd')) {
-                return executablePath + '.cmd';
-            }
-            if (fs.existsSync(executablePath + '.exe')) {
-                return executablePath + '.exe';
-            }
-        } else if (fs.existsSync(executablePath)) {
-            return executablePath;
-        }
+		const exists = (executablePath: string) => {
+			if (process.platform === 'win32') {
+				if (fs.existsSync(executablePath + '.cmd')) {
+					return executablePath + '.cmd';
+				}
+				if (fs.existsSync(executablePath + '.exe')) {
+					return executablePath + '.exe';
+				}
+			} else if (fs.existsSync(executablePath)) {
+				return executablePath;
+			}
+			return undefined;
+		}
+        let executable = exists(path.join(graalVMHome, 'bin', program));
+		if (executable) {
+			return executable;
+		}
+        executable = exists(path.join(graalVMHome, 'jre', 'bin', program));
+		if (executable) {
+			return executable;
+		}
     }
     return undefined;
 }
