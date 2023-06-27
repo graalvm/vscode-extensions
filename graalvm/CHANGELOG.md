@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.27
+* No longer includes Oracle JDBC driver for NetBeans Language Server. Use "GCN Database Support" extension to get database support.
+
 ## Version 0.5.26
 * Update of 3rd party libraries
 

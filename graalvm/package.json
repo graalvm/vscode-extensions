@@ -2,7 +2,7 @@
 	"name": "graalvm",
 	"displayName": "GraalVM Tools for Java",
 	"description": "Support for Java, JavaScript, Python, Ruby and R on GraalVM, native image and more...",
-	"version": "0.5.26",
+	"version": "0.5.27",
 	"preview": true,
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"publisher": "oracle-labs-graalvm",
