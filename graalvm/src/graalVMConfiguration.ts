@@ -28,6 +28,9 @@ export async function setConf(config: vscode.WorkspaceConfiguration, key: string
 }
 
 async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: string): Promise<vscode.ConfigurationTarget | boolean | undefined> {
+    if (!vscode.workspace.workspaceFolders) {
+        return vscode.ConfigurationTarget.Global;
+    }
     const info: {
         key: string;
         defaultValue?: unknown;
