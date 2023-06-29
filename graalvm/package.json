@@ -1284,7 +1284,7 @@
 		"eslint": "^8.36.0",
 		"eslint-webpack-plugin": "^4.0.0",
 		"maven": "^5.0.0",
-		"ts-loader": "^6.2.1",
+		"ts-loader": "^9.4.4",
 		"typescript": "^5.0.2",
 		"webpack": "^5.76.2",
 		"webpack-cli": "^5.0.1"
