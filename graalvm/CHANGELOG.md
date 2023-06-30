@@ -1,7 +1,10 @@
 # Change Log
 
-## Version 0.5.27
+## Versuin 0.5.28
 * No longer includes Oracle JDBC driver for NetBeans Language Server. Use "GCN Database Support" extension to get database support.
+
+## Version 0.5.27
+* Dependencies updated
 * Fixed: Registering GraalVM when no workspace is opened failed 
 
 ## Version 0.5.26
