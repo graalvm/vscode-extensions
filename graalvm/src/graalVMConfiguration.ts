@@ -197,9 +197,10 @@ export async function setupProxy() {
 export async function checkGraalVMconfiguration(graalVMHome: string) {
     gatherConfigurations();
     for (const conf of configurations) {
-        if (!conf.show(graalVMHome) && conf.setted(graalVMHome)) {
+        if (!conf.show(graalVMHome)) {
             try {
-                await conf.unset(graalVMHome);
+                if(conf.setted(graalVMHome))
+                    await conf.unset(graalVMHome);
             } catch (_err) {}
         }
     }
@@ -404,11 +405,10 @@ async function removeDefaultConfigurations(graalVMHome: string) {
 async function removeConfigurations(graalVMHome: string) {
     gatherConfigurations();
     for (const conf of configurations) {
-        if (conf.setted(graalVMHome)) {
-            try {
+        try {
+            if (conf.setted(graalVMHome))
                 await conf.unset(graalVMHome);
-            } catch (_err) {}
-        }
+        } catch (_err) {}
     }
 }
 
