@@ -50,9 +50,10 @@ async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: strin
     if(info?.globalValue !== undefined)
         return vscode.ConfigurationTarget.Global;
     let store: vscode.ConfigurationTarget | undefined = extContext.globalState.get(SAVE_SETTINGS);
-    if(store === undefined) {
-        store = await utils.askYesNo("Do you want to store GraalVM settings globally?", () => vscode.ConfigurationTarget.Global, () => vscode.ConfigurationTarget.Workspace);
-        extContext.globalState.update(SAVE_SETTINGS, store);
+    while (store === undefined) { // force choosing since it is needed information
+        store = await utils.askYesNo("Do you want to store GraalVM settings globally?", () => vscode.ConfigurationTarget.Global, () => vscode.ConfigurationTarget.Workspace, undefined, true);
+        if (store !== undefined)
+            extContext.globalState.update(SAVE_SETTINGS, store);
     }
     return store;
 }

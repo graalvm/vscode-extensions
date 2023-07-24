@@ -54,14 +54,10 @@ export function readDirSyncSafe(path: string): string[] {
     return [];
 }
 
-export async function ask(question: string, options: {option: string; fnc?: (() => any)}[], otherwise?: (() => any)): Promise<any> {
-	const select = await vscode.window.showInformationMessage(question, ...options.map(o => o.option));
+export async function ask(question: string, options: { option: string; fnc?: (() => any) }[], otherwise: () => any = () => undefined, modal: boolean = false): Promise<any> {
+	const select = await vscode.window.showInformationMessage(question, { modal: modal }, ...options.map(o => o.option));
 	if (!select) {
-		if (!otherwise) {
-			return;
-		} else {
-			return otherwise();
-		}
+		return otherwise();
 	}
 	const opt = options.find(o => o.option === select);
 	if (opt && opt.fnc) {
@@ -72,8 +68,8 @@ export async function ask(question: string, options: {option: string; fnc?: (() 
 
 const YES: string = 'Yes';
 const NO: string = 'No';
-export async function askYesNo<Y, N, O>(question: string, ifYes: (() => Y) | undefined, ifNo?: (() => N), otherwise?: (() => O)): Promise<Y | N | O> {
-	return ask(question, [{option: YES, fnc: ifYes}, {option: NO, fnc: ifNo}], otherwise);
+export async function askYesNo<Y, N, O>(question: string, ifYes: (() => Y) | undefined, ifNo?: (() => N), otherwise?: () => O, modal: boolean = false): Promise<Y | N | O> {
+	return ask(question, [{ option: YES, fnc: ifYes }, { option: NO, fnc: ifNo }], otherwise, modal);
 }
 
 const INSTALL: string = 'Install';
