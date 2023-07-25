@@ -49,15 +49,36 @@ async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: strin
         return vscode.ConfigurationTarget.Workspace;
     if(info?.globalValue !== undefined)
         return vscode.ConfigurationTarget.Global;
+    return await obtainConfigTarget();
+}
+    
+class Deffered<T, E = unknown>{
+    promise: Promise<T>;
+    resolve: (value: T | PromiseLike<T>) => void = () => null;
+    reject: (reason?: E) => void = () => null;
+    constructor() {
+        this.promise = new Promise<T>((resolve, reject) => {
+            this.resolve = resolve;
+            this.reject = reject;
+        });
+    }
+}
+    
+const deffered = new Deffered<vscode.ConfigurationTarget>();
+let obtainConfigTarget = async (): Promise<vscode.ConfigurationTarget> => {
+    obtainConfigTarget = (): Promise<vscode.ConfigurationTarget> => deffered.promise;
     let store: vscode.ConfigurationTarget | undefined = extContext.globalState.get(SAVE_SETTINGS);
     if (store === undefined) {
         store = await utils.ask("Do you want to store GraalVM settings in Workspace?",
             [{ option: "Yes", fnc: () => vscode.ConfigurationTarget.Workspace }], undefined, true,
-            "Cancelation will resolve to Globaly stored settings.") ?? vscode.ConfigurationTarget.Global;
+            "Cancelation will resolve to Globaly stored settings.");
+        if (store === undefined)
+            store = vscode.ConfigurationTarget.Global;
         extContext.globalState.update(SAVE_SETTINGS, store);
     }
+    deffered.resolve(store);
     return store;
-}
+};
 
 export function getGVMConfig(gvmConfig?: vscode.WorkspaceConfiguration): vscode.WorkspaceConfiguration {
 	if (!gvmConfig) {
