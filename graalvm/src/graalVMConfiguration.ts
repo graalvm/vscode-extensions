@@ -24,10 +24,17 @@ export function getConf(key: string): vscode.WorkspaceConfiguration {
 }
 
 export async function setConf(config: vscode.WorkspaceConfiguration, key: string, value: any): Promise<void> {
-    return config.update(key, value, await getConfigTarget(config, key));
+    const target = await getConfigTarget(config, key);
+    try {
+        return config.update(key, value, target);
+    } catch (err) {
+        if (target > 1) // Update might fail when the cofiguration cannot be saved in Workspace (wrong scope for config)
+            return config.update(key, value, vscode.ConfigurationTarget.Global);
+        throw err;
+    }
 }
 
-async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: string): Promise<vscode.ConfigurationTarget | boolean | undefined> {
+async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: string): Promise<vscode.ConfigurationTarget> {
     if (!vscode.workspace.workspaceFolders) {
         return vscode.ConfigurationTarget.Global;
     }
@@ -49,13 +56,36 @@ async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: strin
         return vscode.ConfigurationTarget.Workspace;
     if(info?.globalValue !== undefined)
         return vscode.ConfigurationTarget.Global;
+    return await obtainConfigTarget();
+}
+    
+class Deffered<T, E = unknown>{
+    promise: Promise<T>;
+    resolve: (value: T | PromiseLike<T>) => void = () => null;
+    reject: (reason?: E) => void = () => null;
+    constructor() {
+        this.promise = new Promise<T>((resolve, reject) => {
+            this.resolve = resolve;
+            this.reject = reject;
+        });
+    }
+}
+    
+const deffered = new Deffered<vscode.ConfigurationTarget>();
+let obtainConfigTarget = async (): Promise<vscode.ConfigurationTarget> => {
+    obtainConfigTarget = (): Promise<vscode.ConfigurationTarget> => deffered.promise;
     let store: vscode.ConfigurationTarget | undefined = extContext.globalState.get(SAVE_SETTINGS);
-    if(store === undefined) {
-        store = await utils.askYesNo("Do you want to store GraalVM settings globally?", () => vscode.ConfigurationTarget.Global, () => vscode.ConfigurationTarget.Workspace);
+    if (store === undefined) {
+        store = await utils.ask("Do you want to store GraalVM settings in Workspace?",
+            [{ option: "Yes", fnc: () => vscode.ConfigurationTarget.Workspace }], undefined, true,
+            "Cancelation will resolve to Globally stored settings.");
+        if (store === undefined)
+            store = vscode.ConfigurationTarget.Global;
         extContext.globalState.update(SAVE_SETTINGS, store);
     }
+    deffered.resolve(store);
     return store;
-}
+};
 
 export function getGVMConfig(gvmConfig?: vscode.WorkspaceConfiguration): vscode.WorkspaceConfiguration {
 	if (!gvmConfig) {
@@ -195,9 +225,10 @@ export async function setupProxy() {
 export async function checkGraalVMconfiguration(graalVMHome: string) {
     gatherConfigurations();
     for (const conf of configurations) {
-        if (!conf.show(graalVMHome) && conf.setted(graalVMHome)) {
+        if (!conf.show(graalVMHome)) {
             try {
-                await conf.unset(graalVMHome);
+                if(conf.setted(graalVMHome))
+                    await conf.unset(graalVMHome);
             } catch (_err) {}
         }
     }
@@ -402,11 +433,10 @@ async function removeDefaultConfigurations(graalVMHome: string) {
 async function removeConfigurations(graalVMHome: string) {
     gatherConfigurations();
     for (const conf of configurations) {
-        if (conf.setted(graalVMHome)) {
-            try {
+        try {
+            if (conf.setted(graalVMHome))
                 await conf.unset(graalVMHome);
-            } catch (_err) {}
-        }
+        } catch (_err) {}
     }
 }
 

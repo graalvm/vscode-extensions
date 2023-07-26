@@ -52,13 +52,13 @@
 					"type": "string",
 					"default": "",
 					"description": "Path to the active GraalVM installation.",
-					"scope": "machine"
+					"scope": "machine-overridable"
 				},
 				"graalvm.installations": {
 					"type": "array",
 					"default": [],
 					"description": "Paths to GraalVM installations.",
-					"scope": "machine"
+					"scope": "machine-overridable"
 				},
 				"graalvm.languageServer.start": {
 					"type": "string",
@@ -79,13 +79,13 @@
 					"type": "string",
 					"default": "",
 					"description": "Absolute path to the working directory of the GraalVM Language Server.",
-					"scope": "machine"
+					"scope": "machine-overridable"
 				},
 				"graalvm.languageServer.delegateServers": {
 					"type": "string",
 					"default": "",
 					"description": "Comma-separated list of language@[host:]port where other language servers run.",
-					"scope": "machine"
+					"scope": "machine-overridable"
 				},
 				"graalvm.languageServer.startRLanguageServer": {
 					"type": "boolean",
@@ -106,13 +106,13 @@
 					"type": "string",
 					"default": "",
 					"description": "Path to the custom GU configuration file.",
-					"scope": "machine"
+					"scope": "machine-overridable"
 				},
 				"native.buildtools.config.windows": {
 					"type": "string",
 					"default": "",
 					"description": "Optional path to Windows Build Tools Configuration Script",
-					"scope": "machine"
+					"scope": "machine-overridable"
 				}
 			}
 		},
