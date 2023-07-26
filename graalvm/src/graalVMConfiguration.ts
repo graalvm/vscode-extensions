@@ -24,10 +24,17 @@ export function getConf(key: string): vscode.WorkspaceConfiguration {
 }
 
 export async function setConf(config: vscode.WorkspaceConfiguration, key: string, value: any): Promise<void> {
-    return config.update(key, value, await getConfigTarget(config, key));
+    const target = await getConfigTarget(config, key);
+    try {
+        return config.update(key, value, target);
+    } catch (err) {
+        if (target > 1) // Update might fail when the cofiguration cannot be saved in Workspace (wrong scope for config)
+            return config.update(key, value, vscode.ConfigurationTarget.Global);
+        throw err;
+    }
 }
 
-async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: string): Promise<vscode.ConfigurationTarget | boolean | undefined> {
+async function getConfigTarget(config: vscode.WorkspaceConfiguration, key: string): Promise<vscode.ConfigurationTarget> {
     if (!vscode.workspace.workspaceFolders) {
         return vscode.ConfigurationTarget.Global;
     }
@@ -71,7 +78,7 @@ let obtainConfigTarget = async (): Promise<vscode.ConfigurationTarget> => {
     if (store === undefined) {
         store = await utils.ask("Do you want to store GraalVM settings in Workspace?",
             [{ option: "Yes", fnc: () => vscode.ConfigurationTarget.Workspace }], undefined, true,
-            "Cancelation will resolve to Globaly stored settings.");
+            "Cancelation will resolve to Globally stored settings.");
         if (store === undefined)
             store = vscode.ConfigurationTarget.Global;
         extContext.globalState.update(SAVE_SETTINGS, store);
