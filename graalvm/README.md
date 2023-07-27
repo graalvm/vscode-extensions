@@ -1,11 +1,14 @@
 # GraalVM Tools for Java Extension
 *** **Technology Preview** ***
 
-Improve your developer productivity by leveraging the [GraalVM Tools for Java](http://www.graalvm.org/tools/vscode/graalvm-extension/) extension in VS Code. The extension enables you to manage GraalVM installations and their components in VS Code and locally. It includes the GraalVM Installation and Configuration Wizard. 
+## Features
 
-Setting GraalVM as the default Java runtime in VS Code enables both just-in-time ([Graal](http://www.graalvm.org/reference-manual/java/compiler.md)) and ahead-of-time ([Native Image](http://www.graalvm.org/reference-manual/native-image/README.md)) compilers, making VS Code a compelling and convenient GraalVM development environment. Any application that runs on a JVM can run unmodified on GraalVM.
+The extension helps you to manage GraalVM installations and their components by VS Code. It includes the GraalVM Installation and Configuration Wizard. 
+
+Setting GraalVM as the default Java runtime in VS Code enables both just-in-time ([Graal](http://www.graalvm.org/reference-manual/java/compiler.md)) and ahead-of-time ([Native Image](http://www.graalvm.org/reference-manual/native-image/README.md)) compilers.
 
 The GraalVM Tools for Java extension performs the work of several extensions in one.
+
 Key features include:
 * The GraalVM installations manager
 * The just-in-time Graal compiler, ensuring your code runs fast
@@ -16,16 +19,29 @@ Key features include:
 
 > Note: The extension is a Technology Preview.
 
-## Installing the Extension
+## Requirements
 
-To install the GraalVM Tools for Java extension in VS Code:
+<details closed>
+<summary>Java Development and Debugging</summary>
 
-1. Navigate to **Extensions** in the left-hand side Activity Bar (or use the _Ctrl+Shift+X_ shortcut keys combination).
-2. Search for "GraalVM" in the search field.
-3. Once found, click **Install**.
-4. Reload when required.
+[Extension Pack for Java from Microsoft](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) has to be installed to develop Java. 
 
-## GraalVM Installation Wizard
+The [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=ASF.apache-netbeans-java) enables Java language support as well. If VS Code detects the Extension Pack for Java from Microsoft installed, it deactivates the Apache NetBeans Language Server.
+</details>
+
+<details closed>
+<summary>Proxy Settings</summary>
+If you are working behind a firewall, set the proxy for the GraalVM Installation Wizard and components installation. The extension will ask for setting this initially. Set:
+1. __Http: Proxy:__ to the proxy server and port
+2. __Http: Proxy Support: on__ when behind a firewall and __OFF__ when working without the proxy.
+
+For more information about GraalVM's installation and setup, consult the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#graalvm-installation-wizard).
+</details>
+
+## Usage
+
+<details closed>
+<summary>GraalVM Installation Wizard</summary>
 
 After installing the extension, you can install GraalVM by using the built-in installation wizard (click the **Gr** icon in the left side Activity Bar).
 
@@ -34,21 +50,10 @@ The **Download & Install GraalVM** action is recommended as it eliminates the fu
 Choose either the Community distribution (free for all purposes) or Enterprise distribution (free for evaluation and development). You can also choose to install additional components (such as JavaScript and Node.js support).
 
 ![GraalVM Install Dialog](images/graalvm_install_actions.png)
+</details>
 
-### Proxy Settings
-If you are working behind a firewall, set the proxy for the GraalVM Installation Wizard and components installation. The extension will ask for setting this initially. Set:
-1. __Http: Proxy:__ to the proxy server and port
-2. __Http: Proxy Support: on__ when behind a firewall and __OFF__ when working without the proxy.
-
-For more information about GraalVM's installation and setup, consult the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#graalvm-installation-wizard).
-
-## Java Development and Debugging
-
- [Extension Pack for Java from Microsoft](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) has to be installed to develop Java. 
-
-The [Apache NetBeans Language Server](https://marketplace.visualstudio.com/items?itemName=ASF.apache-netbeans-java) enables Java language support as well. If VS Code detects the Extension Pack for Java from Microsoft installed, it deactivates the Apache NetBeans Language Server.
-
-## Integration with VisualVM
+<details closed>
+<summary>Integration with VisualVM</summary>
 
 The GraalVM Tools for Java extension provides integration with [VisualVM](https://visualvm.github.io), the all-in-one Java (and polyglot) monitoring and troubleshooting tool.
 VisualVM brings powerful, yet easy-to-use, visual Java tooling to VS Code.
@@ -56,12 +61,16 @@ VisualVM brings powerful, yet easy-to-use, visual Java tooling to VS Code.
 ![VisualVM and VS Code Integration](images/vscode_visualvm.png)
 
 For more information, see the [dedicated guide](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/visualvm-integration/) about VisualVM and VS Code integration using the extension.
+</details>
 
-## Support for Micronaut
+<details closed>
+<summary>Support for Micronaut</summary>
 
 The GraalVM Tools for Java extension in combination with the [GraalVM Tools for Micronaut](https://marketplace.visualstudio.com/items?itemName=oracle-labs-graalvm.micronaut) extension brings native support for the Micronaut framework in VS Code and opens many more possibilities for Java developers. See the [Micronaut extension documentation](https://www.graalvm.org/dev/tools/vscode/micronaut-extension/) to learn more.
+</details>
 
-## GraalVM Native Image
+<details closed>
+<summary>GraalVM Native Image</summary>
 
 With the GraalVM Tools for Java extension you can compile your Java application into a native executable using [GraalVM Native Image](https://www.graalvm.org/reference-manual/native-image/)
 directly in VS Code. The advantages are many:
@@ -70,18 +79,71 @@ directly in VS Code. The advantages are many:
 * Your application has improved security by greatly reducing attack surfaces and thwarting reverse engineering.
 
 Learn how you can do that from the [extension documentation](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/#native-image-building-and-debugging).
-## Native Image Debugging
+</details>
+
+<details closed>
+<summary>Native Image Debugging</summary>
 
 The GraalVM Tools for Java extension provides Java-like debugging of a native executable in a running state directly from within VS Code.
 You can set breakpoints, inspect the state of your application, even attach the debugger to a Native Image process in VS Code and step over the Java application source code!
 
 Read more about this and find a demo application in the [Native Image Debugging guide](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/debugging-native-image/).
+</details>
+
+## Basic Usage
+Do animated screenshots? How to create it here?
+
+## Available Commands
+| Name | Description |
+|---|---|
+| `extension.graalvm.selectGraalVMHome` | Set Active GraalVM Installation |
+| `extension.graalvm.installGraalVM` | Download & Install GraalVM |
+| `extension.graalvm.addExistingGraalVM` | Add Existing GraalVM |
+| `extension.graalvm.refreshInstallations` | Refresh Installations |
+| `extension.graalvm.installGraalVMComponent` | Install GraalVM Component |
+| `extension.graalvm.uninstallGraalVMComponent` | Uninstall GraalVM Component |
+| `extension.graalvm.gds.showConfiguration` | Show GU Configuration |
+| `extension.graalvm.addNativeImageToPOM` | Add Maven Native Image Plugin |
+| `extension.graalvm.toggleCodeCoverage` | Toggle Code Coverage |
+| `extension.graalvm.installRLanguageServer` | Install R Language Server |
+| `extension.graalvm.installRubyLanguageServer` | Install Ruby Language Server |
+| `extension.graalvm.setupProxy` | Setup Proxy |
+| `extension.graalvm.removeInstallation` | Remove GraalVM Installation |
+| `extension.graalvm.runVisualVMForPID` | Open Process In VisualVM |
+| `extension.graalvm.startVisualVM` | Start VisualVM |
+| `extension.graalvm.threadDumpVisualVM` | Take thread dump |
+| `extension.graalvm.heapDumpVisualVM` | Take heap dump |
+| `extension.graalvm.startCPUSamplerVisualVM` | Start CPU sampling |
+| `extension.graalvm.startMemorySamplerVisualVM` | Start memory sampling |
+| `extension.graalvm.startJFRRecordingVisualVM` | Start flight recording |
+| `extension.graalvm.openWindowsNITerminal` | Open Terminal Preconfigured For Native Image |
+| `extension.graalvm.troubleshootNBLSThreadDump` | Thread Dump |
+| `extension.graalvm.troubleshootNBLSHeapDump` | Heap Dump |
+| `extension.graalvm.troubleshootNBLSCpuSampler` | CPU Sampler |
+| `extension.graalvm.heapReplay` | Replay Heap Recording |
+
+## Settings
+| Name | Description | Default Value / Possible Values |
+|---|---|---|
+| `graalvm.home` | Path to the active GraalVM installation. | "" |
+| `graalvm.installations` | Paths to GraalVM installations. | [] |
+| `graalvm.languageServer.start` | Start GraalVM Language Server. | "**none**", "single", "inProcess" |
+| `graalvm.languageServer.currentWorkDir` | Absolute path to the working directory of the GraalVM Language Server. | "" |
+| `graalvm.languageServer.delegateServers` | Comma-separated list of "language@[host:]port" where other language servers run. | "" |
+| `graalvm.languageServer.startRLanguageServer` | Start R Language Server. | false |
+| `graalvm.languageServer.startRubyLanguageServer` | Start Ruby Language Server. | false |
+| `graalvm.systemDetect` | Detect system GraalVM installations. | true |
+| `graalvm.gu.config` | Path to the custom GU configuration file. | "" |
+| `native.buildtools.config.windows` | Optional path to Windows Build Tools Configuration Script | "" |
+
+## Contributing
+To submit pull requests to vscode-extensions, you need to sign the Oracle Contributor Agreement.
+
+Project members with write access to the repository will determine and assign an appropriate Assignee for the pull request. The assignee will work with the pull request owner to address any issues and then merge the pull request.
 
 ## Provide Feedback or Seek Help
-
 * [Request a feature](https://github.com/graalvm/vscode-extensions/issues/new?labels=enhancement)
 * [File a bug](https://github.com/graalvm/vscode-extensions/issues/new?labels=bug)
 
 ## Privacy Policy
-
 Read the [Oracle Privacy Policy](https://www.oracle.com/legal/privacy/privacy-policy.html) to learn more.
