@@ -96,31 +96,31 @@ Do animated screenshots? How to create it here?
 ## Available Commands
 | Name | Description |
 |---|---|
-| `extension.graalvm.selectGraalVMHome` | Set Active GraalVM Installation |
-| `extension.graalvm.installGraalVM` | Download & Install GraalVM |
-| `extension.graalvm.addExistingGraalVM` | Add Existing GraalVM |
-| `extension.graalvm.refreshInstallations` | Refresh Installations |
-| `extension.graalvm.installGraalVMComponent` | Install GraalVM Component |
-| `extension.graalvm.uninstallGraalVMComponent` | Uninstall GraalVM Component |
-| `extension.graalvm.gds.showConfiguration` | Show GU Configuration |
-| `extension.graalvm.addNativeImageToPOM` | Add Maven Native Image Plugin |
-| `extension.graalvm.toggleCodeCoverage` | Toggle Code Coverage |
-| `extension.graalvm.installRLanguageServer` | Install R Language Server |
-| `extension.graalvm.installRubyLanguageServer` | Install Ruby Language Server |
-| `extension.graalvm.setupProxy` | Setup Proxy |
-| `extension.graalvm.removeInstallation` | Remove GraalVM Installation |
-| `extension.graalvm.runVisualVMForPID` | Open Process In VisualVM |
-| `extension.graalvm.startVisualVM` | Start VisualVM |
-| `extension.graalvm.threadDumpVisualVM` | Take thread dump |
-| `extension.graalvm.heapDumpVisualVM` | Take heap dump |
-| `extension.graalvm.startCPUSamplerVisualVM` | Start CPU sampling |
-| `extension.graalvm.startMemorySamplerVisualVM` | Start memory sampling |
-| `extension.graalvm.startJFRRecordingVisualVM` | Start flight recording |
-| `extension.graalvm.openWindowsNITerminal` | Open Terminal Preconfigured For Native Image |
-| `extension.graalvm.troubleshootNBLSThreadDump` | Thread Dump |
-| `extension.graalvm.troubleshootNBLSHeapDump` | Heap Dump |
-| `extension.graalvm.troubleshootNBLSCpuSampler` | CPU Sampler |
-| `extension.graalvm.heapReplay` | Replay Heap Recording |
+| `extension.graalvm.selectGraalVMHome` | Select Active GraalVM Installation to be used. |
+| `extension.graalvm.installGraalVM` | Download & Install GraalVM. |
+| `extension.graalvm.addExistingGraalVM` | Add Existing GraalVM to installations panel. |
+| `extension.graalvm.refreshInstallations` | Refresh Installations panel. |
+| `extension.graalvm.installGraalVMComponent` | Download & Install GraalVM Component. |
+| `extension.graalvm.uninstallGraalVMComponent` | Uninstall GraalVM Component. |
+| `extension.graalvm.gds.showConfiguration` | Show GU Configuration for GDS access. |
+| `extension.graalvm.addNativeImageToPOM` | Add Native Image Plugin to Maven POM file. |
+| `extension.graalvm.toggleCodeCoverage` | Toggle Code Coverage. |
+| `extension.graalvm.installRLanguageServer` | Install R Language Server for R Component of GraalVM. |
+| `extension.graalvm.installRubyLanguageServer` | Install Ruby Language Server for Ruby Component of GraalVM. |
+| `extension.graalvm.setupProxy` | Setup Proxy for VSCode extensions. |
+| `extension.graalvm.removeInstallation` | Remove GraalVM Installation from Installation panel and optionally Uninstall. |
+| `extension.graalvm.runVisualVMForPID` | Open Process In VisualVM using PID. |
+| `extension.graalvm.startVisualVM` | Start VisualVM. |
+| `extension.graalvm.threadDumpVisualVM` | Take thread dump by VisualVM. |
+| `extension.graalvm.heapDumpVisualVM` | Take heap dump by VisualVM. |
+| `extension.graalvm.startCPUSamplerVisualVM` | Start CPU sampling in VisualVM. |
+| `extension.graalvm.startMemorySamplerVisualVM` | Start memory sampling in VisualVM. |
+| `extension.graalvm.startJFRRecordingVisualVM` | Start flight recording in VisualVM. |
+| `extension.graalvm.openWindowsNITerminal` | Open Terminal Preconfigured For Native Image. |
+| `extension.graalvm.troubleshootNBLSThreadDump` | Thread Dump the Netbeans Language Server by VisualVM. |
+| `extension.graalvm.troubleshootNBLSHeapDump` | Heap Dump the Netbeans Language Server by VisualVM. |
+| `extension.graalvm.troubleshootNBLSCpuSampler` | Run CPU Sampler of VisulaVM for Netbeans Language Server. |
+| `extension.graalvm.heapReplay` | Replay Heap Recording  |
 
 ## Settings
 | Name | Description | Default Value / Possible Values |
