@@ -271,7 +271,7 @@ type InputStep = (input: MultiStepInput) => Thenable<InputStep | void>;
 interface QuickPickParameters<T extends vscode.QuickPickItem> {
 	title: string;
 	step: number;
-	totalSteps: number;
+	totalSteps: number | undefined;
 	items: T[];
 	activeItem?: T;
 	placeholder: string;

@@ -500,7 +500,7 @@ async function selectGraalVMRelease(): Promise<{url: any; location: string; inst
 		state.graalVMDistribution = await input.showQuickPick({
 			title,
 			step: 1,
-			totalSteps,
+			totalSteps: undefined,
 			placeholder: 'Pick GraalVM distribution',
 			items: [
                 { label: GVM_EE_BRAND},
@@ -533,18 +533,23 @@ async function selectGraalVMRelease(): Promise<{url: any; location: string; inst
         }
     }
 
-	async function pickGraalVMVersion(input: utils.MultiStepInput, state: Partial<State>) {
-		state.graalVMVersion = await input.showQuickPick({
-			title,
-			step: 2,
-			totalSteps,
-			placeholder: 'Pick a GraalVM version',
-			items: Object.keys(releaseInfos).map(label => ({ label })).sort(sortVersion),
-			activeItem: state.graalVMVersion,
-			shouldResume: () => Promise.resolve(false)
-		});
-		return (input: utils.MultiStepInput) => pickJavaVersion(input, state);
-	}
+    async function pickGraalVMVersion(input: utils.MultiStepInput, state: Partial<State>) {
+        const simpleEE = state.graalVMDistribution?.label === GVM_EE_BRAND;
+        state.graalVMVersion = await input.showQuickPick({
+            title,
+            step: 2,
+            totalSteps: simpleEE ? totalSteps - 1 : totalSteps,
+            placeholder: 'Pick a GraalVM version',
+            items: Object.keys(releaseInfos).map(label => ({ label })).sort(sortVersion),
+            activeItem: state.graalVMVersion,
+            shouldResume: () => Promise.resolve(false)
+        });
+        if (simpleEE) {
+            state.javaVersion = { label: Object.keys(releaseInfos[state.graalVMVersion.label])[0] };
+            return undefined;
+        } else
+            return (input: utils.MultiStepInput) => pickJavaVersion(input, state);
+    }
 
 	async function pickJavaVersion(input: utils.MultiStepInput, state: Partial<State>) {
 		state.javaVersion = await input.showQuickPick({
