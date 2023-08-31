@@ -500,7 +500,7 @@ async function selectGraalVMRelease(): Promise<{url: any; location: string; inst
 		state.graalVMDistribution = await input.showQuickPick({
 			title,
 			step: 1,
-			totalSteps,
+			totalSteps: undefined,
 			placeholder: 'Pick GraalVM distribution',
 			items: [
                 { label: GVM_EE_BRAND},
@@ -533,18 +533,23 @@ async function selectGraalVMRelease(): Promise<{url: any; location: string; inst
         }
     }
 
-	async function pickGraalVMVersion(input: utils.MultiStepInput, state: Partial<State>) {
-		state.graalVMVersion = await input.showQuickPick({
-			title,
-			step: 2,
-			totalSteps,
-			placeholder: 'Pick a GraalVM version',
-			items: Object.keys(releaseInfos).map(label => ({ label })).sort(sortVersion),
-			activeItem: state.graalVMVersion,
-			shouldResume: () => Promise.resolve(false)
-		});
-		return (input: utils.MultiStepInput) => pickJavaVersion(input, state);
-	}
+    async function pickGraalVMVersion(input: utils.MultiStepInput, state: Partial<State>) {
+        const simpleEE = state.graalVMDistribution?.label === GVM_EE_BRAND;
+        state.graalVMVersion = await input.showQuickPick({
+            title,
+            step: 2,
+            totalSteps: simpleEE ? totalSteps - 1 : totalSteps,
+            placeholder: 'Pick a GraalVM version',
+            items: Object.keys(releaseInfos).map(label => ({ label })).sort(sortVersion),
+            activeItem: state.graalVMVersion,
+            shouldResume: () => Promise.resolve(false)
+        });
+        if (simpleEE) {
+            state.javaVersion = { label: Object.keys(releaseInfos[state.graalVMVersion.label])[0] };
+            return undefined;
+        } else
+            return (input: utils.MultiStepInput) => pickJavaVersion(input, state);
+    }
 
 	async function pickJavaVersion(input: utils.MultiStepInput, state: Partial<State>) {
 		state.javaVersion = await input.showQuickPick({
@@ -888,11 +893,12 @@ async function getGU(graalVMHome?: string): Promise<string> {
     throw new Error(NO_GU_FOUND);
 }
 
+const newGVMnoGU = "GU is placeholder. GVM version > 23.0.";
 async function isGUJSON(guCmd: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
         cp.exec(`${guCmd} --help`, (error, stdout, _stderr) => {
-            if (error || _stderr) {
-                reject(error ?? new Error(_stderr));
+            if (error || _stderr || !stdout.includes("Options:")) {
+                reject(error ?? new Error(_stderr ? _stderr : newGVMnoGU));
             } else {
                 resolve(stdout.includes("-J, --json"));
             }
@@ -1183,37 +1189,44 @@ const componentCache: Cache<string, GraalVMComponent[]> = {};
 async function getAvailableComponents(graalVMHome: string, force?: boolean): Promise<GraalVMComponent[]> {
     return new Promise<GraalVMComponent[]>(async (resolve, reject) => {
         const components = force ? undefined : componentCache[graalVMHome];
-        if(components) {
-            resolve(components); 
+        if (components) {
+            resolve(components);
             return;
         }
         const executablePath = await getGU(graalVMHome);
         const binGVM = join(graalVMHome, 'bin');
         const guListCmd = `${executablePath} list`;
-        const isListJson = await isGUJSON(guListCmd);
-        cp.exec(`${guListCmd} ` + (isListJson ? '-J' : '-v'), { cwd: binGVM }, async (error, stdout, _stderr) => {
-            if (error || _stderr) {
-                reject(error ?? new Error(_stderr));
-            } else {
-                const guAvailCmd = `${executablePath} available`;
-                const isAvailJson = await isGUJSON(guAvailCmd);
-                const installed: GraalVMComponent[] = processsGUOutput(stdout, isListJson);
-                cp.exec(`${guAvailCmd} ` + (isAvailJson ? '-J' : '-v'), { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
-                    if (error || _stderr) {
-                        notifyConnectionProblem('GraalVM components');
-                        reject({error: error ?? new Error(_stderr), list: installed.map(inst => {inst.installed = true; return inst; }) });
-                    } else {
-                        const available: GraalVMComponent[] = processsGUOutput(stdout, isAvailJson);
-                        available.forEach(avail => {
-                            const found = installed.find(item => item.id === avail.id);
-                            avail.installed = found ? true : false;
-                        });
-                        componentCache[graalVMHome] = available;
-                        resolve(available);
-                    }
-                });
+        try {
+            const isListJson = await isGUJSON(guListCmd);
+            cp.exec(`${guListCmd} ` + (isListJson ? '-J' : '-v'), { cwd: binGVM }, async (error, stdout, _stderr) => {
+                if (error || _stderr) {
+                    reject(error ?? new Error(_stderr));
+                } else {
+                    const guAvailCmd = `${executablePath} available`;
+                    const isAvailJson = await isGUJSON(guAvailCmd);
+                    const installed: GraalVMComponent[] = processsGUOutput(stdout, isListJson);
+                    cp.exec(`${guAvailCmd} ` + (isAvailJson ? '-J' : '-v'), { cwd: binGVM }, (error: any, stdout: string, _stderr: any) => {
+                        if (error || _stderr) {
+                            notifyConnectionProblem('GraalVM components');
+                            reject({ error: error ?? new Error(_stderr), list: installed.map(inst => { inst.installed = true; return inst; }) });
+                        } else {
+                            const available: GraalVMComponent[] = processsGUOutput(stdout, isAvailJson);
+                            available.forEach(avail => {
+                                const found = installed.find(item => item.id === avail.id);
+                                avail.installed = found ? true : false;
+                            });
+                            resolve(componentCache[graalVMHome] = available);
+                        }
+                    });
+                }
+            });
+        } catch (e: unknown) {
+            if(e instanceof Error && e.message === newGVMnoGU) {
+                resolve(componentCache[graalVMHome] = []);
             }
-        });
+            else
+                throw e;
+        }
     });
 }
 
