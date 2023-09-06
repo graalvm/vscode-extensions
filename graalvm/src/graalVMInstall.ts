@@ -1193,10 +1193,10 @@ async function getAvailableComponents(graalVMHome: string, force?: boolean): Pro
             resolve(components);
             return;
         }
-        const executablePath = await getGU(graalVMHome);
-        const binGVM = join(graalVMHome, 'bin');
-        const guListCmd = `${executablePath} list`;
         try {
+            const executablePath = await getGU(graalVMHome);
+            const binGVM = join(graalVMHome, 'bin');
+            const guListCmd = `${executablePath} list`;
             const isListJson = await isGUJSON(guListCmd);
             cp.exec(`${guListCmd} ` + (isListJson ? '-J' : '-v'), { cwd: binGVM }, async (error, stdout, _stderr) => {
                 if (error || _stderr) {
@@ -1221,7 +1221,7 @@ async function getAvailableComponents(graalVMHome: string, force?: boolean): Pro
                 }
             });
         } catch (e: unknown) {
-            if(e instanceof Error && e.message === newGVMnoGU) {
+            if(e instanceof Error && (e.message === newGVMnoGU || e.message === NO_GU_FOUND)) {
                 resolve(componentCache[graalVMHome] = []);
             }
             else
