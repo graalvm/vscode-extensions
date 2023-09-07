@@ -309,6 +309,17 @@ export async function getGraalVMVersion(homeFolder: string): Promise<string | un
     });
 }
 
+export async function hasRealGU(graalVMHome: string): Promise<boolean> {
+    try {
+        const executablePath = await getGU(graalVMHome);
+        const guListCmd = `${executablePath} list`;
+        await isGUJSON(guListCmd);
+        return true;
+    } catch (e: unknown) {
+        return false;
+    }
+}
+
 export function getInstallConfigurations(): ConfigurationPickItem[] {
     const ret: ConfigurationPickItem[] = [];
 
