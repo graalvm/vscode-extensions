@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import * as utils from './utils';
 import { getGVMHome } from './graalVMConfiguration';
-import { setupGraalVM, getGraalVMVersion } from './graalVMInstall';
+import { setupGraalVM, getGraalVMVersion, hasRealGU } from './graalVMInstall';
 
 
 const DISPLAY_NAME_PREFIX: string = '-Dvisualvm.display.name=';
@@ -32,6 +32,7 @@ const PERSISTENT_JFR_SETTINGS: string = 'visualvm.persistent.jfrSettings';
 let projectName: string | undefined;
 
 // Supported features based on the currently active GraalVM installation
+// -2 - GraalVM 23.1 and newer   | VisualVM component not available for the active GraalVM
 // -1 - GraalVM 22.2 and newer   | VisualVM component not installed in the active GraalVM 
 //  0 - no active GraalVM set
 //  1 - GraalVM 21.1.x and older | supports start VisualVM, open process (timeout may occur), defined tab
@@ -95,15 +96,9 @@ export function componentsChanged(action: string) {
 }
 
 async function initializeGraalVMAsync(context: vscode.ExtensionContext) {
-    const graalVMVersion: string[] | undefined = graalVMHome ? (await getGraalVMVersion(graalVMHome))?.split(' ') : undefined;
+    const graalVMVersion: string | undefined = graalVMHome ? await getGraalVMVersion(graalVMHome) : undefined;
     if (graalVMVersion) {
-        let version = graalVMVersion[2].slice(0, graalVMVersion[2].length - 1);
-        const dev = version.endsWith('-dev');
-        if (dev) {
-            version = version.slice(0, version.length - '-dev'.length);
-        }
-        const numbers: string[] = version.split('.');
-        const features = resolveFeatureSet(parseInt(numbers[0]), parseInt(numbers[1]), parseInt(numbers[2]), dev);
+        const features = await resolveFeatureSet(graalVMVersion);
         setFeatureSet(features);
         initializeWhenStarted(context);
     } else {
@@ -111,20 +106,41 @@ async function initializeGraalVMAsync(context: vscode.ExtensionContext) {
     }
 }
 
-function resolveFeatureSet(major: number, minor: number, _update: number, _dev: boolean): number {
-    if (major < 21) {
-        return 1;
+async function resolveFeatureSet(graalVMVersion: string): Promise<number> {
+    if (graalVMVersion.includes('+')) { // New GraalVM versioning scheme
+        const hasGU = await hasRealGU(graalVMHome || getGVMHome());
+        if (hasGU) {
+            if (!utils.findExecutable('jvisualvm', graalVMHome)) {
+                return -1;
+            }
+            return 3;
+        }
+        return -2;
+    } else { // Old GraalVM versioning scheme
+        const graalVMVersions = graalVMVersion.split(' ');
+        let version = graalVMVersions[2].slice(0, graalVMVersions[2].length - 1);
+        const dev = version.endsWith('-dev');
+        if (dev) {
+            version = version.slice(0, version.length - '-dev'.length);
+        }
+        const numbers: string[] = version.split('.');
+        const major = parseInt(numbers[0]);
+        const minor = parseInt(numbers[1]);
+        // const update = parseInt(numbers[2]);
+        if (major < 21) {
+            return 1;
+        }
+        if (major === 21 && minor < 2) {
+            return 1;
+        }
+        if (major === 22 && minor < 2) {
+            return 2;
+        }
+        if (!utils.findExecutable('jvisualvm', graalVMHome)) {
+            return -1;
+        }
+        return 3;
     }
-    if (major === 21 && minor < 2) {
-        return 1;
-    }
-    if (major === 22 && minor < 2) {
-        return 2;
-    }
-    if (!utils.findExecutable('jvisualvm', graalVMHome)) {
-        return -1;
-    }
-    return 3;
 }
 
 async function setFeatureSet(features: number) {

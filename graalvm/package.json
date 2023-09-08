@@ -439,6 +439,11 @@
 			},
 			{
 				"view": "visualvm-control-panel",
+				"contents": "VisualVM component not available for the active GraalVM installation.",
+				"when": "!extension.graalvm.remoteMode && visualvm.featureSet == -2"
+			},
+			{
+				"view": "visualvm-control-panel",
 				"contents": "VisualVM integration not available for remote sessions.",
 				"when": "extension.graalvm.remoteMode"
 			}
