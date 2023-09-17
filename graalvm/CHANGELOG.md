@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.5.29
+* Changes to work with GraalVM JDK 21 (23.1) which has no Graal Updater
+   * Starting with GraalVM JDK 21 (23.1) in Sept 2023 there are __no installable components__
+* VisualVM integration disabled
+
 ## Versuin 0.5.28
 * No longer includes Oracle JDBC driver for NetBeans Language Server. Use "GCN Database Support" extension to get database support.
 
