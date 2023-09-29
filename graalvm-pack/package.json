@@ -2,7 +2,7 @@
     "name": "graalvm-pack",
     "displayName": "GraalVM Extension Pack for Java",
     "description": "VS Code extensions for development of polyglot Java, JavaScript, Python, Ruby, R, and Micronaut applications based on GraalVM.",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "preview": true,
     "license": "SEE LICENSE IN LICENSE.txt",
     "publisher": "oracle-labs-graalvm",
@@ -25,8 +25,6 @@
         "Extension Packs"
     ],
     "extensionDependencies": [
-        "oracle-labs-graalvm.graalvm",
-        "oracle-labs-graalvm.micronaut",
-        "asf.apache-netbeans-java"
+        "oracle-labs-graalvm.graalvm"
     ]
 }
