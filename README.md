@@ -1,6 +1,6 @@
 # Visual Studio Code extension
 
-This suite provides extension to Visual Studio Code that supports development of polyglot applications using GraalVM.
+This suite provides extension to Visual Studio Code that supports development of applications targeting GraalVM.
 The extension is Technology Preview.
 
 ## Build VSIX package from sources
