@@ -119,7 +119,7 @@ export async function installGraalVM(): Promise<void> {
     }
 }
 
-export async function removeGraalVMInstallation(homeFolder?: string) {
+export async function removeGraalVMInstallation(homeFolder?: string): Promise<-1 | 0> {
     if (!homeFolder) {
         homeFolder = await _selectInstalledGraalVM(true);
     }
@@ -133,7 +133,7 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
         return -1;
     }
     if (utils.checkFolderWritePermissions(graalFolder, true)) {
-        return utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
+        utils.askYesNo(`Do you want to delete GraalVM installation files from: ${graalFolder}`, () => setTimeout(() => {
             try {
                 deleteFolder(graalFolder);
             } catch (ex: unknown) {
@@ -142,6 +142,7 @@ export async function removeGraalVMInstallation(homeFolder?: string) {
             }
         }, 1000));
     }
+    return 0;
 }
 
 export async function installGraalVMComponent(component: string | TreeItemComponent | undefined, homeFolder?: string): Promise<void> {
@@ -309,14 +310,17 @@ export async function getGraalVMVersion(homeFolder: string): Promise<string | un
     });
 }
 
-export async function hasRealGU(graalVMHome: string): Promise<boolean> {
+const hasRealGUCache: { [gvmPath: string]: boolean } = {};
+export async function hasRealGU(graalVMHome: string, force: boolean = false): Promise<boolean> {
+    if(!force && graalVMHome in hasRealGUCache)
+        return hasRealGUCache[graalVMHome];
     try {
         const executablePath = await getGU(graalVMHome);
         const guListCmd = `${executablePath} list`;
         await isGUJSON(guListCmd);
-        return true;
+        return hasRealGUCache[graalVMHome] = true;
     } catch (e: unknown) {
-        return false;
+        return hasRealGUCache[graalVMHome] = false;
     }
 }
 
