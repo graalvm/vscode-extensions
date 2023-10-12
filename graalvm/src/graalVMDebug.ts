@@ -17,6 +17,7 @@ import { LSPORT, connectToLanguageServer, stopLanguageServer, lspArgs, hasLSClie
 import { StreamInfo } from 'vscode-languageclient/node';
 import { ILaunchRequestArguments, IGraalVMLaunchInfo } from './graalVMDebugInterfaces';
 import { getGVMConfig, getConf, getGVMHome, setConf } from './graalVMConfiguration';
+import { hasRealGU } from './graalVMInstall';
 
 const DEBUG_TERMINAL_NAME = 'GraalVM Debug Console';
 const NODE: string = "node";
@@ -120,7 +121,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 					if (config.env) {
 						config.env['PATH'] = updatePath(config.env['PATH'], graalVMBin);
 					} else {
-						config.env = { 'PATH': graalVMBin };
+						config.env = { PATH: updatePath(process.env['PATH'], graalVMBin) };
 					}
 					if (config.request === 'launch' && languageServerStart === 'inProcess') {
 						stopLanguageServer().then(() => {
@@ -169,7 +170,7 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 			}
 			return config;
 		}
-		return getLaunchInfo(_folder, config, getGVMHome()).then(launchInfo => {
+		return getLaunchInfo(_folder, config, getGVMHome(), config.type === "graalvm").then(launchInfo => {
 			config.graalVMLaunchInfo = launchInfo;
 			if (config.program) {
 				const languageServerStart = getGVMConfig().get('languageServer.start') as 'none' | 'single' | 'inProcess';
@@ -373,7 +374,7 @@ export async function heapReplay(heapUri: vscode.Uri) {
 function checkCanReplay(replayExecutable: string): boolean {
     const re = utils.findExecutable(replayExecutable, getGVMHome());
     if (!re) {
-        vscode.window.showInformationMessage(`Cannot find runtime '${replayExecutable}' within your GraalVM installation. Make sure to have GraalVM '${replayExecutable}' installed.`);
+        vscode.window.showInformationMessage(missingRuntimeMessage(replayExecutable));
         return false;
     }
     let testHprofArgs = ['--language', 'hprof', '--eval', 'js:"OK"'];
@@ -492,7 +493,16 @@ function updatePath(path: string | undefined, graalVMBin: string): string {
 	return pathItems.join(':');
 }
 
-async function getLaunchInfo(workspaceFolder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration | ILaunchRequestArguments, graalVMHome: string | undefined): Promise<IGraalVMLaunchInfo> {
+function missingRuntimeMessage(runtime: string): string {
+	return `Cannot find runtime '${runtime}' within your GraalVM installation. Make sure to have GraalVM '${runtime}' installed.`;
+}
+
+async function rejectedRuntime<T>(graalVMHome: string, runtime: string): Promise<T> {
+	return Promise.reject(new Error(await hasRealGU(graalVMHome) ? missingRuntimeMessage(runtime)
+	: `Currently used GraalVM doesn't contain runtime '${runtime}' please use older version with '${runtime}' installed or don't use 'graalvm' type in your launch configuration.`));
+}
+
+async function getLaunchInfo(workspaceFolder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration | ILaunchRequestArguments, graalVMHome: string, gvmType: boolean): Promise<IGraalVMLaunchInfo> {
 	const port = config.port || utils.random(3000, 50000);
 	let runtimeExecutable = config.runtimeExecutable;
 	if (runtimeExecutable) {
@@ -500,17 +510,17 @@ async function getLaunchInfo(workspaceFolder: vscode.WorkspaceFolder | undefined
 			if (!fs.existsSync(runtimeExecutable)) {
 				return Promise.reject(new Error(`Attribute 'runtimeExecutable' does not exist ('${runtimeExecutable}').`));
 			}
-		} else {
+		} else if (gvmType || await hasRealGU(graalVMHome)) {
 			const re = utils.findExecutable(runtimeExecutable, graalVMHome);
 			if (!re) {
-				return Promise.reject(new Error(`Cannot find runtime '${runtimeExecutable}' within your GraalVM installation. Make sure to have GraalVM '${runtimeExecutable}' installed.`));
+				return rejectedRuntime(graalVMHome, runtimeExecutable);
 			}
 			runtimeExecutable = re;
 		}
-	} else {
+	} else if (gvmType || await hasRealGU(graalVMHome)) {
 		const re = utils.findExecutable(NODE, graalVMHome);
 		if (!re) {
-			return Promise.reject(new Error(`Cannot find runtime '${NODE}' within your GraalVM installation. Make sure to have GraalVM '${NODE}' installed.`));
+			return rejectedRuntime(graalVMHome, NODE);
 		}
 		runtimeExecutable = re;
 	}
