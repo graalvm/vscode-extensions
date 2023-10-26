@@ -420,14 +420,14 @@ async function selectOutputDir(): Promise<string | undefined> {
 
 async function supportsResourcesRoot(): Promise<boolean> {
     const commands: string[] = await vscode.commands.getCommands();
-    return commands.includes('java.get.project.source.roots');
+    return commands.includes('nbls.java.get.project.source.roots');
 }
 
 async function findResourcesRoot(): Promise<string | undefined> {
     const roots = vscode.workspace.workspaceFolders;
     if (roots && roots.length > 0) {
         const project = roots[0].uri.toString();
-        const resources: string[] | undefined = await vscode.commands.executeCommand('java.get.project.source.roots', project, 'resources');
+        const resources: string[] | undefined = await vscode.commands.executeCommand('nbls.java.get.project.source.roots', project, 'resources');
         if (resources && resources.length > 0) {
             return vscode.Uri.parse(resources[0]).fsPath;
         }

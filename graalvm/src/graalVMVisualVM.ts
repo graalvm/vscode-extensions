@@ -439,7 +439,7 @@ function findVSCodeLauncher(): string | undefined {
 
 async function supportsProjectSourceRoots(): Promise<boolean> {
     const commands: string[] = await vscode.commands.getCommands();
-    if (commands.includes('java.get.project.source.roots')) {
+    if (commands.includes('nbls.java.get.project.source.roots')) {
         return true;
     }
     const ext = vscode.extensions.getExtension('redhat.java');
@@ -450,12 +450,12 @@ async function findProjectSourceRoots(): Promise<string | undefined> {
     const folders = vscode.workspace.workspaceFolders;
     if (folders) {
         const commands: string[] = await vscode.commands.getCommands();
-        const hasSourceRootsCommand = commands.includes('java.get.project.source.roots');
+        const hasSourceRootsCommand = commands.includes('nbls.java.get.project.source.roots');
         let ret: string | undefined = undefined;
         for (const folder of folders) {
             let roots: string[] | undefined;
             if (hasSourceRootsCommand) {
-                roots = await vscode.commands.executeCommand('java.get.project.source.roots', folder.uri.toString());
+                roots = await vscode.commands.executeCommand('nbls.java.get.project.source.roots', folder.uri.toString());
             } else {
                 const api: any = vscode.extensions.getExtension('redhat.java')?.exports;
                 if (api?.getProjectSettings) {
@@ -506,19 +506,19 @@ function getJdkPackages(): string {
 
 async function supportsProjectPackages(): Promise<boolean> {
     const commands: string[] = await vscode.commands.getCommands();
-    return commands.includes('java.get.project.packages') || commands.includes('java.execute.workspaceCommand');
+    return commands.includes('nbls.java.get.project.packages') || commands.includes('java.execute.workspaceCommand');
 }
 
 async function getProjectPackages(): Promise<string | undefined> {
     const folders = vscode.workspace.workspaceFolders;
     if (folders) {
         const commands: string[] = await vscode.commands.getCommands();
-        const hasProjectPackagesCommand = commands.includes('java.get.project.packages');
+        const hasProjectPackagesCommand = commands.includes('nbls.java.get.project.packages');
         let ret: string | undefined = undefined;
         for (const folder of folders) {
             let packages: string[] | undefined;
             if (hasProjectPackagesCommand) {
-                packages = await vscode.commands.executeCommand('java.get.project.packages', folder.uri.toString(), true);
+                packages = await vscode.commands.executeCommand('nbls.java.get.project.packages', folder.uri.toString(), true);
             } else {
                 const pkgSet = new Set<string>();
                 const srcRoots = await getPackageData({ kind: 2, projectUri: folder.uri.toString() });
