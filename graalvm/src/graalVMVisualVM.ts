@@ -1563,7 +1563,10 @@ class VisualVMConfigurationProvider implements vscode.DebugConfigurationProvider
             if (handleProjectProcess) {
                 const displayName: string = defineDisplayName();
                 const attach: string = attachVisualVM();
-                const vmArgs = `${displayName} ${attach}`;
+                let vmArgs = `${displayName} ${attach}`;
+                if (!config.vmArgs?.includes('-XX:PerfMaxStringConstLength=')) {
+                    vmArgs = `${vmArgs} -XX:PerfMaxStringConstLength=10240`;
+                }
                 if (!config.vmArgs) {
                     config.vmArgs = vmArgs;
                 } else {
