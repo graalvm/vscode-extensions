@@ -1542,8 +1542,13 @@ export async function initializeConfiguration(): Promise<boolean> {
 		if (maven?.length > 0) {
 			return true;
 		}
-		const gradle = await vscode.workspace.findFiles('build.gradle', '**/node_modules/**', 1);
-		if (gradle?.length > 0) {
+		const gradleBuild = await vscode.workspace.findFiles('build.gradle', '**/node_modules/**', 1);
+		if (gradleBuild?.length > 0) {
+			return true;
+		}
+        // For multi-module Gradle projects (GCN) the build.gradle is not in root folder - search for settings.gradle
+        const gradleSettings = await vscode.workspace.findFiles('settings.gradle', '**/node_modules/**', 1);
+		if (gradleSettings?.length > 0) {
 			return true;
 		}
 	}
