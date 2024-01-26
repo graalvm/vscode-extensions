@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 0.5.30
+* Bug fixes in command line processing & project identification
+
 ## Version 0.5.29
 * Changes to work with GraalVM JDK 21 (23.1) which has no Graal Updater
    * Starting with GraalVM JDK 21 (23.1) in Sept 2023 there are __no installable components__
