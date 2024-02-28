@@ -14,7 +14,6 @@ Key features include:
 * The just-in-time Graal compiler, ensuring your code runs fast
 * The ahead-of-time compiler (provided by GraalVM [Native Image](#native-image)) to turn your Java application into a tiny native executable, perfect for deploying to the cloud
 * [Debugging of Native Image](#native-debugging) processes at run time
-* Integration with [VisualVM](#visualvm) - for even easier and more powerful debugging
 * Native support for the Micronaut framework
 
 > Note: The extension is a Technology Preview.
@@ -52,17 +51,6 @@ Choose either the Community distribution (free for all purposes) or Enterprise d
 ![GraalVM Install Dialog](images/graalvm_install_actions.png)
 </details>
 
-<details id="visualvm" closed>
-<summary>Integration with VisualVM</summary>
-
-The GraalVM Tools for Java extension provides integration with [VisualVM](https://visualvm.github.io), the all-in-one Java (and polyglot) monitoring and troubleshooting tool.
-VisualVM brings powerful, yet easy-to-use, visual Java tooling to VS Code.
-
-![VisualVM and VS Code Integration](images/vscode_visualvm.png)
-
-For more information, see the [dedicated guide](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/visualvm-integration/) about VisualVM and VS Code integration using the extension.
-</details>
-
 <details closed>
 <summary>Support for Micronaut</summary>
 
@@ -90,9 +78,6 @@ You can set breakpoints, inspect the state of your application, even attach the 
 Read more about this and find a demo application in the [Native Image Debugging guide](https://www.graalvm.org/dev/tools/vscode/graalvm-extension/debugging-native-image/).
 </details>
 
-## Basic Usage
-Do animated screenshots? How to create it here?
-
 ## Available Commands
 | Name | Description |
 |---|---|
@@ -109,17 +94,7 @@ Do animated screenshots? How to create it here?
 | `extension.graalvm.installRLanguageServer` | Install R Language Server for R Component of GraalVM. |
 | `extension.graalvm.installRubyLanguageServer` | Install Ruby Language Server for Ruby Component of GraalVM. |
 | `extension.graalvm.setupProxy` | [Setup Proxy](#proxy-settings) for VS Code extensions. |
-| `extension.graalvm.runVisualVMForPID` | Open Process In [VisualVM](#visualvm) using PID. |
-| `extension.graalvm.startVisualVM` | Start [VisualVM](#visualvm). |
-| `extension.graalvm.threadDumpVisualVM` | Take thread dump by [VisualVM](#visualvm). |
-| `extension.graalvm.heapDumpVisualVM` | Take heap dump by [VisualVM](#visualvm). |
-| `extension.graalvm.startCPUSamplerVisualVM` | Start CPU sampling in [VisualVM](#visualvm). |
-| `extension.graalvm.startMemorySamplerVisualVM` | Start memory sampling in [VisualVM](#visualvm). |
-| `extension.graalvm.startJFRRecordingVisualVM` | Start flight recording in [VisualVM](#visualvm). |
 | `extension.graalvm.openWindowsNITerminal` | Open Windows Terminal Preconfigured For [Native Image](#native-image). |
-| `extension.graalvm.troubleshootNBLSThreadDump` | Thread Dump the Netbeans Language Server by [VisualVM](#visualvm). |
-| `extension.graalvm.troubleshootNBLSHeapDump` | Heap Dump the Netbeans Language Server by [VisualVM](#visualvm). |
-| `extension.graalvm.troubleshootNBLSCpuSampler` | Run CPU Sampler of [VisualVM](#visualvm) for Netbeans Language Server. |
 | `extension.graalvm.heapReplay` | Replay Heap Recording. |
 
 ## Settings

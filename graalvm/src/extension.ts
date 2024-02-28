@@ -15,14 +15,11 @@ import { installRPackage, R_LANGUAGE_SERVER_PACKAGE_NAME } from './graalVMR';
 import { installRubyGem, RUBY_LANGUAGE_SERVER_GEM_NAME } from './graalVMRuby';
 import * as nativeImage from './graalVMNativeImage';
 import { getGVMHome, setupProxy, configureGraalVMHome } from './graalVMConfiguration';
-import * as visualvm from './graalVMVisualVM';
 import * as gds from './gdsUtils';
 
 export let extContext: vscode.ExtensionContext;
 export function activate(context: vscode.ExtensionContext) {
 	extContext = context;
-	const remoteMode = context.extension.extensionKind === 2;
-	vscode.commands.executeCommand('setContext', 'extension.graalvm.remoteMode', remoteMode);
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectGraalVMHome', async (installation?: string | Installation, nonInteractive?: boolean) => {
 		await selectActiveGraalVM(installation instanceof Installation ? installation.home : installation, nonInteractive);
 	}));
@@ -75,108 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.gds.showConfiguration', () => {
 		gds.showConfiguration();
 	}));
-	if (!remoteMode) {
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startVisualVM', () => {
-			visualvm.startVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleHandleProjectProcessVisualVM', () => {
-			visualvm.toggleHandleProjectProcess(context);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleHandleProjectProcessVisualVM_', () => {
-			visualvm.toggleHandleProjectProcess(context);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectOverviewVisualVM', () => {
-			visualvm.preselectView(context, '1');
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectOverviewVisualVM_', () => {}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectMonitorVisualVM', () => {
-			visualvm.preselectView(context, '2');
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectMonitorVisualVM_', () => {}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectThreadsVisualVM', () => {
-			visualvm.preselectView(context, '3');
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectThreadsVisualVM_', () => {}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectSamplerVisualVM', () => {
-			visualvm.preselectView(context, '4');
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.preselectSamplerVisualVM_', () => {}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleWindowToFrontVisualVM', () => {
-			visualvm.toggleWindowToFront(context);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleWindowToFrontVisualVM_', () => {
-			visualvm.toggleWindowToFront(context);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleSourcesIntegrationVisualVM', () => {
-			visualvm.toggleSourcesIntegration(context);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.toggleSourcesIntegrationVisualVM_', () => {
-			visualvm.toggleSourcesIntegration(context);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.defineDisplayName', (): string => {
-			return visualvm.defineDisplayName();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.attachVisualVM', (): string => {
-			return visualvm.attachVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installVisualVMComponent', () => {
-			installGraalVMComponent('visualvm', getGVMHome());
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.selectProcessVisualVM', () => {
-			visualvm.selectProcessVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.runVisualVMForPID', () => {
-			visualvm.selectProcessVisualVM(true).then(selected => {
-				if (selected) visualvm.startVisualVM(); 
-			});
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.threadDumpVisualVM', () => {
-			visualvm.threadDumpVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.heapDumpVisualVM', () => {
-			visualvm.heapDumpVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startCPUSamplerVisualVM', () => {
-			visualvm.startCPUSamplerVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startMemorySamplerVisualVM', () => {
-			visualvm.startMemorySamplerVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.snapshotSamplerVisualVM', () => {
-			visualvm.snapshotSamplerVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.stopSamplerVisualVM', () => {
-			visualvm.stopSamplerVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.startJFRRecordingVisualVM', () => {
-			visualvm.startJFRRecordingVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.dumpJFRRecordingVisualVM', () => {
-			visualvm.dumpJFRRecordingVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.stopJFRRecordingVisualVM', () => {
-			visualvm.stopJFRRecordingVisualVM();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.configureSettingVisualVM', (...params: any[]) => {
-			visualvm.configureSettingVisualVM(context, params);
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSThreadDump', () => {
-			visualvm.troubleshootNBLSThreadDump();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSHeapDump', () => {
-			visualvm.troubleshootNBLSHeapDump();
-		}));
-		context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.troubleshootNBLSCpuSampler', () => {
-			visualvm.troubleshootNBLSCpuSampler();
-		}));
-		visualvm.initializeConfiguration().then(initialized => {
-			if (initialized) {
-				context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java+', visualvm.configurationProvider));
-				context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java8+', visualvm.configurationProvider));
-				context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('java', visualvm.configurationProvider));
-			}
-		});
-	}
 	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.createWindowsNITerminal', (options: vscode.TerminalOptions): Promise<vscode.Terminal | undefined> => {
 		return nativeImage.createWindowsNITerminal(options);
 	}));
@@ -210,9 +105,6 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('workbench.extensions.installExtension', 'redhat.java');
 		nativeImage.setFeatureSet(-2);
 	}));
-	if (!remoteMode) {
-		context.subscriptions.push(vscode.window.registerTreeDataProvider('visualvm-control-panel', visualvm.nodeProvider));
-	}
 	context.subscriptions.push(vscode.window.registerTreeDataProvider('ni-control-panel', nativeImage.nodeProvider));
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
@@ -234,9 +126,6 @@ export function activate(context: vscode.ExtensionContext) {
 		if (e.affectsConfiguration('graalvm.home')) {
 			vscode.commands.executeCommand('extension.graalvm.refreshInstallations');
 			const graalVMHome = getGVMHome();
-			if (!remoteMode) {
-				visualvm.initializeGraalVM(context, graalVMHome);
-			}
 			nativeImage.initializeGraalVM(graalVMHome);
 			if (!graalVMHome) {
 				setupGraalVM();
@@ -262,10 +151,21 @@ export function activate(context: vscode.ExtensionContext) {
 	} else {
 		selectActiveGraalVM(graalVMHome, true).then(() => startLanguageServer(graalVMHome));
 	}
-	if (!remoteMode) {
-		visualvm.initialize(context);
-	}
 	nativeImage.initialize(context);
+
+	context.subscriptions.push(vscode.commands.registerCommand('extension.graalvm.installVisualVMIntegration', async () => {
+		const VISUALVM_EXTENSION_ID = 'oracle-labs-graalvm.visualvm-integration';
+		if (vscode.extensions.getExtension(VISUALVM_EXTENSION_ID)) {
+			await vscode.window.showInformationMessage('VisualVM Integration extension already installed.');
+		} else {
+			try {
+				await vscode.commands.executeCommand('workbench.extensions.installExtension', VISUALVM_EXTENSION_ID);
+			} catch (err) {
+				await vscode.window.showErrorMessage(`Failed to install VisualVM Integration extension: ${err}`);
+			}
+		}
+	}));
+
 	vscode.window.setStatusBarMessage('GraalVM extension activated', 3000);
 	
 	// Public API
