@@ -17,7 +17,6 @@ import { LicenseCheckPanel } from './graalVMLicenseCheck';
 import { ConfigurationPickItem, getGVMHome, getConf, getGVMConfig, configureGraalVMHome, getGVMInsts, setGVMInsts, setupProxy, checkGraalVMconfiguration, removeGraalVMconfiguration, getTerminalEnv, setTerminalEnv, getTerminalEnvName, setJavaRuntime, setConf } from './graalVMConfiguration';
 import { startLanguageServer, stopLanguageServer } from './graalVMLanguageServer';
 import { isSDKmanPresent, obtainSDKmanGVMInstallations } from './sdkmanSupport';
-import { componentsChanged } from './graalVMVisualVM';
 import assert = require('assert');
 import { Cache, GraalVMComponent } from './types';
 import { extContext } from './extension';
@@ -865,9 +864,6 @@ async function changeGraalVMComponent(graalVMHome: string, components: GraalVMCo
             }
         }
         unlockComponents(graalVMHome, components);
-        if (activeGVM) {
-            componentsChanged(action);
-        }
     });
 }
 
